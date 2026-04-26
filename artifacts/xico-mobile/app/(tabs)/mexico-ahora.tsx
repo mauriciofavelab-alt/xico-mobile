@@ -475,7 +475,7 @@ const s = StyleSheet.create({
   mastheadTitle: { fontFamily: "CormorantGaramond_300Light", fontSize: 48, lineHeight: 44, color: Colors.textPrimary, letterSpacing: -1 },
   mastheadItalic: { fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic" },
   mastheadUpdate: { fontFamily: "Inter_400Regular", fontSize: 8, color: "rgba(255,255,255,0.25)", letterSpacing: 1.5, textTransform: "uppercase" },
-  mastheadDate: { fontFamily: "Inter_600SemiBold", fontSize: 9, color: "rgba(255,255,255,0.5)", letterSpacing: 2, marginTop: 3 },
+  mastheadDate: { fontFamily: "Inter_600SemiBold", fontSize: 9, color: "rgba(255,255,255,0.5)", letterSpacing: 2, marginTop: 6 },
   sectionRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, marginVertical: 20, gap: 12 },
   sectionLabel: { fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 3, color: Colors.textTertiary },
   sectionLine: { flex: 1, height: 1, backgroundColor: Colors.border },
