@@ -2,8 +2,10 @@ import { Platform } from "react-native";
 import { supabase } from "@/constants/supabase";
 
 const getApiBase = () => {
-  if (typeof process !== "undefined" && process.env.EXPO_PUBLIC_DOMAIN) {
-    return `http://${process.env.EXPO_PUBLIC_DOMAIN}`;
+  const domain = typeof process !== "undefined" ? process.env.EXPO_PUBLIC_DOMAIN : undefined;
+  if (domain) {
+    const isLocal = domain.startsWith("localhost") || /^\d+\.\d+\.\d+\.\d+/.test(domain);
+    return isLocal ? `http://${domain}` : `https://${domain}`;
   }
   if (Platform.OS === "web") return "http://localhost:8080";
   return "http://localhost:8080";
