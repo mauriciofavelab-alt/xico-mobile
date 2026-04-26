@@ -9,7 +9,8 @@ export type StampId =
   | "agenda"
   | "ruta"
   | "guardado"
-  | "madrugador";
+  | "madrugador"
+  | "despacho";
 
 export type StampCategory = "lectura" | "presencia" | "coleccion";
 
@@ -53,6 +54,7 @@ export const DEFINITIONS: Omit<Stamp, "earned">[] = [
   { id: "ruta",            titulo: "Peregrino", descripcion: "Recorriste la ruta",             color: COLOR_PRESENCIA, category: "presencia", pts: 25 },
   { id: "guardado",        titulo: "Archivo",   descripcion: "Construyes tu memoria",          color: COLOR_COLECCION, category: "coleccion", pts: 25 },
   { id: "madrugador",      titulo: "Alba",      descripcion: "Lees antes del mundo",           color: COLOR_COLECCION, category: "coleccion", pts: 20 },
+  { id: "despacho",        titulo: "Despacho",  descripcion: "Abriste el despacho del día",    color: COLOR_PRESENCIA, category: "presencia", pts: 25 },
 ];
 
 const STAMP_KEY    = "xico_passport";

@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { XicoAvatar } from "@/components/XicoAvatar";
 import { StampNotification } from "@/components/StampNotification";
+import { ElDespacho } from "@/components/ElDespacho";
 import { Colors } from "@/constants/colors";
 import { getImage } from "@/constants/imageMap";
 import { fetchJson, API_BASE } from "@/constants/api";
@@ -1377,7 +1378,7 @@ export default function IndexScreen() {
   const topPad = Platform.OS === "web" ? 20 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  const { stamps, newStamp, dismissStamp } = usePassport();
+  const { stamps, newStamp, dismissStamp, earn } = usePassport();
   const { streak } = useStreak();
   const earnedSet = new Set(stamps.filter((s) => s.earned).map((s) => s.id));
   const pts = calculatePoints(earnedSet as any, streak);
@@ -1500,6 +1501,8 @@ export default function IndexScreen() {
         }
       >
         <Masthead topPad={topPad} />
+
+        <ElDespacho onOpen={() => earn("despacho")} />
 
         {hero && (
           <HeroSection article={hero} savedIds={savedIds} onToggleSave={toggleSave} />
