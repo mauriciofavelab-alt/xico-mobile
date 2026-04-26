@@ -223,7 +223,6 @@ function PassportSection({ stamps, streak, companionName }: {
 // ─── CRITERIO — Spotify Wrapped permanente ────────────────────────────────────
 function CriterionSection() {
   const criteria = useUserCriterion();
-  if (criteria.length === 0) return null;
 
   return (
     <View style={cr.wrap}>
@@ -232,14 +231,21 @@ function CriterionSection() {
         <Text style={cr.labelText}>TU CRITERIO</Text>
         <View style={cr.line} />
       </View>
-      <View style={cr.cards}>
-        {criteria.map((c, i) => (
-          <View key={i} style={[cr.card, i > 0 && { borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.06)" }]}>
-            <Text style={cr.headline}>{c.headline}</Text>
-            <Text style={cr.detail}>{c.detail}</Text>
-          </View>
-        ))}
-      </View>
+      {criteria.length === 0 ? (
+        <View style={cr.emptyCard}>
+          <Text style={cr.emptyTitle}>Tu criterio se forma leyendo.</Text>
+          <Text style={cr.emptyDetail}>Cada artículo construye tu perfil editorial.</Text>
+        </View>
+      ) : (
+        <View style={cr.cards}>
+          {criteria.map((c, i) => (
+            <View key={i} style={[cr.card, i > 0 && { borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.06)" }]}>
+              <Text style={cr.headline}>{c.headline}</Text>
+              <Text style={cr.detail}>{c.detail}</Text>
+            </View>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -265,6 +271,26 @@ const cr = StyleSheet.create({
     fontFamily: "CormorantGaramond_300Light_Italic",
     fontStyle: "italic", fontSize: 14, lineHeight: 20,
     color: "rgba(255,255,255,0.5)",
+  },
+  emptyCard: {
+    marginHorizontal: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "#0e0a0c",
+  },
+  emptyTitle: {
+    fontFamily: "CormorantGaramond_600SemiBold",
+    fontSize: 20, lineHeight: 24,
+    color: "rgba(255,255,255,0.4)",
+    marginBottom: 6,
+  },
+  emptyDetail: {
+    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontStyle: "italic",
+    fontSize: 13, lineHeight: 19,
+    color: "rgba(255,255,255,0.22)",
   },
 });
 
@@ -487,8 +513,6 @@ function RutaSection({ earn }: { earn: (id: any) => Promise<void> }) {
   });
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => { if (ruta) trackRuta(earn); }, [ruta]);
-
   if (!ruta) return null;
 
   const stops = expanded ? ruta.stops : ruta.stops.slice(0, 2);
@@ -536,7 +560,13 @@ function RutaSection({ earn }: { earn: (id: any) => Promise<void> }) {
           })}
         </View>
         {ruta.stops.length > 2 && (
-          <Pressable onPress={() => setExpanded(!expanded)} style={ru.expandBtn}>
+          <Pressable
+            onPress={() => {
+              if (!expanded) trackRuta(earn);
+              setExpanded(!expanded);
+            }}
+            style={ru.expandBtn}
+          >
             <Text style={ru.expandText}>{expanded ? "Ver menos ↑" : `Ver las ${ruta.stops.length - 2} paradas restantes →`}</Text>
           </Pressable>
         )}
@@ -872,10 +902,9 @@ function AgendaTab({ earn }: { earn: (id: any) => Promise<void> }) {
                 )}
               </View>
               <Text style={ag.title}>{event.title}</Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 12, marginTop: 4 }}>
-                <Text style={ag.meta}>📅 {event.date}</Text>
-                <Text style={ag.meta}>🕐 {event.time}</Text>
-                <Text style={ag.meta}>📍 {event.venue}</Text>
+              <View style={{ flexDirection: "column", gap: 4, marginBottom: 12, marginTop: 4 }}>
+                <Text style={ag.meta}>{event.date} · {event.time}</Text>
+                <Text style={ag.meta}>{event.venue}</Text>
               </View>
               <Text style={ag.desc} numberOfLines={2}>{event.description}</Text>
               <View style={{ flexDirection: "row", gap: 12, marginTop: 12 }}>
@@ -1069,10 +1098,6 @@ export default function MiXicoScreen() {
         </View>
 
         <View style={s.badgeRow}>
-          <View style={s.circleBadge}>
-            <Text style={s.circleLabel}>CÍRCULO</Text>
-            <Text style={s.circleValue}>Casa de México</Text>
-          </View>
           <View style={s.levelBadge}>
             <Text style={s.levelBadgeXico}>NIVEL</Text>
             <View style={[s.levelBadgeDot, { backgroundColor: level.color }]} />

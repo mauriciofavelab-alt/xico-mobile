@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -299,6 +300,8 @@ const ac = StyleSheet.create({
   thumbImg: { width: "100%", height: "100%" },
 });
 
+const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+
 function Masthead({ topPad }: { topPad: number }) {
   const hoy = new Date();
   const mes = hoy.toLocaleDateString("es-ES", { month: "long" });
@@ -306,13 +309,17 @@ function Masthead({ topPad }: { topPad: number }) {
   const aperturaCaps = aperturaMes.toUpperCase();
   const mesCaps = mes.charAt(0).toUpperCase() + mes.slice(1);
 
+  const vol = hoy.getFullYear() - 2023;
+  const volStr = ROMAN[vol - 1] ?? String(vol);
+  const issueStr = String(hoy.getMonth() + 1).padStart(2, "0");
+
   return (
     <View style={[mh.wrap, { paddingTop: topPad }]}>
       <View style={mh.strip}>
         <View style={mh.stripLeft}>
           <View style={mh.dot} />
           <Text style={mh.stripText}>
-            {aperturaCaps} · {mes.toUpperCase()} 2026
+            {aperturaCaps} · {mes.toUpperCase()} {hoy.getFullYear()}
           </Text>
         </View>
       </View>
@@ -321,7 +328,7 @@ function Masthead({ topPad }: { topPad: number }) {
         <Text style={mh.logo}>XICO</Text>
         <View style={mh.meta}>
           <View style={mh.tag}>
-            <Text style={mh.tagText}>Vol. III · Nº 12</Text>
+            <Text style={mh.tagText}>Vol. {volStr} · Nº {issueStr}</Text>
           </View>
           <Text style={mh.edicion}>Edición {mesCaps}</Text>
         </View>
@@ -645,10 +652,10 @@ function TablaContenidos() {
       route: "/mexico-ahora",
     },
     {
-      label: "Archivo",
+      label: "Mi XICO",
       intent: "Tu lectura, tu recorrido",
       accentColor: "hsl(160, 100%, 20%)",
-      count: "Mi XICO",
+      count: "Archivo",
       route: "/mi-xico",
     },
   ];
@@ -788,9 +795,11 @@ function HeroSection({
               }}
               style={hh.bookmarkBtn}
             >
-              <Text style={{ color: saved ? accentBg : "rgba(255,255,255,0.5)", fontSize: 18 }}>
-                {saved ? "⊙" : "○"}
-              </Text>
+              <Feather
+                name="bookmark"
+                size={17}
+                color={saved ? accentBg : "rgba(255,255,255,0.3)"}
+              />
             </Pressable>
           </View>
         </View>

@@ -68,9 +68,6 @@ function HeroCard({ article }: { article: Article }) {
             <Text style={{ fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 15, lineHeight: 22, color: "rgba(255,255,255,0.6)" }} numberOfLines={2}>
               {article.subtitle}
             </Text>
-            <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 2, color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
-              Leer →
-            </Text>
           </View>
         </ImageBackground>
       </View>
