@@ -1,4 +1,3 @@
-import { SymbolView } from "expo-symbols";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -47,12 +46,6 @@ export default function AuthScreen() {
     return (
       <View style={[s.sentRoot, { paddingTop: insets.top, paddingBottom: insets.bottom + 32 }]}>
         <View style={s.sentContent}>
-          <SymbolView
-            name="sparkles"
-            size={52}
-            tintColor={Colors.primary}
-            style={s.sparkle}
-          />
           <Text style={s.logo}>XICO</Text>
           <View style={s.divider} />
           <Text style={s.heading}>Revisa tu correo.</Text>
@@ -125,9 +118,6 @@ const s = StyleSheet.create({
   sentContent: {
     alignItems: "center",
     paddingHorizontal: 40,
-  },
-  sparkle: {
-    marginBottom: 32,
   },
   header: { marginBottom: 40 },
   logo: {

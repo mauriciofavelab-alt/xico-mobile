@@ -652,10 +652,10 @@ function TablaContenidos() {
       route: "/mexico-ahora",
     },
     {
-      label: "Mi XICO",
+      label: "Archivo",
       intent: "Tu lectura, tu recorrido",
       accentColor: "hsl(160, 100%, 20%)",
-      count: "Archivo",
+      count: "Mi XICO",
       route: "/mi-xico",
     },
   ];
@@ -1126,7 +1126,7 @@ function ModuloPersonalizado({
     <View style={mp.wrap}>
       <View style={mp.header}>
         <View style={mp.dot} />
-        <Text style={mp.eyebrow}>De tu archivo</Text>
+        <Text style={mp.eyebrow}>Según tu criterio</Text>
       </View>
       <Text style={mp.contexto}>{contexto}</Text>
 

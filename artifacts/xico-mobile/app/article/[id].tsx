@@ -311,6 +311,13 @@ export default function ArticleScreen() {
   const readTime = article.read_time_minutes || 4;
   const body = article.body || article.excerpt || "";
 
+  const sectionRoute = article.pillar === "cultura" ? "/(tabs)/cultura"
+    : article.pillar === "mexico-ahora" ? "/(tabs)/mexico-ahora"
+    : "/(tabs)";
+  const sectionName = article.pillar === "cultura" ? "Cultura"
+    : article.pillar === "mexico-ahora" ? "México Ahora"
+    : "Índice";
+
   return (
     <View style={s.root}>
       {/* Barra de progreso de lectura */}
@@ -394,6 +401,15 @@ export default function ArticleScreen() {
             <Text style={[s.endText, { color: accent }]}>XICO</Text>
             <View style={[s.endLine, { backgroundColor: accent }]} />
           </View>
+
+          <Pressable
+            onPress={() => router.push(sectionRoute as any)}
+            style={({ pressed }) => [s.sectionLink, pressed && { opacity: 0.5 }]}
+          >
+            <Text style={[s.sectionLinkText, { color: accent }]}>
+              Seguir en {sectionName} →
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
 
@@ -480,4 +496,12 @@ const s = StyleSheet.create({
   endMarker: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 40, marginBottom: 20 },
   endLine: { flex: 1, height: 1, opacity: 0.35 },
   endText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 4, opacity: 0.55 },
+  sectionLink: { alignItems: "center", paddingVertical: 20 },
+  sectionLinkText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 9,
+    letterSpacing: 2.5,
+    textTransform: "uppercase",
+    opacity: 0.6,
+  },
 });
