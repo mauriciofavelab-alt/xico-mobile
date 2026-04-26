@@ -1025,13 +1025,28 @@ export default function MiXicoScreen() {
     return "Mi Cuenta";
   })();
 
+  const { signOut } = useAuth();
+
   const handleSettings = () => {
     Alert.alert(
-      "Cambiar intereses",
-      "¿Quieres volver a seleccionar tus intereses?",
+      "Configuración",
+      user?.email ?? "Mi cuenta",
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Sí, cambiar", onPress: async () => { await AsyncStorage.removeItem("xico_onboarding_done"); router.replace("/onboarding"); } },
+        {
+          text: "Cambiar intereses",
+          onPress: async () => {
+            await AsyncStorage.removeItem("xico_onboarding_done");
+            router.replace("/onboarding");
+          },
+        },
+        {
+          text: "Cerrar sesión",
+          style: "destructive",
+          onPress: async () => {
+            await signOut();
+          },
+        },
       ]
     );
   };
