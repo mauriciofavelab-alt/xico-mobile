@@ -67,3 +67,4 @@ The voice must feel:
 
 ## Brand test
 If a sentence, screen, feature, or illustration could belong to any premium culture app, it is not yet XICO.
+

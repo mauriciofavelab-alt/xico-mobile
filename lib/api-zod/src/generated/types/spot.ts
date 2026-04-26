@@ -18,3 +18,4 @@ export interface Spot {
   imageKey: string;
 }
 
+

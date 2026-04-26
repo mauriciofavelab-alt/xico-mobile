@@ -52,3 +52,4 @@ It should feel like:
 The biggest danger is building something beautiful that people admire once and do not reopen.
 
 XICO succeeds only if beauty, editorial intelligence, and repeat-opening mechanics reinforce each other.
+

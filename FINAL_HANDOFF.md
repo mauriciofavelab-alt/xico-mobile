@@ -202,3 +202,4 @@ Requiere cuenta Expo, cuenta Apple Developer, y certificados configurados en `ea
 - **Assets de imágenes** — Todas las imágenes son PNG estáticas en el bundle. Hay que asegurarse de que `iturbide-iguanas.png` (foto de Graciela Iturbide) tenga los derechos correctos antes de publicar.
 - **Fonts cargadas** — CormorantGaramond e Inter se cargan desde `expo-google-fonts`. Requieren conexión en primer arranque si no están en caché.
 
+

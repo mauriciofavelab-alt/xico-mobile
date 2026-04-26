@@ -1288,3 +1288,4 @@ export function useGetEdicionDelMes<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
+

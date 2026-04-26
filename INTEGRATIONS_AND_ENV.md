@@ -188,3 +188,4 @@ eas secret:create --name EXPO_PUBLIC_DOMAIN --value api.tudominio.com --scope pr
 | Base de datos | No existe | FALTANTE |
 | Push notifications | No existe | FALTANTE |
 
+
