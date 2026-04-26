@@ -402,12 +402,14 @@ function TuXicoWidget({
   levelColor,
   dailyFrase,
   level,
+  streak,
 }: {
   companionName: string | null;
   levelNombre: string;
   levelColor: string;
   dailyFrase: string;
   level: ReturnType<typeof getXicoLevel>;
+  streak: number;
 }) {
   const today = new Date();
   const dia = today.toLocaleDateString("es-ES", {
@@ -422,7 +424,15 @@ function TuXicoWidget({
       <View style={aw.topRule} />
       <View style={aw.inner}>
         <View style={aw.left}>
-          <Text style={aw.eyebrow}>TU XICO HOY</Text>
+          <View style={aw.eyebrowRow}>
+            <Text style={aw.eyebrow}>TU XICO HOY</Text>
+            {streak > 1 && (
+              <View style={[aw.streakBadge, { borderColor: `${levelColor}55` }]}>
+                <Text style={[aw.streakNum, { color: levelColor }]}>{streak}</Text>
+                <Text style={aw.streakLabel}>días</Text>
+              </View>
+            )}
+          </View>
           <View style={aw.nameLine}>
             <Text style={[aw.companionName, { color: levelColor }]}>
               {companionName || "XICO"}
@@ -464,13 +474,32 @@ const aw = StyleSheet.create({
   },
   left: { flex: 1 },
   right: { width: 96, alignItems: "center", justifyContent: "center" },
+  eyebrowRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
   eyebrow: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 7,
     letterSpacing: 3.5,
     color: "rgba(255,255,255,0.28)",
     textTransform: "uppercase",
-    marginBottom: 10,
+  },
+  streakBadge: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 3,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  streakNum: {
+    fontFamily: "CormorantGaramond_600SemiBold",
+    fontSize: 14,
+    lineHeight: 16,
+  },
+  streakLabel: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 7,
+    color: "rgba(255,255,255,0.3)",
+    letterSpacing: 1,
   },
   nameLine: { flexDirection: "row", alignItems: "baseline", gap: 10, marginBottom: 10 },
   companionName: {
@@ -1514,6 +1543,7 @@ export default function IndexScreen() {
           levelColor={level.color}
           dailyFrase={dailyFrase}
           level={level}
+          streak={streak}
         />
 
         <NotaDelEditor />

@@ -22,6 +22,7 @@ import { Colors } from "@/constants/colors";
 import { fetchJson, API_BASE } from "@/constants/api";
 import { getImage } from "@/constants/imageMap";
 import { usePassport, trackArticleRead, trackSaved } from "@/hooks/usePassport";
+import { trackReadContext } from "@/hooks/useUserCriterion";
 import { StampNotification } from "@/components/StampNotification";
 
 type ApiArticle = {
@@ -208,6 +209,7 @@ export default function ArticleScreen() {
   useEffect(() => {
     if (!article) return;
     trackArticleRead(earn);
+    trackReadContext(article.pillar, article.subcategory);
     fetch(`${API_BASE}/api/saved/${article.id}/status`)
       .then(r => r.json()).then(d => setSaved(d.saved)).catch(() => {});
   }, [article]);
