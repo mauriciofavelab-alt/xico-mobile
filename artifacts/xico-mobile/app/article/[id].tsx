@@ -84,7 +84,11 @@ function stripHtml(raw: string): string {
     .trim();
 }
 
-function ArticleBody({ body }: { body: string }) {
+function isQuote(para: string): boolean {
+  return para.startsWith('"') || para.startsWith('“') || para.startsWith('—') || para.startsWith('—') || para.startsWith('«');
+}
+
+function ArticleBody({ body, accent }: { body: string; accent: string }) {
   if (!body) return null;
   const clean = stripHtml(body);
   const normalized = clean.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
@@ -94,21 +98,60 @@ function ArticleBody({ body }: { body: string }) {
 
   return (
     <View>
-      {paragraphs.map((para, i) => (
-        <Text key={i} style={i === 0 ? body_s.firstPara : body_s.para}>{para}</Text>
-      ))}
+      {paragraphs.map((para, i) => {
+        if (i === 0 && para.length > 1) {
+          const dropLetter = para.charAt(0);
+          const rest = para.slice(1);
+          return (
+            <View key={0} style={body_s.dropCapRow}>
+              <View style={body_s.dropCapBox}>
+                <Text style={[body_s.dropCap, { color: accent }]}>{dropLetter}</Text>
+              </View>
+              <View style={body_s.dropCapRest}>
+                <Text style={body_s.firstParaRest}>{rest}</Text>
+              </View>
+            </View>
+          );
+        }
+        if (isQuote(para)) {
+          return (
+            <View key={i} style={[body_s.quoteBlock, { borderLeftColor: accent }]}>
+              <Text style={body_s.quoteText}>{para}</Text>
+            </View>
+          );
+        }
+        return <Text key={i} style={body_s.para}>{para}</Text>;
+      })}
     </View>
   );
 }
 
 const body_s = StyleSheet.create({
-  firstPara: {
+  dropCapRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 22,
+  },
+  dropCapBox: {
+    width: 54,
+    alignItems: "center",
+  },
+  dropCap: {
+    fontFamily: "CormorantGaramond_600SemiBold",
+    fontSize: 80,
+    lineHeight: 64,
+    letterSpacing: -2,
+  },
+  dropCapRest: {
+    flex: 1,
+    paddingTop: 2,
+  },
+  firstParaRest: {
     fontFamily: "CormorantGaramond_400Regular",
     fontSize: 20,
     lineHeight: 32,
     color: "rgba(240,236,230,0.95)",
     letterSpacing: 0.1,
-    marginBottom: 22,
   },
   para: {
     fontFamily: "CormorantGaramond_400Regular",
@@ -117,6 +160,21 @@ const body_s = StyleSheet.create({
     color: "rgba(220,215,208,0.88)",
     letterSpacing: 0.1,
     marginBottom: 22,
+  },
+  quoteBlock: {
+    borderLeftWidth: 2,
+    paddingLeft: 18,
+    paddingVertical: 4,
+    marginBottom: 24,
+    marginLeft: 2,
+  },
+  quoteText: {
+    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontStyle: "italic",
+    fontSize: 21,
+    lineHeight: 31,
+    color: "rgba(240,236,230,0.75)",
+    letterSpacing: -0.1,
   },
 });
 
@@ -325,7 +383,7 @@ export default function ArticleScreen() {
 
         {/* BODY */}
         <View style={s.bodyWrap}>
-          {body ? <ArticleBody body={body} /> : <Text style={s.noBody}>Contenido no disponible.</Text>}
+          {body ? <ArticleBody body={body} accent={accent} /> : <Text style={s.noBody}>Contenido no disponible.</Text>}
           <View style={s.endMarker}>
             <View style={[s.endLine, { backgroundColor: accent }]} />
             <Text style={[s.endText, { color: accent }]}>XICO</Text>

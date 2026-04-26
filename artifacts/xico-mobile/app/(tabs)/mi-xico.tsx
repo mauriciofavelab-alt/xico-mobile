@@ -53,6 +53,7 @@ const SELLO_NUM: Record<string, string> = {
   "ruta":            "VI",
   "guardado":        "VII",
   "madrugador":      "VIII",
+  "despacho":        "IX",
 };
 
 type SelloDef = { id: string; titulo: string; descripcion: string; color: string; pts: number };
