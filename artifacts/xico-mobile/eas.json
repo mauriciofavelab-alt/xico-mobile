@@ -13,7 +13,7 @@
       "env": {
         "EXPO_PUBLIC_DOMAIN": "192.168.1.132:8080",
         "EXPO_PUBLIC_SUPABASE_URL": "https://jrnsodwpdupybxjlzybv.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_tIns-y_35TH24pmJD0af5Q_Iwn425LT"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpybnNvZHdwZHVweWJ4amx6eWJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjk3NzUsImV4cCI6MjA5MDY0NTc3NX0.zBYPHQZnPO16JncW6YVoa_Xp6G2a0kCvF_eb0j8mj10"
       }
     },
     "preview": {
@@ -21,7 +21,7 @@
       "env": {
         "EXPO_PUBLIC_DOMAIN": "xico-api-production.up.railway.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://jrnsodwpdupybxjlzybv.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_tIns-y_35TH24pmJD0af5Q_Iwn425LT"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpybnNvZHdwZHVweWJ4amx6eWJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjk3NzUsImV4cCI6MjA5MDY0NTc3NX0.zBYPHQZnPO16JncW6YVoa_Xp6G2a0kCvF_eb0j8mj10"
       }
     },
     "production": {
@@ -29,7 +29,7 @@
       "env": {
         "EXPO_PUBLIC_DOMAIN": "xico-api-production.up.railway.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://jrnsodwpdupybxjlzybv.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_tIns-y_35TH24pmJD0af5Q_Iwn425LT"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpybnNvZHdwZHVweWJ4amx6eWJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjk3NzUsImV4cCI6MjA5MDY0NTc3NX0.zBYPHQZnPO16JncW6YVoa_Xp6G2a0kCvF_eb0j8mj10"
       }
     }
   },
