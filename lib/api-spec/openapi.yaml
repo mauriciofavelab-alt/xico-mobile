@@ -1,0 +1,517 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: XICO API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: articles
+    description: Article operations
+  - name: profile
+    description: User profile
+  - name: saved
+    description: Saved articles
+  - name: momentos
+    description: Momentos
+  - name: events
+    description: Events
+  - name: spots
+    description: Spots
+  - name: ruta
+    description: Ruta del mes
+  - name: edicion
+    description: Edicion del mes
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /articles:
+    get:
+      operationId: getArticles
+      tags: [articles]
+      summary: Get articles
+      parameters:
+        - name: pillar
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+  /articles/{id}:
+    get:
+      operationId: getArticle
+      tags: [articles]
+      summary: Get article by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Article
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get user profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    patch:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+  /saved:
+    get:
+      operationId: getSaved
+      tags: [saved]
+      summary: Get saved articles
+      responses:
+        "200":
+          description: Saved articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+  /saved/{articleId}:
+    post:
+      operationId: saveArticle
+      tags: [saved]
+      summary: Save article
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveStatus"
+    delete:
+      operationId: unsaveArticle
+      tags: [saved]
+      summary: Unsave article
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Unsaved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveStatus"
+  /saved/{articleId}/status:
+    get:
+      operationId: getSaveStatus
+      tags: [saved]
+      summary: Get save status of article
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Save status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveStatus"
+  /momentos:
+    get:
+      operationId: getMomentos
+      tags: [momentos]
+      summary: Get momentos
+      responses:
+        "200":
+          description: Momentos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Momento"
+  /events:
+    get:
+      operationId: getEvents
+      tags: [events]
+      summary: Get events
+      responses:
+        "200":
+          description: Events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+  /events/{eventId}/voy:
+    post:
+      operationId: addRsvp
+      tags: [events]
+      summary: RSVP to event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: RSVP added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+    delete:
+      operationId: removeRsvp
+      tags: [events]
+      summary: Remove RSVP
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: RSVP removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+  /spots:
+    get:
+      operationId: getSpots
+      tags: [spots]
+      summary: Get spots
+      responses:
+        "200":
+          description: Spots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Spot"
+  /ruta:
+    get:
+      operationId: getRuta
+      tags: [ruta]
+      summary: Get ruta del mes
+      responses:
+        "200":
+          description: Ruta
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ruta"
+  /edicion-del-mes:
+    get:
+      operationId: getEdicionDelMes
+      tags: [edicion]
+      summary: Get edicion del mes
+      responses:
+        "200":
+          description: Edicion del mes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EdicionDelMes"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Article:
+      type: object
+      properties:
+        id:
+          type: string
+        pillar:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type: string
+        body:
+          type: string
+        author:
+          type: string
+        institution:
+          type: string
+        imageKey:
+          type: string
+        readTime:
+          type: string
+        accentColor:
+          type: string
+        date:
+          type: string
+        featured:
+          type: boolean
+      required:
+        - id
+        - pillar
+        - title
+        - subtitle
+        - body
+        - author
+        - imageKey
+        - readTime
+        - accentColor
+        - date
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        interests:
+          type: array
+          items:
+            type: string
+        memberType:
+          type: string
+        memberSince:
+          type: string
+      required:
+        - id
+        - name
+        - interests
+        - memberType
+        - memberSince
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        interests:
+          type: array
+          items:
+            type: string
+    SaveStatus:
+      type: object
+      properties:
+        saved:
+          type: boolean
+      required:
+        - saved
+    Momento:
+      type: object
+      properties:
+        id:
+          type: string
+        imageKey:
+          type: string
+        headline:
+          type: string
+        caption:
+          type: string
+        category:
+          type: string
+        accentColor:
+          type: string
+      required:
+        - id
+        - imageKey
+        - headline
+        - caption
+        - category
+        - accentColor
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        date:
+          type: string
+        time:
+          type: string
+        venue:
+          type: string
+        venueId:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        price:
+          type: string
+        accentColor:
+          type: string
+        voy:
+          type: boolean
+      required:
+        - id
+        - title
+        - date
+        - time
+        - venue
+        - description
+        - category
+        - price
+        - accentColor
+        - voy
+    Spot:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        neighborhood:
+          type: string
+        address:
+          type: string
+        description:
+          type: string
+        accentColor:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        imageKey:
+          type: string
+      required:
+        - id
+        - name
+        - category
+        - neighborhood
+        - address
+        - description
+        - accentColor
+        - tags
+        - imageKey
+    Ruta:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        stops:
+          type: array
+          items:
+            $ref: "#/components/schemas/RutaStop"
+        month:
+          type: string
+      required:
+        - title
+        - subtitle
+        - stops
+        - month
+    RutaStop:
+      type: object
+      properties:
+        order:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        accentColor:
+          type: string
+      required:
+        - order
+        - name
+        - address
+        - description
+        - category
+        - accentColor
+    EdicionDelMes:
+      type: object
+      properties:
+        month:
+          type: string
+        headline:
+          type: string
+        subheadline:
+          type: string
+        imageKey:
+          type: string
+        accentColor:
+          type: string
+        articles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Article"
+      required:
+        - month
+        - headline
+        - subheadline
+        - imageKey
+        - accentColor
+        - articles
+

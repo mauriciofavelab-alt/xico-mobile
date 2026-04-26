@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(cmd //c \"ipconfig\")",
+      "Bash(iconv -f UTF-16LE -t UTF-8 /tmp/ipconfig_out.txt)",
+      "Bash(iconv -f CP850 -t UTF-8 /tmp/ipconfig_out.txt)",
+      "Bash(node *)",
+      "WebSearch",
+      "WebFetch(domain:expo.dev)",
+      "Bash(eas build:logs 03db9b4b-7ea4-4d0a-8f45-73d07c9f03c6)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d.get\\('auth',{}\\).get\\('sessionSecret','NOT FOUND'\\)[:20]+'...' if d.get\\('auth',{}\\).get\\('sessionSecret'\\) else 'NO TOKEN'\\)\")",
+      "Bash(grep -i \"^node$\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"import json,sys; print\\(json.dumps\\(json.load\\(sys.stdin\\), indent=2\\)\\)\")",
+      "Bash(curl -s -X POST https://api.expo.dev/graphql -H 'Content-Type: application/json' -H 'expo-session: {\"id\":\"18262338-20d4-48d9-ac48-88af7a08373c\",\"version\":2}' -d '{\"query\":\"{ builds\\(buildId: \\\\\"ed3e31e8-2016-4a57-a0fe-cdcdc6802fe0\\\\\"\\) { ... on Build { id status logFiles } } }\"}')",
+      "Bash(curl *)",
+      "WebFetch(domain:job-logs.eascdn.net)"
+    ]
+  }
+}
+
