@@ -24,7 +24,9 @@ RUN node ./build.mjs
 FROM node:20-alpine
 WORKDIR /app
 COPY --from=builder /app/artifacts/api-server/dist/ ./dist/
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 ENV PORT=8080
 EXPOSE 8080
-CMD ["node", "--enable-source-maps", "/app/dist/index.mjs"]
+CMD ["/start.sh"]

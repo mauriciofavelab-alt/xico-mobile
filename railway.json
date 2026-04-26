@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "node --enable-source-maps /app/dist/index.mjs",
+    "startCommand": "/start.sh",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 30
   }
