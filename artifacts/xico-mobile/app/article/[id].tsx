@@ -319,6 +319,12 @@ export default function ArticleScreen() {
     : article.pillar === "mexico-ahora" ? "México Ahora"
     : "Índice";
 
+  const nextArticle = useMemo(() => {
+    if (articles.length === 0) return null;
+    const sameSection = articles.filter(a => a.pillar === article.pillar && a.id !== article.id && a.slug !== routeId);
+    return sameSection[0] ?? null;
+  }, [articles, article]);
+
   return (
     <View style={s.root}>
       {/* Barra de progreso de lectura */}
@@ -361,22 +367,21 @@ export default function ArticleScreen() {
 
           <View style={s.metaRow}>
             <View style={s.metaLeft}>
-              <Text style={s.authorLabel}>Por</Text>
               <Text style={s.authorName}>{article.author_name || "Equipo XICO"}</Text>
-              <Text style={s.dateMeta}>{dateLabel}</Text>
+              <Text style={s.dateMeta}>{dateLabel} · {readTime} min de lectura</Text>
             </View>
             <Pressable
               onPress={handleAudio}
               disabled={audioLoading}
               style={({ pressed }) => [
                 s.audioPill,
-                { borderColor: accent, backgroundColor: "transparent" },
+                { borderColor: accent },
                 pressed && { opacity: 0.7 },
               ]}
             >
               <Feather name={playing ? "pause" : "headphones"} size={13} color="#fff" />
               <Text style={s.audioPillText}>
-                {playing ? "Pausar" : `${readTime} min`}
+                {playing ? "Pausar" : "Escuchar"}
               </Text>
             </Pressable>
           </View>
@@ -403,6 +408,28 @@ export default function ArticleScreen() {
             <Text style={[s.endText, { color: accent }]}>XICO</Text>
             <View style={[s.endLine, { backgroundColor: accent }]} />
           </View>
+
+          {nextArticle && (
+            <Pressable
+              onPress={() => router.push(`/article/${nextArticle.id}` as any)}
+              style={({ pressed }) => [s.nextCard, pressed && { opacity: 0.85 }]}
+            >
+              <Text style={s.nextEye}>CONTINÚA LEYENDO</Text>
+              <View style={s.nextInner}>
+                <Image source={getImageForArticle(nextArticle)} style={s.nextImg} resizeMode="cover" />
+                <View style={s.nextBody}>
+                  <View style={[s.nextAccent, { backgroundColor: accent }]} />
+                  <Text style={[s.nextTag, { color: accent }]}>
+                    {(nextArticle.subcategory ?? nextArticle.pillar ?? "").replace(/-/g, " ").toUpperCase()}
+                  </Text>
+                  <Text style={s.nextTitle} numberOfLines={3}>{nextArticle.title}</Text>
+                  {!!nextArticle.read_time_minutes && (
+                    <Text style={s.nextRead}>{nextArticle.read_time_minutes} min</Text>
+                  )}
+                </View>
+              </View>
+            </Pressable>
+          )}
 
           <Pressable
             onPress={() => router.push(sectionRoute as any)}
@@ -464,18 +491,14 @@ const s = StyleSheet.create({
   },
   divider: { height: 1, backgroundColor: "rgba(255,255,255,0.07)", marginVertical: 16 },
   metaRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
-  metaLeft: { gap: 3 },
-  authorLabel: {
-    fontFamily: "Inter_400Regular", fontSize: 9,
-    color: "rgba(255,255,255,0.22)", letterSpacing: 1, textTransform: "uppercase",
-  },
+  metaLeft: { flex: 1, gap: 4 },
   authorName: {
-    fontFamily: "Inter_600SemiBold", fontSize: 11,
-    color: "rgba(255,255,255,0.55)", letterSpacing: 1.5, textTransform: "uppercase",
+    fontFamily: "Newsreader_400Regular_Italic", fontStyle: "italic",
+    fontSize: 16, color: "rgba(240,236,230,0.72)", lineHeight: 20,
   },
   dateMeta: {
     fontFamily: "Inter_400Regular", fontSize: 9,
-    color: "rgba(255,255,255,0.22)", letterSpacing: 0.5, marginTop: 2,
+    color: "rgba(255,255,255,0.22)", letterSpacing: 0.5,
   },
   audioPill: {
     flexDirection: "row", alignItems: "center", gap: 6,
@@ -505,5 +528,37 @@ const s = StyleSheet.create({
     letterSpacing: 2.5,
     textTransform: "uppercase",
     opacity: 0.6,
+  },
+  nextCard: {
+    marginTop: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+    padding: 20,
+    backgroundColor: "#0e0a0c",
+  },
+  nextEye: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 8,
+    letterSpacing: 3,
+    color: "rgba(255,255,255,0.25)",
+    textTransform: "uppercase",
+    marginBottom: 16,
+  },
+  nextInner: { flexDirection: "row", gap: 16, alignItems: "flex-start" },
+  nextImg: { width: 72, height: 96, backgroundColor: Colors.surfaceHigh },
+  nextBody: { flex: 1, gap: 4 },
+  nextAccent: { width: 20, height: 2, marginBottom: 4 },
+  nextTag: { fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 2 },
+  nextTitle: {
+    fontFamily: "Newsreader_600SemiBold",
+    fontSize: 20, lineHeight: 25,
+    color: "#f0ece6",
+  },
+  nextRead: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 9,
+    color: "rgba(255,255,255,0.28)",
+    letterSpacing: 0.5,
+    marginTop: 4,
   },
 });

@@ -440,8 +440,12 @@ function MomentosInTab({ earn }: { earn: (id: any) => Promise<void> }) {
           const ac = getAccentColor(m.accentColor);
           return (
             <Pressable key={m.id} onPress={() => openStory(i)} style={({ pressed }) => [ms.bubble, pressed && { opacity: 0.82 }]}>
-              <View style={[ms.bubbleRing, { borderColor: `${ac}99` }]}>
-                <Image source={img} style={ms.bubbleImg} resizeMode="cover" />
+              <View style={[ms.bubbleCard, { borderColor: `${ac}55` }]}>
+                <Image source={img} style={StyleSheet.absoluteFill as any} resizeMode="cover" />
+                <LinearGradient colors={["transparent", "rgba(0,0,0,0.78)"]} style={StyleSheet.absoluteFill} />
+                <View style={ms.bubbleBottom}>
+                  <View style={[ms.bubbleLine, { backgroundColor: ac }]} />
+                </View>
               </View>
               <Text style={ms.bubbleCat} numberOfLines={1}>{m.category}</Text>
             </Pressable>
@@ -488,10 +492,11 @@ const ms = StyleSheet.create({
   line: { flex: 1, height: 1, backgroundColor: Colors.border },
   labelText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: Colors.textTertiary },
   labelRight: { fontFamily: "Inter_400Regular", fontSize: 9, color: Colors.textTertiary },
-  bubble: { alignItems: "center", width: 76 },
-  bubbleRing: { width: 68, height: 68, borderRadius: 34, borderWidth: 2, overflow: "hidden", marginBottom: 6 },
-  bubbleImg: { width: 64, height: 64, borderRadius: 32 },
-  bubbleCat: { fontFamily: "Inter_500Medium", fontSize: 8, letterSpacing: 1, color: Colors.textTertiary, textTransform: "uppercase", textAlign: "center" },
+  bubble: { width: 82 },
+  bubbleCard: { width: 82, height: 116, overflow: "hidden", borderWidth: 1, marginBottom: 8, position: "relative" },
+  bubbleBottom: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 10 },
+  bubbleLine: { width: 18, height: 2 },
+  bubbleCat: { fontFamily: "Inter_500Medium", fontSize: 8, letterSpacing: 1, color: Colors.textTertiary, textTransform: "uppercase" },
   storyTop: { paddingHorizontal: 16, paddingBottom: 8 },
   bars: { flexDirection: "row", gap: 4, marginBottom: 8 },
   barBg: { flex: 1, height: 2, backgroundColor: "rgba(255,255,255,0.3)", overflow: "hidden" },

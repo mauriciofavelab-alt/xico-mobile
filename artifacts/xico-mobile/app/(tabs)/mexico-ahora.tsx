@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors, getAccentColor } from "@/constants/colors";
 import { getImage } from "@/constants/imageMap";
 import { fetchJson } from "@/constants/api";
+import { XicoLoader } from "@/components/XicoLoader";
 
 type Article = {
   id: string; pillar: string; type: string; subcategory: string;
@@ -196,6 +197,7 @@ const dc = StyleSheet.create({
 });
 
 const RATE_MXN_EUR = 21.2;
+const RATE_DATE = "may 2026";
 function ConvertidorMXN() {
   const [mode, setMode] = useState<"mxn" | "eur">("mxn");
   const [value, setValue] = useState("");
@@ -212,7 +214,7 @@ function ConvertidorMXN() {
       <View style={cx.header}>
         <View>
           <Text style={cx.eyebrow}>Conversor de divisas</Text>
-          <Text style={cx.rate}>1 EUR = {RATE_MXN_EUR} MXN · {new Date().toLocaleDateString("es-ES", { month: "short", year: "numeric" })}</Text>
+          <Text style={cx.rate}>aprox. 1 EUR = {RATE_MXN_EUR} MXN · {RATE_DATE}</Text>
         </View>
         <Pressable
           onPress={() => { setMode(m => m === "mxn" ? "eur" : "mxn"); setValue(""); }}
@@ -304,19 +306,27 @@ function ArticleRow({ article }: { article: Article }) {
 }
 
 function AgendaHighlight({ article }: { article: Article }) {
+  const img = article.hero_image_url ? { uri: article.hero_image_url } : getImage(article.imageKey);
   return (
     <Pressable
       onPress={() => router.push(`/article/${article.id}` as any)}
       style={({ pressed }) => [s.agendaWrap, pressed && { opacity: 0.85 }]}
     >
-      <View style={s.agendaLabelRow}>
-        <Text style={s.agendaTag}>AGENDA</Text>
-        <Text style={s.agendaTagSep}>·</Text>
-        <Text style={s.agendaTagRight}>ESTE MES</Text>
+      <ImageBackground source={img} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      <LinearGradient
+        colors={["rgba(20,18,16,0.18)", "rgba(20,18,16,0.88)", "rgba(20,18,16,0.98)"]}
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={s.agendaContent}>
+        <View style={s.agendaLabelRow}>
+          <Text style={s.agendaTag}>AGENDA</Text>
+          <Text style={s.agendaTagSep}>·</Text>
+          <Text style={s.agendaTagRight}>ESTE MES</Text>
+        </View>
+        <Text style={s.agendaTitle}>{article.title}</Text>
+        <Text style={s.agendaSub} numberOfLines={2}>{article.subtitle}</Text>
+        <Text style={s.agendaCta}>Ver agenda completa →</Text>
       </View>
-      <Text style={s.agendaTitle}>{article.title}</Text>
-      <Text style={s.agendaSub} numberOfLines={2}>{article.subtitle}</Text>
-      <Text style={s.agendaCta}>Ver agenda completa →</Text>
     </Pressable>
   );
 }
@@ -446,7 +456,7 @@ export default function MexicoAhoraScreen() {
   return (
     <View style={s.container}>
       {isLoading ? (
-        <View style={s.loading}><ActivityIndicator color={Colors.ochre} /></View>
+        <XicoLoader color={Colors.ochre} />
       ) : (
         <FlatList
           data={items}
@@ -488,12 +498,13 @@ const s = StyleSheet.create({
   rowTitle: { fontFamily: "Newsreader_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
   rowSub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: Colors.textSecondary },
   rowRead: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginTop: 2 },
-  agendaWrap: { marginHorizontal: 16, marginBottom: 8, backgroundColor: "#100d0a", padding: 20, borderWidth: 1, borderColor: "rgba(140,74,13,0.3)", borderLeftWidth: 3, borderLeftColor: Colors.ochre },
-  agendaLabelRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
+  agendaWrap: { marginHorizontal: 16, marginBottom: 8, height: 200, overflow: "hidden", position: "relative", borderLeftWidth: 3, borderLeftColor: Colors.ochre },
+  agendaContent: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 20 },
+  agendaLabelRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
   agendaTag: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2.5, color: Colors.ochre, textTransform: "uppercase" },
   agendaTagSep: { color: "rgba(255,255,255,0.2)", fontSize: 10 },
   agendaTagRight: { fontFamily: "Inter_400Regular", fontSize: 8, letterSpacing: 2, color: "rgba(255,255,255,0.35)", textTransform: "uppercase" },
-  agendaTitle: { fontFamily: "Newsreader_300Light", fontSize: 28, lineHeight: 32, color: Colors.textPrimary, marginBottom: 10 },
+  agendaTitle: { fontFamily: "Newsreader_300Light", fontSize: 26, lineHeight: 30, color: "#fff", marginBottom: 14 },
   agendaSub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 15, lineHeight: 22, color: Colors.textSecondary, marginBottom: 18 },
   agendaCta: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2.5, color: Colors.ochre, textTransform: "uppercase" },
   featuredWrap: { marginTop: 24, backgroundColor: "#0a0a0a", borderTopWidth: 1, borderTopColor: "rgba(140,74,13,0.15)" },

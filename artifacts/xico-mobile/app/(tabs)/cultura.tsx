@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors, getAccentColor } from "@/constants/colors";
 import { getImage } from "@/constants/imageMap";
 import { fetchJson } from "@/constants/api";
+import { XicoLoader } from "@/components/XicoLoader";
 
 type Article = {
   id: string;
@@ -215,7 +216,7 @@ export default function CulturaScreen() {
   return (
     <View style={s.container}>
       {isLoading ? (
-        <View style={s.loading}><ActivityIndicator color={Colors.cobalt} /></View>
+        <XicoLoader color={Colors.cobalt} />
       ) : (
         <FlatList
           data={items}
