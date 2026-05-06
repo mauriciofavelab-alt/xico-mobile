@@ -4,7 +4,6 @@ import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  ActivityIndicator,
   FlatList,
   Image,
   ImageBackground,

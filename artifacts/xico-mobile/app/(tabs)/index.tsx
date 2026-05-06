@@ -19,6 +19,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { XicoAvatar } from "@/components/XicoAvatar";
+import { XicoLoader } from "@/components/XicoLoader";
 import { StampNotification } from "@/components/StampNotification";
 import { ElDespacho } from "@/components/ElDespacho";
 import { Colors } from "@/constants/colors";
@@ -1005,7 +1006,7 @@ const ma = StyleSheet.create({
     textTransform: "uppercase",
     marginBottom: 4,
   },
-  carouselContent: { paddingHorizontal: 16, paddingBottom: 8, gap: 10 },
+  carouselContent: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 8, gap: 10 },
   carouselCard: {
     width: SCREEN_W * 0.68,
     height: 210,
@@ -1280,7 +1281,7 @@ const mp = StyleSheet.create({
     color: Colors.textPrimary,
   },
   read: { fontFamily: "Inter_400Regular", fontSize: 7, color: "rgba(255,255,255,0.25)" },
-  thumb: { width: 64, height: 64, flexShrink: 0 },
+  thumb: { width: 64, height: 88, flexShrink: 0 },
 });
 
 function EstaSemana({
@@ -1321,6 +1322,10 @@ function EstaSemana({
                   ]}
                 >
                   <Image source={img} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+                  <LinearGradient
+                    colors={["rgba(0,0,0,0.0)", "rgba(0,0,0,0.38)"]}
+                    style={StyleSheet.absoluteFill}
+                  />
                   <View style={[es.gridAccentLine, { backgroundColor: accentBg }]} />
                 </View>
 
@@ -1573,7 +1578,7 @@ export default function IndexScreen() {
   if (isLoading) {
     return (
       <View style={sc.center}>
-        <Text style={sc.loadingLogo}>XICO</Text>
+        <XicoLoader />
       </View>
     );
   }
@@ -1653,12 +1658,6 @@ const sc = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-  },
-  loadingLogo: {
-    fontFamily: "Newsreader_600SemiBold",
-    fontSize: 42,
-    letterSpacing: 14,
-    color: "rgba(255,255,255,0.2)",
   },
   errorTitle: {
     color: Colors.textPrimary,

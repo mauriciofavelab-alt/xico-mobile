@@ -5,7 +5,6 @@ import { BlurView } from "expo-blur";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Animated,
   Image,
   Platform,
@@ -25,6 +24,7 @@ import { getImage } from "@/constants/imageMap";
 import { usePassport, trackArticleRead, trackSaved } from "@/hooks/usePassport";
 import { trackReadContext } from "@/hooks/useUserCriterion";
 import { StampNotification } from "@/components/StampNotification";
+import { XicoLoader } from "@/components/XicoLoader";
 
 type ApiArticle = {
   id: string; slug?: string; title?: string; subtitle?: string;
@@ -289,8 +289,7 @@ export default function ArticleScreen() {
   if (isLoading) {
     return (
       <View style={s.center}>
-        <Text style={s.loadingLogo}>XICO</Text>
-        <ActivityIndicator color={Colors.primary} style={{ marginTop: 24 }} />
+        <XicoLoader />
       </View>
     );
   }
@@ -458,10 +457,6 @@ const s = StyleSheet.create({
   center: {
     flex: 1, backgroundColor: "#080508",
     alignItems: "center", justifyContent: "center", paddingHorizontal: 24,
-  },
-  loadingLogo: {
-    fontFamily: "Newsreader_600SemiBold",
-    fontSize: 42, letterSpacing: 14, color: "rgba(255,255,255,0.15)",
   },
   errorTitle: {
     fontFamily: "Newsreader_600SemiBold",
