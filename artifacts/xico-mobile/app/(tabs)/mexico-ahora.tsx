@@ -326,7 +326,7 @@ function ArticleRow({ article }: { article: Article }) {
         <Text style={s.rowType}>{(article.subcategory ?? article.type ?? "").toUpperCase()}</Text>
         <Text style={s.rowTitle} numberOfLines={2}>{article.title}</Text>
         <Text style={s.rowSub} numberOfLines={1}>{article.subtitle}</Text>
-        <Text style={s.rowRead}>{article.readTime}</Text>
+        <Text style={s.rowRead}>{article.read_time_minutes ? `${article.read_time_minutes} min` : article.readTime}</Text>
       </View>
     </Pressable>
   );

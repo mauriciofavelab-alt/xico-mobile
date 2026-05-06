@@ -101,10 +101,11 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.35)",
   },
   titulo: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
+    fontFamily: "Newsreader_600SemiBold",
+    fontSize: 16,
     color: "#fff",
-    letterSpacing: 0.3,
+    lineHeight: 19,
+    letterSpacing: -0.2,
   },
   desc: {
     fontFamily: "Inter_400Regular",

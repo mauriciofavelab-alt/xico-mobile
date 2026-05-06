@@ -58,7 +58,6 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
-    "@expo-google-fonts/cormorant-garamond": "^0.4.1",
     "@expo-google-fonts/newsreader": "^0.4.1",
     "@supabase/supabase-js": "^2.101.1",
     "expo-av": "~16.0.8",
