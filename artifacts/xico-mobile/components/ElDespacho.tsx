@@ -95,14 +95,26 @@ export function ElDespacho({ onOpen }: { onOpen?: () => void }) {
 
       {/* SEALED */}
       {opened === false && (
-        <Pressable onPress={handleOpen} style={s.sealWrap}>
+        <Pressable
+          onPress={handleOpen}
+          style={[s.sealWrap, { backgroundColor: `${despacho.color.hex}0D` }]}
+        >
           <Animated.View
             style={{
               opacity: sealOpacity,
-              transform: [{ scale: sealScale }, { scale: pulseScale }],
+              transform: [{ scale: sealScale }],
               alignItems: "center",
             }}
           >
+            <Animated.View
+              style={[
+                s.sealRing,
+                {
+                  borderColor: `${despacho.color.hex}28`,
+                  transform: [{ scale: pulseScale }],
+                },
+              ]}
+            />
             <View style={[s.sealCircle, { borderColor: despacho.color.hex }]}>
               <Text style={[s.sealText, { color: despacho.color.hex }]}>XICO</Text>
             </View>
@@ -210,16 +222,23 @@ const s = StyleSheet.create({
   // SEALED
   sealWrap: {
     alignItems: "center",
-    paddingVertical: 40,
+    paddingVertical: 48,
+  },
+  sealRing: {
+    position: "absolute",
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 1,
   },
   sealCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 14,
+    marginBottom: 18,
   },
   sealText: {
     fontFamily: "CormorantGaramond_600SemiBold",

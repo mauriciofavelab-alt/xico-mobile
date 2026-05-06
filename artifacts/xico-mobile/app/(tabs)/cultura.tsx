@@ -243,7 +243,7 @@ const s = StyleSheet.create({
   filterTab: { paddingHorizontal: 16, paddingVertical: 11, borderBottomWidth: 1.5, borderBottomColor: "transparent" },
   filterText: { fontFamily: "Inter_500Medium", fontSize: 9, letterSpacing: 1.5, color: Colors.textTertiary, textTransform: "uppercase" },
   row: { flexDirection: "row", marginHorizontal: 16, marginVertical: 6, marginBottom: 16, gap: 14, alignItems: "flex-start", borderBottomWidth: 1, borderBottomColor: Colors.border, paddingBottom: 16 },
-  rowImg: { width: 72, height: 72, backgroundColor: Colors.surfaceHigh },
+  rowImg: { width: 80, height: 108, backgroundColor: Colors.surfaceHigh },
   rowBody: { flex: 1, gap: 3 },
   accentBar: { width: 22, height: 2, borderRadius: 1, marginBottom: 3 },
   rowType: { fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 2 },

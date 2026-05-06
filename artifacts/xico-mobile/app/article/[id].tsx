@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -345,7 +346,8 @@ export default function ArticleScreen() {
             style={StyleSheet.absoluteFill}
           />
           <Pressable onPress={() => router.back()} style={[s.backBtn, { top: topPad + 8 }]}>
-            <Feather name="arrow-left" size={18} color="rgba(255,255,255,0.85)" />
+            <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} />
+            <Feather name="arrow-left" size={18} color="rgba(255,255,255,0.9)" />
           </Pressable>
         </View>
 
@@ -440,12 +442,12 @@ const s = StyleSheet.create({
   },
   btn: { borderWidth: 1, borderColor: Colors.border, paddingHorizontal: 20, paddingVertical: 10 },
   btnText: { fontFamily: "Inter_400Regular", color: Colors.textPrimary, fontSize: 13, letterSpacing: 1 },
-  heroWrap: { width: "100%", height: 420, backgroundColor: "#000", overflow: "hidden" },
+  heroWrap: { width: "100%", height: 480, backgroundColor: "#000", overflow: "hidden" },
   heroImg: { width: "100%", height: "100%" },
   backBtn: {
     position: "absolute", left: 18, zIndex: 10,
     width: 36, height: 36, alignItems: "center", justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.45)", borderRadius: 18,
+    borderRadius: 18, overflow: "hidden",
   },
   headerWrap: { paddingHorizontal: 24, paddingTop: 28, paddingBottom: 4 },
   sectionLabel: {

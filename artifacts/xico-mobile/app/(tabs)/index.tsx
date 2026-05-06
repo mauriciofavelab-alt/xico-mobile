@@ -32,7 +32,7 @@ import {
 import { useXicoCompanion } from "@/hooks/useXicoCompanion";
 import { useStreak } from "@/hooks/useStreak";
 
-const { height: SCREEN_H } = Dimensions.get("window");
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 const ACCENT_BAR: Record<string, string> = {
   magenta: "#8B1E45",
@@ -291,8 +291,8 @@ const ac = StyleSheet.create({
     lineHeight: 19,
   },
   thumb: {
-    width: 56,
-    height: 56,
+    width: 70,
+    height: 92,
     flexShrink: 0,
     overflow: "hidden",
     backgroundColor: "rgba(255,255,255,0.05)",
@@ -428,6 +428,13 @@ function TuXicoWidget({
 
   return (
     <View style={aw.wrap}>
+      <LinearGradient
+        colors={[`${levelColor}20`, `${levelColor}08`, "transparent"]}
+        start={{ x: 1, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
       <View style={aw.topRule} />
       <View style={aw.inner}>
         <View style={aw.left}>
@@ -891,17 +898,39 @@ function MexicoAhoraPreview({ articles }: { articles: Article[] }) {
 
       <Text style={ma.sub}>Lo urgente, sin rodeos</Text>
 
-      <View style={ma.list}>
-        {articles.slice(0, 2).map((art, i) => (
-          <ArticleCard
-            key={art.id}
-            article={art}
-            index={i + 1}
-            dark
-            onPress={() => router.push(`/article/${art.id}` as any)}
-          />
-        ))}
-      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={ma.carouselContent}
+      >
+        {articles.slice(0, 5).map((art) => {
+          const img = getImage(art.hero_image_url ?? art.imageKey);
+          const accentBg = ACCENT_BAR[art.accentColor] ?? "#141414";
+          return (
+            <Pressable
+              key={art.id}
+              onPress={() => router.push(`/article/${art.id}` as any)}
+              style={({ pressed }) => [ma.carouselCard, pressed && { opacity: 0.82 }]}
+            >
+              <Image source={img} style={ma.carouselImg} resizeMode="cover" />
+              <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.5)", "rgba(0,0,0,0.92)"]}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={ma.carouselOverlay}>
+                <View style={[ma.carouselAccentBar, { backgroundColor: accentBg }]} />
+                <Text style={ma.carouselTag} numberOfLines={1}>
+                  {art.subcategory ?? art.tag}
+                </Text>
+                <Text style={ma.carouselTitle} numberOfLines={3}>
+                  {art.title}
+                </Text>
+                <Text style={ma.carouselMeta}>{art.readTime}</Text>
+              </View>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
       <Pressable
         onPress={() => router.push("/mexico-ahora" as any)}
@@ -976,7 +1005,45 @@ const ma = StyleSheet.create({
     textTransform: "uppercase",
     marginBottom: 4,
   },
-  list: { paddingHorizontal: 16 },
+  carouselContent: { paddingHorizontal: 16, paddingBottom: 8, gap: 10 },
+  carouselCard: {
+    width: SCREEN_W * 0.68,
+    height: 210,
+    overflow: "hidden",
+    backgroundColor: "#141414",
+  },
+  carouselImg: { width: "100%", height: "100%" },
+  carouselOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+  },
+  carouselAccentBar: { width: 20, height: 2, marginBottom: 10 },
+  carouselTag: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 7,
+    letterSpacing: 2,
+    color: "rgba(255,255,255,0.45)",
+    textTransform: "uppercase",
+    marginBottom: 6,
+  },
+  carouselTitle: {
+    fontFamily: "CormorantGaramond_600SemiBold",
+    fontSize: 18,
+    lineHeight: 22,
+    color: "#fff",
+    letterSpacing: -0.2,
+  },
+  carouselMeta: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 7,
+    letterSpacing: 1.5,
+    color: "rgba(255,255,255,0.3)",
+    textTransform: "uppercase",
+    marginTop: 10,
+  },
   link: {
     paddingHorizontal: 24,
     paddingTop: 20,
@@ -1408,7 +1475,7 @@ const es = StyleSheet.create({
     lineHeight: 19,
     color: Colors.textPrimary,
   },
-  listThumb: { width: 56, height: 56, flexShrink: 0 },
+  listThumb: { width: 70, height: 88, flexShrink: 0 },
 });
 
 export default function IndexScreen() {

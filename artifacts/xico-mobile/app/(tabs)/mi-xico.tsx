@@ -210,7 +210,8 @@ function PassportSection({ stamps, streak, companionName }: {
         </View>
 
         <View style={pp.passportRight}>
-          <View style={[pp.ptsStamp, { borderColor: level.color }]}>
+          <XicoAvatar level={getXicoLevel(pts)} size={64} />
+          <View style={[pp.ptsStamp, { borderColor: level.color, marginTop: 12 }]}>
             <Text style={pp.ptsStampLabel}>PTS</Text>
             <Text style={[pp.ptsStampNum, { color: level.color }]}>{pts}</Text>
           </View>
@@ -332,7 +333,7 @@ const pp = StyleSheet.create({
     gap: 16,
   },
   passportLeft: { flex: 1 },
-  passportRight: { justifyContent: "center", alignItems: "center" },
+  passportRight: { alignItems: "center", justifyContent: "flex-start" },
   passportEye: {
     fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 3,
     color: "rgba(255,255,255,0.3)", textTransform: "uppercase", marginBottom: 10,
@@ -1091,10 +1092,15 @@ export default function MiXicoScreen() {
           </Pressable>
         </View>
 
-        <View style={s.nameBlock}>
-          <Text style={s.accountLabel}>Cuenta de</Text>
-          <Text style={s.profileName}>{displayName}</Text>
-          <View style={s.magentaLine} />
+        <View style={s.nameRow}>
+          <View style={s.nameLeft}>
+            <Text style={s.accountLabel}>Cuenta de</Text>
+            <Text style={s.profileName}>{displayName}</Text>
+            <View style={s.magentaLine} />
+          </View>
+          <View style={s.nameRight}>
+            <XicoAvatar level={level} size={68} />
+          </View>
         </View>
 
         <View style={s.badgeRow}>
@@ -1184,7 +1190,9 @@ const s = StyleSheet.create({
   },
   settingsBtn: { padding: 6 },
 
-  nameBlock: { marginBottom: 18 },
+  nameRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18, gap: 16 },
+  nameLeft: { flex: 1 },
+  nameRight: { paddingTop: 20, alignItems: "center" },
   accountLabel: {
     fontFamily: "Inter_400Regular",
     fontSize: 9, color: "rgba(255,255,255,0.3)",
@@ -1193,8 +1201,8 @@ const s = StyleSheet.create({
   },
   profileName: {
     fontFamily: "CormorantGaramond_300Light",
-    fontSize: 52, lineHeight: 54,
-    color: Colors.textPrimary, letterSpacing: -1,
+    fontSize: 36, lineHeight: 40,
+    color: Colors.textPrimary, letterSpacing: -0.8,
     marginBottom: 12,
   },
   magentaLine: {
