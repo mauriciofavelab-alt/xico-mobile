@@ -802,19 +802,21 @@ function MapaTab() {
         const color = SPOT_COLOR[spot.type] ?? Colors.primary;
         return (
           <View key={spot.id} style={mp.card}>
-            <View style={[mp.stripe, { backgroundColor: color }]} />
+            <View style={[mp.cardAccent, { backgroundColor: color }]} />
             <View style={mp.body}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <Text style={[mp.type, { color }]}>{(SPOT_TYPE_LABEL[spot.type] ?? spot.type ?? "").toUpperCase()}</Text>
                 {spot.copil && (
-                  <View style={mp.copilBadge}>
-                    <Text style={mp.copilBadgeText}>✦ SELLO COPIL</Text>
+                  <View style={[mp.copilBadge, { borderColor: `${color}55` }]}>
+                    <Text style={[mp.copilBadgeText, { color }]}>✦ SELLO COPIL</Text>
                   </View>
                 )}
               </View>
               <Text style={mp.name}>{spot.name}</Text>
               <Text style={mp.address}>{spot.address}</Text>
-              <Text style={mp.desc} numberOfLines={2}>{spot.description}</Text>
+              {!!spot.description && (
+                <Text style={mp.desc} numberOfLines={3}>{spot.description}</Text>
+              )}
             </View>
           </View>
         );
@@ -838,14 +840,14 @@ const mp = StyleSheet.create({
   countText: { fontFamily: "Inter_400Regular", fontSize: 9, color: Colors.textTertiary },
   copilLegend: { flexDirection: "row", alignItems: "center", gap: 6 },
   copilDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#CA8A04", borderWidth: 1, borderColor: "#FDE047" },
-  card: { flexDirection: "row", marginHorizontal: 16, marginBottom: 12, backgroundColor: Colors.surface, overflow: "hidden" },
-  stripe: { width: 3 },
-  body: { flex: 1, padding: 14 },
+  card: { marginHorizontal: 16, marginBottom: 12, backgroundColor: Colors.surface, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.06)" },
+  cardAccent: { height: 3 },
+  body: { padding: 16 },
   type: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2 },
-  copilBadge: { backgroundColor: Colors.primaryDim, paddingHorizontal: 8, paddingVertical: 3 },
-  copilBadgeText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 1.5, color: "#CA8A04" },
-  name: { fontFamily: "Newsreader_500Medium", fontSize: 18, lineHeight: 22, color: Colors.textPrimary, marginBottom: 2 },
-  address: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginBottom: 4 },
+  copilBadge: { borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3 },
+  copilBadgeText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 1.5 },
+  name: { fontFamily: "Newsreader_500Medium", fontSize: 20, lineHeight: 25, color: Colors.textPrimary, marginBottom: 4 },
+  address: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginBottom: 6 },
   desc: { fontFamily: "Inter_400Regular", fontSize: 12, lineHeight: 17, color: Colors.textSecondary },
 });
 

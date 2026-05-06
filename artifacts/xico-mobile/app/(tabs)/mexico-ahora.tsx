@@ -59,6 +59,10 @@ function DualClock() {
 
   const getClockState = () => {
     const now = new Date();
+    const madridH = parseInt(fmt("Europe/Madrid", { hour: "numeric", hour12: false }).format(now), 10);
+    const cdmxH = parseInt(fmt("America/Mexico_City", { hour: "numeric", hour12: false }).format(now), 10);
+    let diff = madridH - cdmxH;
+    if (diff < 0) diff += 24;
     return {
       madridHM: fmt("Europe/Madrid", { hour: "2-digit", minute: "2-digit", hour12: false }).format(now),
       cdmxHM: fmt("America/Mexico_City", { hour: "2-digit", minute: "2-digit", hour12: false }).format(now),
@@ -66,6 +70,7 @@ function DualClock() {
       cdmxSec: fmt("America/Mexico_City", { second: "2-digit", hour12: false }).format(now),
       madridDay: fmt("Europe/Madrid", { weekday: "long" }).format(now),
       cdmxDay: fmt("America/Mexico_City", { weekday: "long" }).format(now),
+      hourDiff: diff,
     };
   };
 
@@ -75,11 +80,6 @@ function DualClock() {
     const id = setInterval(() => setClock(getClockState()), 1000);
     return () => clearInterval(id);
   }, []);
-
-  const columns = [
-    { city: "Madrid", hm: clock.madridHM, sec: clock.madridSec, day: clock.madridDay },
-    { city: "CDMX", hm: clock.cdmxHM, sec: clock.cdmxSec, day: clock.cdmxDay },
-  ];
 
   return (
     <View style={dc.wrap}>
@@ -93,18 +93,31 @@ function DualClock() {
         </View>
       </View>
       <View style={dc.body}>
-        {columns.map(({ city, hm, sec, day }, i) => (
-          <View key={city} style={[dc.col, i === 0 && dc.colBorder]}>
-            <View style={dc.colInner}>
-              <Text style={dc.cityLabel}>{city}</Text>
-              <View style={dc.timeLine}>
-                <Text style={dc.timeDigits}>{hm}</Text>
-                <Text style={dc.timeSec}>:{sec}</Text>
-              </View>
-              <Text style={dc.dayText}>{day}</Text>
+        <View style={dc.col}>
+          <View style={dc.colInner}>
+            <Text style={dc.cityLabel}>Madrid</Text>
+            <View style={dc.timeLine}>
+              <Text style={dc.timeDigits}>{clock.madridHM}</Text>
+              <Text style={dc.timeSec}>:{clock.madridSec}</Text>
             </View>
+            <Text style={dc.dayText}>{clock.madridDay}</Text>
           </View>
-        ))}
+        </View>
+        <View style={dc.sep}>
+          <View style={dc.sepLine} />
+          <Text style={dc.sepDiff}>+{clock.hourDiff}h</Text>
+          <View style={dc.sepLine} />
+        </View>
+        <View style={dc.col}>
+          <View style={dc.colInner}>
+            <Text style={dc.cityLabel}>CDMX</Text>
+            <View style={dc.timeLine}>
+              <Text style={dc.timeDigits}>{clock.cdmxHM}</Text>
+              <Text style={dc.timeSec}>:{clock.cdmxSec}</Text>
+            </View>
+            <Text style={dc.dayText}>{clock.cdmxDay}</Text>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -150,15 +163,11 @@ const dc = StyleSheet.create({
     color: "rgba(255,255,255,0.2)",
     letterSpacing: 1,
   },
-  body: { flexDirection: "row" },
+  body: { flexDirection: "row", alignItems: "stretch" },
   col: { flex: 1 },
-  colBorder: {
-    borderRightWidth: 1,
-    borderRightColor: "rgba(140,74,13,0.15)",
-  },
   colInner: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 22,
     gap: 8,
   },
   cityLabel: {
@@ -175,23 +184,42 @@ const dc = StyleSheet.create({
   },
   timeDigits: {
     fontFamily: "Inter_300Light",
-    fontSize: 38,
+    fontSize: 50,
     color: "#fff",
-    letterSpacing: -1,
-    lineHeight: 42,
+    letterSpacing: -2,
+    lineHeight: 54,
   },
   timeSec: {
     fontFamily: "Inter_300Light",
-    fontSize: 16,
-    color: "rgba(255,255,255,0.25)",
-    lineHeight: 20,
+    fontSize: 20,
+    color: "rgba(255,255,255,0.2)",
+    lineHeight: 24,
   },
   dayText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.45)",
+    fontFamily: "Newsreader_300Light_Italic",
+    fontStyle: "italic",
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
     textTransform: "capitalize",
-    letterSpacing: 0.3,
+  },
+  sep: {
+    width: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 22,
+    gap: 0,
+  },
+  sepLine: {
+    flex: 1,
+    width: 1,
+    backgroundColor: "rgba(140,74,13,0.2)",
+  },
+  sepDiff: {
+    fontFamily: "Newsreader_300Light",
+    fontSize: 14,
+    color: "rgba(140,74,13,0.7)",
+    letterSpacing: 0.5,
+    paddingVertical: 10,
   },
 });
 
