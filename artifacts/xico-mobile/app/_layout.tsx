@@ -7,14 +7,15 @@ import {
   useFonts as useInterFonts,
 } from "@expo-google-fonts/inter";
 import {
-  CormorantGaramond_300Light,
-  CormorantGaramond_300Light_Italic,
-  CormorantGaramond_400Regular,
-  CormorantGaramond_400Regular_Italic,
-  CormorantGaramond_500Medium,
-  CormorantGaramond_600SemiBold,
-  useFonts as useCormorantFonts,
-} from "@expo-google-fonts/cormorant-garamond";
+  Newsreader_300Light,
+  Newsreader_300Light_Italic,
+  Newsreader_400Regular,
+  Newsreader_400Regular_Italic,
+  Newsreader_500Medium,
+  Newsreader_600SemiBold,
+  Newsreader_600SemiBold_Italic,
+  useFonts as useNewsreaderFonts,
+} from "@expo-google-fonts/newsreader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
@@ -85,17 +86,18 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
-  const [cormorantLoaded, cormorantError] = useCormorantFonts({
-    CormorantGaramond_300Light,
-    CormorantGaramond_300Light_Italic,
-    CormorantGaramond_400Regular,
-    CormorantGaramond_400Regular_Italic,
-    CormorantGaramond_500Medium,
-    CormorantGaramond_600SemiBold,
+  const [newsreaderLoaded, newsreaderError] = useNewsreaderFonts({
+    Newsreader_300Light,
+    Newsreader_300Light_Italic,
+    Newsreader_400Regular,
+    Newsreader_400Regular_Italic,
+    Newsreader_500Medium,
+    Newsreader_600SemiBold,
+    Newsreader_600SemiBold_Italic,
   });
 
-  const fontsLoaded = interLoaded && cormorantLoaded;
-  const fontError = interError || cormorantError;
+  const fontsLoaded = interLoaded && newsreaderLoaded;
+  const fontError = interError || newsreaderError;
 
   useEffect(() => {
     if (fontsLoaded || fontError) {

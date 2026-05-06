@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+﻿import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
@@ -286,7 +286,7 @@ const ac = StyleSheet.create({
     textTransform: "uppercase",
   },
   title: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 15,
     lineHeight: 19,
   },
@@ -382,7 +382,7 @@ const mh = StyleSheet.create({
     paddingBottom: 12,
   },
   logo: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 42,
     letterSpacing: 8,
     color: Colors.textPrimary,
@@ -505,7 +505,7 @@ const aw = StyleSheet.create({
     paddingVertical: 3,
   },
   streakNum: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 14,
     lineHeight: 16,
   },
@@ -517,7 +517,7 @@ const aw = StyleSheet.create({
   },
   nameLine: { flexDirection: "row", alignItems: "baseline", gap: 10, marginBottom: 10 },
   companionName: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 22,
     lineHeight: 24,
   },
@@ -529,7 +529,7 @@ const aw = StyleSheet.create({
   },
   colorBar: { width: 24, height: 1.5, marginBottom: 12 },
   frase: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     fontSize: 16,
     lineHeight: 24,
@@ -623,7 +623,7 @@ const nd = StyleSheet.create({
     textTransform: "uppercase",
   },
   texto: {
-    fontFamily: "CormorantGaramond_300Light",
+    fontFamily: "Newsreader_300Light",
     fontSize: 22,
     lineHeight: 31,
     color: Colors.textPrimary,
@@ -733,7 +733,7 @@ const tc = StyleSheet.create({
   },
   cellCount: { fontFamily: "Inter_400Regular", fontSize: 7, color: "rgba(255,255,255,0.25)" },
   cellIntent: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     fontSize: 13,
     lineHeight: 18,
@@ -852,14 +852,14 @@ const hh = StyleSheet.create({
   accentBar: { width: 32, height: 2 },
   accentLine: { flex: 1, height: 0.5, backgroundColor: "rgba(255,255,255,0.2)" },
   title: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 36,
     lineHeight: 42,
     color: "#fff",
     marginBottom: 12,
   },
   subtitle: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     fontSize: 14,
     lineHeight: 21,
@@ -983,14 +983,14 @@ const ma = StyleSheet.create({
     marginBottom: 4,
   },
   titleMain: {
-    fontFamily: "CormorantGaramond_300Light",
+    fontFamily: "Newsreader_300Light",
     fontSize: 34,
     lineHeight: 36,
     letterSpacing: -0.5,
     color: "#fff",
   },
   titleItalic: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     fontSize: 34,
     lineHeight: 36,
@@ -1030,7 +1030,7 @@ const ma = StyleSheet.create({
     marginBottom: 6,
   },
   carouselTitle: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 18,
     lineHeight: 22,
     color: "#fff",
@@ -1145,14 +1145,14 @@ const pp = StyleSheet.create({
     textTransform: "uppercase",
   },
   title: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 25,
     lineHeight: 30,
     color: Colors.textPrimary,
     letterSpacing: -0.2,
   },
   subtitle: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     fontSize: 14,
     lineHeight: 21,
@@ -1245,7 +1245,7 @@ const mp = StyleSheet.create({
     textTransform: "uppercase",
   },
   contexto: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     fontSize: 14,
     lineHeight: 20,
@@ -1274,7 +1274,7 @@ const mp = StyleSheet.create({
     textTransform: "uppercase",
   },
   title: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 16,
     lineHeight: 20,
     color: Colors.textPrimary,
@@ -1429,14 +1429,14 @@ const es = StyleSheet.create({
     textTransform: "uppercase",
   },
   gridTitle: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 22,
     lineHeight: 26,
     color: Colors.textPrimary,
   },
   gridTitleSmall: { fontSize: 13, lineHeight: 17 },
   gridSubtitle: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     fontSize: 12,
     lineHeight: 17,
@@ -1470,7 +1470,7 @@ const es = StyleSheet.create({
     textTransform: "uppercase",
   },
   listTitle: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 15,
     lineHeight: 19,
     color: Colors.textPrimary,
@@ -1655,7 +1655,7 @@ const sc = StyleSheet.create({
     paddingHorizontal: 24,
   },
   loadingLogo: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 42,
     letterSpacing: 14,
     color: "rgba(255,255,255,0.2)",

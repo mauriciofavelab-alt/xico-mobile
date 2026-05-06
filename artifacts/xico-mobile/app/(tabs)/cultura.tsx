@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -62,10 +62,10 @@ function HeroCard({ article }: { article: Article }) {
           </View>
           <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 20, gap: 10 }}>
             <View style={{ width: 28, height: 2, backgroundColor: accent }} />
-            <Text style={{ fontFamily: "CormorantGaramond_600SemiBold", fontSize: 36, lineHeight: 40, color: "#fff" }} numberOfLines={3}>
+            <Text style={{ fontFamily: "Newsreader_600SemiBold", fontSize: 36, lineHeight: 40, color: "#fff" }} numberOfLines={3}>
               {article.title}
             </Text>
-            <Text style={{ fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 15, lineHeight: 22, color: "rgba(255,255,255,0.6)" }} numberOfLines={2}>
+            <Text style={{ fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 15, lineHeight: 22, color: "rgba(255,255,255,0.6)" }} numberOfLines={2}>
               {article.subtitle}
             </Text>
           </View>
@@ -237,7 +237,7 @@ const s = StyleSheet.create({
   masthead: { paddingHorizontal: 20, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: Colors.border },
   cobaltDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.cobalt },
   mastheadEye: { fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 2.5, color: Colors.cobalt },
-  mastheadTitle: { fontFamily: "CormorantGaramond_300Light", fontSize: 48, lineHeight: 50, color: Colors.textPrimary, letterSpacing: -1 },
+  mastheadTitle: { fontFamily: "Newsreader_300Light", fontSize: 48, lineHeight: 50, color: Colors.textPrimary, letterSpacing: -1 },
   mastheadCount: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, letterSpacing: 0.5, paddingBottom: 8 },
   filterScroll: { backgroundColor: Colors.background, borderBottomWidth: 1, borderBottomColor: Colors.border },
   filterTab: { paddingHorizontal: 16, paddingVertical: 11, borderBottomWidth: 1.5, borderBottomColor: "transparent" },
@@ -247,8 +247,8 @@ const s = StyleSheet.create({
   rowBody: { flex: 1, gap: 3 },
   accentBar: { width: 22, height: 2, borderRadius: 1, marginBottom: 3 },
   rowType: { fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 2 },
-  rowTitle: { fontFamily: "CormorantGaramond_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
-  rowSub: { fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: Colors.textSecondary },
+  rowTitle: { fontFamily: "Newsreader_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
+  rowSub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: Colors.textSecondary },
   rowRead: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginTop: 2 },
   sectionRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, marginTop: 24, marginBottom: 12, gap: 12 },
   sectionLabel: { fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 3 },
@@ -256,8 +256,8 @@ const s = StyleSheet.create({
   sectionCount: { fontFamily: "Inter_400Regular", fontSize: 9, color: Colors.textTertiary },
   copilBlock: { marginHorizontal: 16, marginVertical: 32, backgroundColor: "#0a0f1f", borderWidth: 1, borderColor: "rgba(26,63,160,0.4)", borderTopWidth: 2, borderTopColor: Colors.cobalt, padding: 24 },
   copilLabel: { fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 3, color: Colors.cobalt, textTransform: "uppercase", marginBottom: 12 },
-  copilTitle: { fontFamily: "CormorantGaramond_300Light", fontSize: 28, lineHeight: 32, color: "#fff", marginBottom: 8 },
-  copilSub: { fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 22, color: "rgba(255,255,255,0.55)", marginBottom: 20 },
+  copilTitle: { fontFamily: "Newsreader_300Light", fontSize: 28, lineHeight: 32, color: "#fff", marginBottom: 8 },
+  copilSub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 22, color: "rgba(255,255,255,0.55)", marginBottom: 20 },
   copilBtn: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1, borderColor: "rgba(26,63,160,0.4)", paddingHorizontal: 16, paddingVertical: 8, alignSelf: "flex-start" },
   copilBtnText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2.5, color: Colors.cobalt, textTransform: "uppercase" },
 });

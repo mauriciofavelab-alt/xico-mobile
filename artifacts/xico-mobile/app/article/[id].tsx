@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
@@ -144,7 +144,7 @@ const body_s = StyleSheet.create({
     marginTop: 2,
   },
   dropCap: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 72,
     lineHeight: 60,
   },
@@ -153,7 +153,7 @@ const body_s = StyleSheet.create({
     paddingTop: 4,
   },
   firstParaRest: {
-    fontFamily: "CormorantGaramond_400Regular",
+    fontFamily: "Newsreader_400Regular",
     fontSize: 20,
     lineHeight: 32,
     color: "rgba(240,236,230,0.95)",
@@ -166,7 +166,7 @@ const body_s = StyleSheet.create({
     marginBottom: 22,
   },
   quoteText: {
-    fontFamily: "CormorantGaramond_400Regular_Italic",
+    fontFamily: "Newsreader_400Regular_Italic",
     fontStyle: "italic",
     fontSize: 21,
     lineHeight: 31,
@@ -174,7 +174,7 @@ const body_s = StyleSheet.create({
     letterSpacing: -0.1,
   },
   para: {
-    fontFamily: "CormorantGaramond_400Regular",
+    fontFamily: "Newsreader_400Regular",
     fontSize: 18,
     lineHeight: 30,
     color: "rgba(220,215,208,0.88)",
@@ -433,11 +433,11 @@ const s = StyleSheet.create({
     alignItems: "center", justifyContent: "center", paddingHorizontal: 24,
   },
   loadingLogo: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 42, letterSpacing: 14, color: "rgba(255,255,255,0.15)",
   },
   errorTitle: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 22, color: Colors.textPrimary, marginBottom: 20, textAlign: "center",
   },
   btn: { borderWidth: 1, borderColor: Colors.border, paddingHorizontal: 20, paddingVertical: 10 },
@@ -455,11 +455,11 @@ const s = StyleSheet.create({
     letterSpacing: 3.5, textTransform: "uppercase", marginBottom: 14,
   },
   title: {
-    fontFamily: "CormorantGaramond_600SemiBold", fontSize: 34,
+    fontFamily: "Newsreader_600SemiBold", fontSize: 34,
     lineHeight: 40, color: "#f8f4ee", letterSpacing: -0.4, marginBottom: 14,
   },
   subtitle: {
-    fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic",
+    fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic",
     fontSize: 18, lineHeight: 27, color: "rgba(220,215,205,0.58)", marginBottom: 20,
   },
   divider: { height: 1, backgroundColor: "rgba(255,255,255,0.07)", marginVertical: 16 },
@@ -492,7 +492,7 @@ const s = StyleSheet.create({
   },
   bodyWrap: { paddingHorizontal: 26, paddingTop: 32, paddingBottom: 60 },
   noBody: {
-    fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic",
+    fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic",
     fontSize: 18, color: "rgba(255,255,255,0.35)",
   },
   endMarker: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 40, marginBottom: 20 },

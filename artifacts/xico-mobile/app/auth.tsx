@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+﻿import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -136,7 +136,7 @@ const s = StyleSheet.create({
     alignSelf: "center",
   },
   heading: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 38,
     lineHeight: 44,
     color: Colors.textPrimary,

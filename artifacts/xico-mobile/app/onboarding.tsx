@@ -1,8 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+﻿import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Animated,
+  ImageBackground,
   Platform,
   Pressable,
   ScrollView,
@@ -12,7 +14,19 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
+import { getImage } from "@/constants/imageMap";
 import { INTERESTS } from "@/constants/interests";
+
+const INTEREST_IMAGE: Record<string, string> = {
+  "Arte Contemporáneo": "arte-contemporaneo",
+  "Arte Mesoamericano": "arte-mesoamerica",
+  "Fotografía y Memoria": "photo-editorial",
+  "Gastronomía": "gastronomia-fina",
+  "Arte Popular y Artesanía": "artesania-mexicana",
+  "Cine y Literatura": "cine-film",
+  "Artes Escénicas": "teatro-luces",
+  "Diseño e Identidad": "tela-colores",
+};
 
 const MAX_SELECT = 4;
 
@@ -32,34 +46,42 @@ function InterestButton({
   const anim = useRef(new Animated.Value(isSelected ? 1 : 0)).current;
 
   React.useEffect(() => {
-    Animated.timing(anim, {
-      toValue: isSelected ? 1 : 0,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+    Animated.timing(anim, { toValue: isSelected ? 1 : 0, duration: 280, useNativeDriver: false }).start();
   }, [isSelected]);
 
-  const borderColor = anim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["rgba(255,255,255,0.08)", colorHex],
-  });
+  const img = getImage(INTEREST_IMAGE[id] ?? "gastronomia-fina");
 
   return (
     <Pressable
       onPress={onPress}
       disabled={isDisabled && !isSelected}
-      style={({ pressed }) => [{ opacity: isDisabled && !isSelected ? 0.25 : pressed ? 0.75 : 1 }]}
+      style={({ pressed }) => [{ opacity: isDisabled && !isSelected ? 0.22 : pressed ? 0.78 : 1 }]}
     >
-      <Animated.View style={[ob.btn, { borderColor }]}>
-        <Animated.View
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: colorHex, opacity: anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.12] }) },
-          ]}
-        />
+      <Animated.View style={[ob.btn, {
+        borderColor: anim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(255,255,255,0.08)", colorHex] }),
+        borderWidth: anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.5] }) as any,
+      }]}>
+        <ImageBackground source={img} style={StyleSheet.absoluteFill} resizeMode="cover">
+          <LinearGradient
+            colors={["rgba(8,5,8,0.75)", "rgba(8,5,8,0.30)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+          {isSelected && (
+            <Animated.View style={[StyleSheet.absoluteFill, {
+              backgroundColor: colorHex,
+              opacity: anim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.22] }),
+            }]} />
+          )}
+        </ImageBackground>
         <View style={ob.btnInner}>
-          <View style={[ob.dot, { backgroundColor: isSelected ? colorHex : "transparent", borderColor: isSelected ? colorHex : "rgba(255,255,255,0.15)" }]} />
+          <View style={[ob.dot, {
+            backgroundColor: isSelected ? colorHex : "transparent",
+            borderColor: isSelected ? colorHex : "rgba(255,255,255,0.35)",
+          }]} />
           <Text style={[ob.btnLabel, isSelected && { color: "#fff" }]}>{id}</Text>
+          {isSelected && <Text style={[ob.checkMark, { color: colorHex }]}>✓</Text>}
         </View>
       </Animated.View>
     </Pressable>
@@ -174,7 +196,7 @@ const ob = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 46,
     lineHeight: 52,
     letterSpacing: -0.5,
@@ -182,7 +204,7 @@ const ob = StyleSheet.create({
     marginBottom: 20,
   },
   titleItalic: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     color: "rgba(255,255,255,0.45)",
   },
@@ -196,18 +218,22 @@ const ob = StyleSheet.create({
   },
   list: { gap: 8, paddingHorizontal: 20, paddingBottom: 8 },
   btn: {
-    borderWidth: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    height: 84,
     overflow: "hidden",
+    justifyContent: "center",
   },
-  btnInner: { flexDirection: "row", alignItems: "center", gap: 14 },
-  dot: { width: 10, height: 10, borderRadius: 5, borderWidth: 1 },
+  btnInner: { flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 20 },
+  dot: { width: 10, height: 10, borderRadius: 5, borderWidth: 1.5, flexShrink: 0 },
   btnLabel: {
-    fontFamily: "CormorantGaramond_500Medium",
-    fontSize: 20,
-    color: "rgba(255,255,255,0.55)",
+    fontFamily: "Newsreader_500Medium",
+    fontSize: 21,
+    color: "rgba(255,255,255,0.82)",
     flex: 1,
+  },
+  checkMark: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    letterSpacing: 0.5,
   },
   footer: {
     position: "absolute",

@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+﻿import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
@@ -71,7 +71,7 @@ function LoteriaSello({ def, earned }: { def: SelloDef; earned: boolean }) {
       <View style={{ width: W, borderWidth: 1, borderColor: "rgba(255,255,255,0.06)", backgroundColor: "#0b080a" }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 11, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.04)" }}>
           <Text style={{ fontFamily: "Inter_700Bold", fontSize: 5.5, letterSpacing: 2.5, color: "rgba(255,255,255,0.18)", textTransform: "uppercase" }}>XICO</Text>
-          <Text style={{ fontFamily: "CormorantGaramond_600SemiBold", fontSize: 10, color: "rgba(255,255,255,0.12)" }}>{num}</Text>
+          <Text style={{ fontFamily: "Newsreader_600SemiBold", fontSize: 10, color: "rgba(255,255,255,0.12)" }}>{num}</Text>
         </View>
         <View style={{ height: 104, alignItems: "center", justifyContent: "center" }}>
           <View style={{ width: 60, height: 60, borderRadius: 30, borderWidth: 0.5, borderColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center" }}>
@@ -109,7 +109,7 @@ function LoteriaSello({ def, earned }: { def: SelloDef; earned: boolean }) {
 
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 13, paddingVertical: 9 }}>
           <Text style={{ fontFamily: "Inter_700Bold", fontSize: 5.5, letterSpacing: 3, color: "rgba(255,255,255,0.85)", textTransform: "uppercase" }}>XICO</Text>
-          <Text style={{ fontFamily: "CormorantGaramond_600SemiBold", fontSize: 13, color: "rgba(255,255,255,0.95)" }}>{num}</Text>
+          <Text style={{ fontFamily: "Newsreader_600SemiBold", fontSize: 13, color: "rgba(255,255,255,0.95)" }}>{num}</Text>
         </View>
 
         <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.28)", marginHorizontal: 13 }} />
@@ -264,12 +264,12 @@ const cr = StyleSheet.create({
   },
   card: { paddingHorizontal: 20, paddingVertical: 18 },
   headline: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 22, lineHeight: 26,
     color: "#f0ece6", marginBottom: 4,
   },
   detail: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic", fontSize: 14, lineHeight: 20,
     color: "rgba(255,255,255,0.5)",
   },
@@ -282,13 +282,13 @@ const cr = StyleSheet.create({
     backgroundColor: "#0e0a0c",
   },
   emptyTitle: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 20, lineHeight: 24,
     color: "rgba(255,255,255,0.4)",
     marginBottom: 6,
   },
   emptyDetail: {
-    fontFamily: "CormorantGaramond_300Light_Italic",
+    fontFamily: "Newsreader_300Light_Italic",
     fontStyle: "italic",
     fontSize: 13, lineHeight: 19,
     color: "rgba(255,255,255,0.22)",
@@ -339,11 +339,11 @@ const pp = StyleSheet.create({
     color: "rgba(255,255,255,0.3)", textTransform: "uppercase", marginBottom: 10,
   },
   levelName: {
-    fontFamily: "CormorantGaramond_600SemiBold", fontSize: 34,
+    fontFamily: "Newsreader_600SemiBold", fontSize: 34,
     lineHeight: 38, marginBottom: 2,
   },
   levelDesc: {
-    fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic",
+    fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic",
     fontSize: 14, color: "rgba(255,255,255,0.45)", marginBottom: 18,
   },
   ageRow: {
@@ -356,7 +356,7 @@ const pp = StyleSheet.create({
   ageItem: { flex: 1, alignItems: "flex-start" },
   ageDivider: { width: 1, height: 24, backgroundColor: "rgba(255,255,255,0.08)", marginHorizontal: 10 },
   ageNum: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 24, color: "#f0ece6", lineHeight: 26,
   },
   ageLabel: {
@@ -378,7 +378,7 @@ const pp = StyleSheet.create({
     color: "rgba(255,255,255,0.3)", textTransform: "uppercase",
   },
   ptsStampNum: {
-    fontFamily: "CormorantGaramond_600SemiBold",
+    fontFamily: "Newsreader_600SemiBold",
     fontSize: 28, lineHeight: 32,
   },
   sellosLabel: {
@@ -502,8 +502,8 @@ const ms = StyleSheet.create({
   storyBottom: { paddingHorizontal: 20 },
   accentLine: { width: 28, height: 2, marginBottom: 12 },
   storyCat: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, textTransform: "uppercase", marginBottom: 8 },
-  storyHeadline: { fontFamily: "CormorantGaramond_600SemiBold", fontSize: 32, lineHeight: 36, color: "#fff", marginBottom: 8 },
-  storyCaption: { fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 16, lineHeight: 24, color: "rgba(255,255,255,0.8)" },
+  storyHeadline: { fontFamily: "Newsreader_600SemiBold", fontSize: 32, lineHeight: 36, color: "#fff", marginBottom: 8 },
+  storyCaption: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 16, lineHeight: 24, color: "rgba(255,255,255,0.8)" },
 });
 
 // ─── RUTA ─────────────────────────────────────────────────────────────────────
@@ -583,8 +583,8 @@ const ru = StyleSheet.create({
   card: { marginHorizontal: 16, backgroundColor: "#0e0a0c", borderWidth: 1, borderColor: "rgba(255,255,255,0.06)", marginBottom: 8, overflow: "hidden" },
   top: { paddingHorizontal: 20, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" },
   date: { fontFamily: "Inter_400Regular", fontSize: 8, color: "rgba(255,255,255,0.3)", letterSpacing: 2, marginBottom: 4 },
-  title: { fontFamily: "CormorantGaramond_600SemiBold", fontSize: 24, lineHeight: 28, color: "#fff", marginBottom: 4 },
-  sub: { fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: "rgba(255,255,255,0.4)" },
+  title: { fontFamily: "Newsreader_600SemiBold", fontSize: 24, lineHeight: 28, color: "#fff", marginBottom: 4 },
+  sub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: "rgba(255,255,255,0.4)" },
   timeline: { paddingTop: 20, paddingLeft: 16, paddingRight: 16 },
   stopRow: { flexDirection: "row", gap: 12 },
   timelineLeft: { alignItems: "center", width: 48 },
@@ -598,7 +598,7 @@ const ru = StyleSheet.create({
   stopCat: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 2, marginBottom: 2 },
   stopTitle: { fontFamily: "Inter_600SemiBold", fontSize: 15, color: "#fff", lineHeight: 19, marginBottom: 2 },
   stopAddr: { fontFamily: "Inter_400Regular", fontSize: 9, color: "rgba(255,255,255,0.3)", letterSpacing: 0.3, marginBottom: 4 },
-  stopDesc: { fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 13, lineHeight: 19, color: "rgba(255,255,255,0.5)" },
+  stopDesc: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 13, lineHeight: 19, color: "rgba(255,255,255,0.5)" },
   expandBtn: { alignItems: "center", padding: 14, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" },
   expandText: { fontFamily: "Inter_400Regular", fontSize: 9, letterSpacing: 2, color: "rgba(255,255,255,0.35)", textTransform: "uppercase" },
 });
@@ -673,14 +673,14 @@ const rc = StyleSheet.create({
   line: { flex: 1, height: 1, backgroundColor: Colors.border },
   labelText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: Colors.textTertiary },
   empty: { paddingHorizontal: 16, paddingVertical: 24, borderWidth: 1, borderColor: Colors.border, marginHorizontal: 16 },
-  emptyTitle: { fontFamily: "CormorantGaramond_400Regular", fontSize: 20, color: Colors.textSecondary, marginBottom: 8 },
+  emptyTitle: { fontFamily: "Newsreader_400Regular", fontSize: 20, color: Colors.textSecondary, marginBottom: 8 },
   emptySub: { fontFamily: "Inter_400Regular", fontSize: 13, color: Colors.textTertiary, fontStyle: "italic" },
   row: { flexDirection: "row", marginHorizontal: 16, marginBottom: 16, gap: 14, alignItems: "flex-start", borderBottomWidth: 1, borderBottomColor: Colors.border, paddingBottom: 16 },
-  img: { width: 72, height: 72, backgroundColor: Colors.surfaceHigh },
+  img: { width: 80, height: 108, backgroundColor: Colors.surfaceHigh },
   body: { flex: 1, gap: 3 },
   bar: { width: 22, height: 2, borderRadius: 1, marginBottom: 3 },
   type: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2, color: Colors.textTertiary },
-  title: { fontFamily: "CormorantGaramond_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
+  title: { fontFamily: "Newsreader_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
   read: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginTop: 2 },
 });
 
@@ -839,7 +839,7 @@ const mp = StyleSheet.create({
   type: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2 },
   copilBadge: { backgroundColor: Colors.primaryDim, paddingHorizontal: 8, paddingVertical: 3 },
   copilBadgeText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 1.5, color: "#CA8A04" },
-  name: { fontFamily: "CormorantGaramond_500Medium", fontSize: 18, lineHeight: 22, color: Colors.textPrimary, marginBottom: 2 },
+  name: { fontFamily: "Newsreader_500Medium", fontSize: 18, lineHeight: 22, color: Colors.textPrimary, marginBottom: 2 },
   address: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginBottom: 4 },
   desc: { fontFamily: "Inter_400Regular", fontSize: 12, lineHeight: 17, color: Colors.textSecondary },
 });
@@ -938,9 +938,9 @@ const ag = StyleSheet.create({
   freeText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 1.5, color: "#1a4a1a" },
   priceBadge: { borderWidth: 1, borderColor: Colors.border, paddingHorizontal: 8, paddingVertical: 3 },
   priceText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 1.5, color: Colors.textTertiary },
-  title: { fontFamily: "CormorantGaramond_500Medium", fontSize: 20, lineHeight: 24, color: Colors.textPrimary, marginBottom: 4 },
+  title: { fontFamily: "Newsreader_500Medium", fontSize: 20, lineHeight: 24, color: Colors.textPrimary, marginBottom: 4 },
   meta: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textSecondary },
-  desc: { fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: Colors.textTertiary },
+  desc: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: Colors.textTertiary },
   voyBtn: { borderWidth: 1, borderColor: Colors.border, paddingHorizontal: 16, paddingVertical: 8 },
   voyBtnActive: { backgroundColor: "#1a4a1a", borderColor: "#1a4a1a" },
   voyText: { fontFamily: "Inter_700Bold", fontSize: 9, letterSpacing: 2, color: Colors.textPrimary, textTransform: "uppercase" },
@@ -1002,15 +1002,15 @@ const gu = StyleSheet.create({
   countText: { fontFamily: "Inter_400Regular", fontSize: 9, color: Colors.textTertiary },
   empty: { marginHorizontal: 16, padding: 24, borderWidth: 1, borderColor: Colors.border },
   emptyLine: { width: 20, height: 1.5, backgroundColor: Colors.magenta, marginBottom: 16 },
-  emptyTitle: { fontFamily: "CormorantGaramond_400Regular", fontSize: 18, color: Colors.textSecondary, lineHeight: 22, marginBottom: 8 },
-  emptySub: { fontFamily: "CormorantGaramond_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 22, color: Colors.textTertiary, marginBottom: 16 },
+  emptyTitle: { fontFamily: "Newsreader_400Regular", fontSize: 18, color: Colors.textSecondary, lineHeight: 22, marginBottom: 8 },
+  emptySub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 22, color: Colors.textTertiary, marginBottom: 16 },
   emptyMono: { fontFamily: "Inter_400Regular", fontSize: 8, color: Colors.textTertiary, letterSpacing: 1.5, textTransform: "uppercase" },
   row: { flexDirection: "row", marginHorizontal: 16, marginBottom: 16, gap: 14, alignItems: "flex-start", borderBottomWidth: 1, borderBottomColor: Colors.border, paddingBottom: 16 },
-  img: { width: 72, height: 72, backgroundColor: Colors.surfaceHigh },
+  img: { width: 80, height: 108, backgroundColor: Colors.surfaceHigh },
   body: { flex: 1, gap: 3 },
   bar: { width: 22, height: 2, borderRadius: 1, marginBottom: 3 },
   type: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2, color: Colors.textTertiary },
-  title: { fontFamily: "CormorantGaramond_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
+  title: { fontFamily: "Newsreader_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
   read: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginTop: 2 },
 });
 
@@ -1200,7 +1200,7 @@ const s = StyleSheet.create({
     marginBottom: 6,
   },
   profileName: {
-    fontFamily: "CormorantGaramond_300Light",
+    fontFamily: "Newsreader_300Light",
     fontSize: 36, lineHeight: 40,
     color: Colors.textPrimary, letterSpacing: -0.8,
     marginBottom: 12,
@@ -1220,7 +1220,7 @@ const s = StyleSheet.create({
     color: "rgba(255,255,255,0.3)", textTransform: "uppercase", marginBottom: 2,
   },
   circleValue: {
-    fontFamily: "CormorantGaramond_500Medium", fontSize: 14, lineHeight: 16, color: Colors.textPrimary,
+    fontFamily: "Newsreader_500Medium", fontSize: 14, lineHeight: 16, color: Colors.textPrimary,
   },
   levelBadge: {
     flexDirection: "row", alignItems: "center", gap: 8,
