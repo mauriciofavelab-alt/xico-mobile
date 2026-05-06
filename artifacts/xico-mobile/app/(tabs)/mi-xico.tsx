@@ -137,6 +137,7 @@ type Article = {
   id: string; pillar: string; type: string; subcategory: string;
   title: string; subtitle: string; author: string; institution: string;
   imageKey: string; readTime: string; accentColor: string; date: string; featured: boolean;
+  hero_image_url?: string; read_time_minutes?: number;
 };
 
 type Momento = {
@@ -663,7 +664,7 @@ function RecomendacionesSection({ interests }: { interests: string[] }) {
                 <View style={[rc.bar, { backgroundColor: accent }]} />
                 <Text style={rc.type}>{(art.subcategory ?? art.type ?? "").toUpperCase()}</Text>
                 <Text style={rc.title} numberOfLines={2}>{art.title}</Text>
-                <Text style={rc.read}>{art.readTime}</Text>
+                <Text style={rc.read}>{art.read_time_minutes ? `${art.read_time_minutes} min` : art.readTime}</Text>
               </View>
             </Pressable>
           );
@@ -991,7 +992,7 @@ function GuardadosTab() {
                 <View style={[gu.bar, { backgroundColor: accent }]} />
                 <Text style={gu.type}>{(art.subcategory ?? art.type ?? "").toUpperCase()}</Text>
                 <Text style={gu.title} numberOfLines={2}>{art.title}</Text>
-                <Text style={gu.read}>{art.readTime}</Text>
+                <Text style={gu.read}>{art.read_time_minutes ? `${art.read_time_minutes} min` : art.readTime}</Text>
               </View>
             </Pressable>
           );
