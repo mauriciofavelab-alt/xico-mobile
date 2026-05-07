@@ -8,7 +8,7 @@ const getApiBase = () => {
     return isLocal ? `http://${domain}` : `https://${domain}`;
   }
   if (Platform.OS === "web") return "http://localhost:8080";
-  return "http://localhost:8080";
+  return "https://xico-api-production.up.railway.app";
 };
 
 export const API_BASE = getApiBase();

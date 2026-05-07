@@ -467,9 +467,9 @@ const s = StyleSheet.create({
   heroWrap: { width: "100%", height: 480, backgroundColor: "#000", overflow: "hidden" },
   heroImg: { width: "100%", height: "100%" },
   backBtn: {
-    position: "absolute", left: 18, zIndex: 10,
-    width: 36, height: 36, alignItems: "center", justifyContent: "center",
-    borderRadius: 18, overflow: "hidden",
+    position: "absolute", left: 14, zIndex: 10,
+    width: 44, height: 44, alignItems: "center", justifyContent: "center",
+    borderRadius: 22, overflow: "hidden",
   },
   headerWrap: { paddingHorizontal: 24, paddingTop: 28, paddingBottom: 4 },
   sectionLabel: {

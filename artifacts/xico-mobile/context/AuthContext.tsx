@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       options: {
         shouldCreateUser: true,
+        emailRedirectTo: "xico://",
       },
     });
     return { error: error?.message ?? null };

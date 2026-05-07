@@ -36,7 +36,7 @@ function IconIndice({ active }: { active: boolean }) {
 }
 
 function IconCultura({ active }: { active: boolean }) {
-  const color = active ? "hsl(220, 100%, 30%)" : Colors.textTertiary;
+  const color = active ? "hsl(220, 85%, 62%)" : Colors.textTertiary;
   const sw = active ? 1.75 : 1.4;
   return (
     <TabIcon active={active} color={color}>
@@ -65,7 +65,7 @@ function IconAhora({ active }: { active: boolean }) {
 }
 
 function IconArchivo({ active }: { active: boolean }) {
-  const color = active ? "hsl(160, 100%, 20%)" : Colors.textTertiary;
+  const color = active ? "hsl(160, 65%, 48%)" : Colors.textTertiary;
   const sw = active ? 1.75 : 1.4;
   return (
     <TabIcon active={active} color={color}>
@@ -128,7 +128,7 @@ export default function TabLayout() {
         name="cultura"
         options={{
           title: "Cultura",
-          tabBarActiveTintColor: "hsl(220, 100%, 30%)",
+          tabBarActiveTintColor: "hsl(220, 85%, 62%)",
           tabBarIcon: ({ focused }) => <IconCultura active={focused} />,
         }}
       />
@@ -144,7 +144,7 @@ export default function TabLayout() {
         name="mi-xico"
         options={{
           title: "Archivo",
-          tabBarActiveTintColor: "hsl(160, 100%, 20%)",
+          tabBarActiveTintColor: "hsl(160, 65%, 48%)",
           tabBarIcon: ({ focused }) => <IconArchivo active={focused} />,
         }}
       />
