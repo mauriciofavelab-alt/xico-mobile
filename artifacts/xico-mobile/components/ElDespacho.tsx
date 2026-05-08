@@ -9,13 +9,43 @@ import {
   View,
 } from "react-native";
 import { Colors } from "@/constants/colors";
-import { getDespachoForToday } from "@/constants/despachos";
+import { fetchJson } from "@/constants/api";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 const STORAGE_KEY = `xico_despacho_${TODAY}`;
+const CACHE_KEY = `xico_despacho_data_${TODAY}`;
+
+type DespachoData = {
+  subtitulo: string;
+  color: { hex: string; nombre: string };
+  pensamiento: string;
+  palabra: { nahuatl: string; español: string; nota: string };
+  lugar: { nombre: string; barrio: string; nota: string };
+  hecho: string;
+  pregunta: string;
+  teaser: string;
+};
+
+function mapApiToLocal(api: any): DespachoData {
+  return {
+    subtitulo: api.subtitulo,
+    color: api.color,
+    pensamiento: api.pensamiento,
+    palabra: {
+      nahuatl: api.nahuatl?.word ?? "",
+      español: api.nahuatl?.meaning ?? "",
+      nota: api.nahuatl?.nota ?? "",
+    },
+    lugar: api.lugar,
+    hecho: api.hecho,
+    pregunta: api.pregunta,
+    teaser: api.teaser,
+  };
+}
 
 export function ElDespacho({ onOpen }: { onOpen?: () => void }) {
   const [opened, setOpened] = useState<boolean | null>(null);
+  const [despacho, setDespacho] = useState<DespachoData | null>(null);
 
   const sealOpacity = useRef(new Animated.Value(1)).current;
   const sealScale = useRef(new Animated.Value(1)).current;
@@ -23,7 +53,30 @@ export function ElDespacho({ onOpen }: { onOpen?: () => void }) {
   const contentOpacity = useRef(new Animated.Value(0)).current;
   const contentSlide = useRef(new Animated.Value(10)).current;
 
-  const despacho = getDespachoForToday();
+  // Fetch personalized despacho from API, cache for the day
+  useEffect(() => {
+    (async () => {
+      try {
+        const cached = await AsyncStorage.getItem(CACHE_KEY);
+        if (cached) {
+          setDespacho(JSON.parse(cached));
+          return;
+        }
+        // Try authenticated endpoint first, fall back to public
+        let data: any = null;
+        try {
+          data = await fetchJson<any>("/api/despacho");
+        } catch {
+          data = await fetchJson<any>("/api/despacho/public");
+        }
+        const mapped = mapApiToLocal(data);
+        setDespacho(mapped);
+        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(mapped));
+      } catch {
+        // despacho stays null — empty state rendered below
+      }
+    })();
+  }, []);
 
   const todayLabel = new Date().toLocaleDateString("es-ES", {
     weekday: "long",
@@ -78,7 +131,7 @@ export function ElDespacho({ onOpen }: { onOpen?: () => void }) {
     });
   }, [opened, onOpen]);
 
-  if (opened === null) return null;
+  if (opened === null || despacho === null) return null;
 
   return (
     <View style={s.card}>

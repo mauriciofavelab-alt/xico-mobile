@@ -957,9 +957,22 @@ const ag = StyleSheet.create({
 
 // ─── GUARDADOS ────────────────────────────────────────────────────────────────
 function GuardadosTab() {
+  const qc = useQueryClient();
   const { data: saved = [] } = useQuery<Article[]>({
     queryKey: ["saved"],
     queryFn: () => fetchJson<Article[]>("/api/saved"),
+  });
+
+  const unsaveMutation = useMutation({
+    mutationFn: (id: string) => fetchJson(`/api/saved/${id}`, { method: "DELETE" }),
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ["saved"] });
+      const prev = qc.getQueryData<Article[]>(["saved"]);
+      qc.setQueryData<Article[]>(["saved"], (old) => (old ?? []).filter(a => a.id !== id));
+      return { prev };
+    },
+    onError: (_e, _id, ctx) => { qc.setQueryData(["saved"], ctx?.prev); },
+    onSettled: () => { qc.invalidateQueries({ queryKey: ["saved"] }); },
   });
 
   return (
@@ -982,19 +995,27 @@ function GuardadosTab() {
           const img = getImage(art.hero_image_url ?? art.imageKey);
           const accent = getAccentColor(art.accentColor);
           return (
-            <Pressable
-              key={art.id}
-              onPress={() => router.push(`/article/${art.id}` as any)}
-              style={({ pressed }) => [gu.row, pressed && { opacity: 0.82 }]}
-            >
-              <Image source={img} style={gu.img} resizeMode="cover" />
-              <View style={gu.body}>
-                <View style={[gu.bar, { backgroundColor: accent }]} />
-                <Text style={gu.type}>{(art.subcategory ?? art.type ?? "").toUpperCase()}</Text>
-                <Text style={gu.title} numberOfLines={2}>{art.title}</Text>
-                <Text style={gu.read}>{art.read_time_minutes ? `${art.read_time_minutes} min` : art.readTime}</Text>
-              </View>
-            </Pressable>
+            <View key={art.id} style={gu.row}>
+              <Pressable
+                onPress={() => router.push(`/article/${art.id}` as any)}
+                style={{ flexDirection: "row", flex: 1, gap: 14, alignItems: "flex-start" }}
+              >
+                <Image source={img} style={gu.img} resizeMode="cover" />
+                <View style={gu.body}>
+                  <View style={[gu.bar, { backgroundColor: accent }]} />
+                  <Text style={gu.type}>{(art.subcategory ?? art.type ?? "").toUpperCase()}</Text>
+                  <Text style={gu.title} numberOfLines={2}>{art.title}</Text>
+                  <Text style={gu.read}>{art.read_time_minutes ? `${art.read_time_minutes} min` : art.readTime}</Text>
+                </View>
+              </Pressable>
+              <Pressable
+                onPress={() => unsaveMutation.mutate(art.id)}
+                hitSlop={12}
+                style={gu.unsaveBtn}
+              >
+                <Text style={gu.unsaveX}>×</Text>
+              </Pressable>
+            </View>
           );
         })
       )}
@@ -1013,7 +1034,9 @@ const gu = StyleSheet.create({
   emptyTitle: { fontFamily: "Newsreader_400Regular", fontSize: 18, color: Colors.textSecondary, lineHeight: 22, marginBottom: 8 },
   emptySub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 22, color: Colors.textTertiary, marginBottom: 16 },
   emptyMono: { fontFamily: "Inter_400Regular", fontSize: 8, color: Colors.textTertiary, letterSpacing: 1.5, textTransform: "uppercase" },
-  row: { flexDirection: "row", marginHorizontal: 16, marginBottom: 16, gap: 14, alignItems: "flex-start", borderBottomWidth: 1, borderBottomColor: Colors.border, paddingBottom: 16 },
+  row: { flexDirection: "row", marginHorizontal: 16, marginBottom: 16, alignItems: "flex-start", borderBottomWidth: 1, borderBottomColor: Colors.border, paddingBottom: 16 },
+  unsaveBtn: { paddingLeft: 12, paddingTop: 2 },
+  unsaveX: { fontFamily: "Inter_300Light", fontSize: 18, color: "rgba(255,255,255,0.2)", lineHeight: 22 },
   img: { width: 80, height: 108, backgroundColor: Colors.surfaceHigh },
   body: { flex: 1, gap: 3 },
   bar: { width: 22, height: 2, borderRadius: 1, marginBottom: 3 },

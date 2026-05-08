@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useCallback, useEffect } from "react";
+import { supabase } from "@/constants/supabase";
 
 export type StampId =
   | "primera-lectura"
@@ -107,6 +108,37 @@ async function saveEarned(set: Set<StampId>) {
   await AsyncStorage.setItem(STAMP_KEY, JSON.stringify([...set]));
 }
 
+async function syncEarnedToCloud(stampId: StampId, allEarned: Set<StampId>) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("stamps").upsert(
+      { user_id: user.id, stamp_id: stampId },
+      { onConflict: "user_id,stamp_id" },
+    );
+    const pts = calculatePoints(allEarned, 0);
+    await supabase.from("profiles")
+      .update({ points: pts })
+      .eq("auth_user_id", user.id);
+  } catch {
+    // Offline — local state is already saved
+  }
+}
+
+async function loadEarnedFromCloud(): Promise<Set<StampId>> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return new Set();
+    const { data } = await supabase
+      .from("stamps")
+      .select("stamp_id")
+      .eq("user_id", user.id);
+    return new Set((data ?? []).map((r: any) => r.stamp_id as StampId));
+  } catch {
+    return new Set();
+  }
+}
+
 async function getReadCount(): Promise<number> {
   try {
     const raw = await AsyncStorage.getItem(READS_KEY);
@@ -132,8 +164,12 @@ export function usePassport() {
   const [newStamp, setNewStamp] = useState<Stamp | null>(null);
 
   const load = useCallback(async () => {
-    const earned = await loadEarned();
-    setStamps(DEFINITIONS.map(d => ({ ...d, earned: earned.has(d.id) })));
+    const local = await loadEarned();
+    // Merge with cloud — cloud wins on reinstall, local wins offline
+    const cloud = await loadEarnedFromCloud();
+    const merged = new Set([...local, ...cloud]);
+    if (merged.size > local.size) await saveEarned(merged);
+    setStamps(DEFINITIONS.map(d => ({ ...d, earned: merged.has(d.id) })));
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -148,6 +184,7 @@ export function usePassport() {
     setStamps(DEFINITIONS.map(d => ({ ...d, earned: earned.has(d.id) })));
     setNewStamp(s);
     setTimeout(() => setNewStamp(null), 3500);
+    syncEarnedToCloud(id, earned); // fire and forget
   }, []);
 
   const dismissStamp = useCallback(() => setNewStamp(null), []);

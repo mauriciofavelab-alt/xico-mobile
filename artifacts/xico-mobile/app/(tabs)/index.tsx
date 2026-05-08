@@ -69,54 +69,8 @@ const INTEREST_TO_SUBCATEGORY: Record<string, string[]> = {
   "Diseño e Identidad": ["moda", "Moda"],
 };
 
-const CONTEXTOS_PERSONALIZADOS: Record<string, string> = {
-  "Arte Contemporáneo": "Esto conecta con la práctica que has estado siguiendo.",
-  "Arte Mesoamericano": "Una pieza que amplía la raíz que te interesa.",
-  "Fotografía y Memoria": "Para cuando tengas veinte minutos y buena luz.",
-  "Gastronomía": "Vuelve a esto antes de tu próxima visita a algún Copil.",
-  "Arte Popular y Artesanía": "El oficio que guardaste merece este contexto.",
-  "Cine y Literatura": "Una lectura que completa lo que ya tienes marcado.",
-  "Artes Escénicas": "Lo que el cuerpo sabe antes que la mente.",
-  "Diseño e Identidad": "El hilo entre lo que usas y lo que te importa.",
-};
+type NarrationStyle = "intellectual" | "visual" | "material" | "kinesthetic" | "conceptual";
 
-const NOTAS_EDITOR = [
-  {
-    lugar: "Serrano 46, Madrid",
-    texto:
-      "Esta mañana en el Rastro encontré una cerámica Talavera de Puebla entre chatarra alemana y loza inglesa. Madrid colecciona sin saber que colecciona. Esta edición intenta nombrar lo que la ciudad ya tiene sin saberlo.",
-  },
-  {
-    lugar: "Casa de México, Madrid",
-    texto:
-      "El Prado cierra los lunes. Casa de México, no. Hay días en que la única pintura viva de Madrid está en Serrano 46. Esta semana cerramos con esa certeza.",
-  },
-  {
-    lugar: "Malasaña, Madrid",
-    texto:
-      "Tres restaurantes con Sello Copil en Malasaña. Los madrileños piden mole negro sin pestañear. Algo ha cambiado aquí en diez años. Esta edición lo documenta.",
-  },
-  {
-    lugar: "Barrio de las Letras, Madrid",
-    texto:
-      "Martes de vernissage en el barrio de las letras. Cuatro galerías, un catálogo de artista mexicano en cada una. La presencia es geográfica antes que simbólica.",
-  },
-  {
-    lugar: "Lavapiés, Madrid",
-    texto:
-      "Llueve en Lavapiés y el olor del comal de Doña Esperanza se mezcla con el café de la esquina. Hay olores que no necesitan traducción. Esta edición tampoco.",
-  },
-  {
-    lugar: "Complutense, Madrid",
-    texto:
-      "La Complutense abre convocatorias. Treinta y un estados de México miran hacia Madrid este mes. El talento tiene dirección postal. Lo seguimos.",
-  },
-  {
-    lugar: "El Retiro, Madrid",
-    texto:
-      "Domingo de Retiro. Un grupo de estudiantes becados discute a Rulfo en un banco frente al estanque. México le habla a Madrid en voz baja y con precisión.",
-  },
-];
 
 type ApiArticle = {
   id: string;
@@ -555,9 +509,8 @@ const aw = StyleSheet.create({
   bottomRule: { height: 2 },
 });
 
-function NotaDelEditor() {
+function NotaDelEditor({ nota }: { nota: { lugar: string; texto: string } | null }) {
   const hoy = new Date();
-  const nota = NOTAS_EDITOR[hoy.getDay()];
   const h = hoy.getHours();
   const saludo = h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
   const fechaStr = hoy.toLocaleDateString("es-ES", {
@@ -565,6 +518,8 @@ function NotaDelEditor() {
     month: "long",
     year: "numeric",
   });
+
+  if (!nota) return null;
 
   return (
     <View style={nd.wrap}>
@@ -1179,16 +1134,20 @@ const pp = StyleSheet.create({
 function ModuloPersonalizado({
   articles,
   interests,
+  narrationStyle,
+  contexts,
 }: {
   articles: Article[];
   interests: string[];
+  narrationStyle: NarrationStyle;
+  contexts: Record<string, Record<string, string>>;
 }) {
   if (articles.length === 0) return null;
 
   const contexto =
     interests.length > 0
-      ? CONTEXTOS_PERSONALIZADOS[interests[0]] ?? "Una pieza guardada a propósito."
-      : "Seleccionado con criterio para esta edición.";
+      ? (contexts[interests[0]]?.[narrationStyle] ?? contexts[interests[0]]?.intellectual ?? "")
+      : "";
 
   return (
     <View style={mp.wrap}>
@@ -1497,6 +1456,9 @@ export default function IndexScreen() {
 
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [interests, setInterests] = useState<string[]>([]);
+  const [narrationStyle, setNarrationStyle] = useState<NarrationStyle>("intellectual");
+  const [personalizationContexts, setPersonalizationContexts] = useState<Record<string, Record<string, string>>>({});
+  const [notaEditor, setNotaEditor] = useState<{ lugar: string; texto: string } | null>(null);
 
   const {
     data: apiArticles = [],
@@ -1528,17 +1490,21 @@ export default function IndexScreen() {
 
   useEffect(() => {
     AsyncStorage.getItem("xico_interests").then((raw) => {
-      if (raw) {
-        try {
-          setInterests(JSON.parse(raw));
-        } catch {}
-      }
+      if (raw) { try { setInterests(JSON.parse(raw)); } catch {} }
     });
-
+    AsyncStorage.getItem("xico_narration_style").then((style) => {
+      if (style) setNarrationStyle(style as NarrationStyle);
+    });
     fetchJson<any[]>("/api/saved")
       .then((saved) => {
         setSavedIds(new Set(saved.map((a: any) => a.articleId ?? a.id)));
       })
+      .catch(() => {});
+    fetchJson<Record<string, Record<string, string>>>("/api/personalization/contexts")
+      .then(setPersonalizationContexts)
+      .catch(() => {});
+    fetchJson<{ lugar: string; texto: string }>("/api/personalization/nota-editor")
+      .then(setNotaEditor)
       .catch(() => {});
   }, []);
 
@@ -1627,7 +1593,7 @@ export default function IndexScreen() {
           streak={streak}
         />
 
-        <NotaDelEditor />
+        <NotaDelEditor nota={notaEditor} />
         <TablaContenidos />
 
         {mexicoAhoraArticles.length > 0 && (
@@ -1637,7 +1603,7 @@ export default function IndexScreen() {
         {piezaProfunda && <PiezaProfunda article={piezaProfunda} />}
 
         {interests.length > 0 && personalizados.length > 0 && (
-          <ModuloPersonalizado articles={personalizados} interests={interests} />
+          <ModuloPersonalizado articles={personalizados} interests={interests} narrationStyle={narrationStyle} contexts={personalizationContexts} />
         )}
 
         {(gridPair.length > 0 || listaArticulos.length > 0) && (
