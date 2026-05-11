@@ -2,7 +2,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -1063,11 +1063,11 @@ export default function MiXicoScreen() {
   const { stamps, newStamp, earn, dismissStamp } = usePassport();
   const { streak } = useStreak();
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     AsyncStorage.getItem("xico_interests").then(val => {
       if (val) { try { setInterests(JSON.parse(val)); } catch {} }
     });
-  }, []);
+  }, []));
 
   const earned = new Set(stamps.filter(s => s.earned).map(s => s.id));
   const pts = calculatePoints(earned as any, streak);
@@ -1095,11 +1095,8 @@ export default function MiXicoScreen() {
       [
         { text: "Cancelar", style: "cancel" },
         {
-          text: "Cambiar intereses",
-          onPress: async () => {
-            await AsyncStorage.removeItem("xico_onboarding_done");
-            router.replace("/onboarding");
-          },
+          text: "Editar intereses",
+          onPress: () => router.push("/edit-interests" as any),
         },
         {
           text: "Cerrar sesión",
@@ -1142,20 +1139,24 @@ export default function MiXicoScreen() {
           </View>
         </View>
 
-        {interests.length > 0 && (
+        <Pressable
+          onPress={() => router.push("/edit-interests" as any)}
+          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, paddingBottom: 4 }]}
+        >
           <View style={s.tagsRow}>
             {interests.slice(0, 4).map(tag => (
               <View key={tag} style={s.tag}>
                 <Text style={s.tagText}>{INTEREST_LABELS[tag] ?? tag}</Text>
               </View>
             ))}
-            {interests.length > 4 && (
+            {interests.length === 0 && (
               <View style={s.tag}>
-                <Text style={s.tagText}>+{interests.length - 4}</Text>
+                <Text style={s.tagText}>Configura tus intereses</Text>
               </View>
             )}
+            <Text style={s.tagsEditHint}>Editar ›</Text>
           </View>
-        )}
+        </Pressable>
       </View>
 
       <View style={s.tabNav}>
@@ -1265,11 +1266,15 @@ const s = StyleSheet.create({
   levelBadgeDot: { width: 6, height: 6, borderRadius: 3 },
   levelBadgeName: { fontFamily: "Inter_700Bold", fontSize: 10, letterSpacing: 1.5, textTransform: "uppercase" },
 
-  tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, alignItems: "center" },
   tag: { borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", paddingHorizontal: 9, paddingVertical: 4 },
   tagText: {
     fontFamily: "Inter_400Regular", fontSize: 8,
     color: "rgba(255,255,255,0.5)", letterSpacing: 1.5, textTransform: "uppercase",
+  },
+  tagsEditHint: {
+    fontFamily: "Inter_400Regular", fontSize: 8,
+    color: Colors.primary, letterSpacing: 1, marginLeft: 2,
   },
 
   tabNav: {
