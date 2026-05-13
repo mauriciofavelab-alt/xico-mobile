@@ -13,6 +13,12 @@ import despachoRouter from "./despacho.js";
 import companionRouter from "./companion.js";
 import personalizationRouter from "./personalization.js";
 import editorLettersRouter from "./editor-letters.js";
+import rumbosRouter from "./rumbos.js";
+import rutaStopsRouter from "./ruta-stops.js";
+import sellosRumboRouter from "./sellos-rumbo.js";
+import rutaStopNotesRouter from "./ruta-stop-notes.js";
+import madridPulseRouter from "./madrid-pulse.js";
+import emotionalEventsRouter from "./emotional-events.js";
 
 const router: IRouter = Router();
 
@@ -30,5 +36,11 @@ router.use("/despacho", despachoRouter);
 router.use("/companion", companionRouter);
 router.use("/personalization", personalizationRouter);
 router.use("/editor-letters", editorLettersRouter);
+router.use("/rumbos", rumbosRouter);
+router.use("/ruta-stops", rutaStopsRouter);
+router.use("/sellos-rumbo", sellosRumboRouter);
+router.use("/ruta-stop-notes", rutaStopNotesRouter);
+router.use("/madrid-pulse", madridPulseRouter);
+router.use("/emotional-events", emotionalEventsRouter);
 
 export default router;

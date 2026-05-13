@@ -87,4 +87,56 @@ router.patch("/", requireAuth, async (req, res) => {
   res.json(toApiProfile(data));
 });
 
+// GET /api/profile/tier · auth
+// Returns the computed tier state (iniciado / conocedor / curador / cronista)
+// plus per-rumbo distribution and the list of eligible_perks the user has
+// unlocked from the partners table. Tier is computed via profile_tier() SQL
+// function — never stored. sellos_rumbo rows are the source of truth.
+router.get("/tier", requireAuth, async (req, res) => {
+  const userId = (req as Request & { userId: string }).userId;
+
+  const { profile, error: profileErr } = await getOrCreateProfile(userId);
+  if (profileErr || !profile) {
+    res.status(500).json({ error: profileErr ?? "Unknown error" });
+    return;
+  }
+
+  const { data: tierData, error: tierErr } = await supabase.rpc("profile_tier", {
+    p_profile_id: (profile as any).id,
+  });
+  if (tierErr) {
+    res.status(500).json({ error: tierErr.message });
+    return;
+  }
+
+  const tier = tierData as {
+    tier: string;
+    total: number;
+    by_rumbo: Record<string, number>;
+    distinct_rumbos: number;
+    min_per_rumbo: number;
+  };
+
+  // Eligible perks: partners whose min_tier_required is met by current tier.
+  // Tier ordering: iniciado < conocedor < curador < cronista
+  const TIER_ORDER: Record<string, number> = {
+    iniciado: 0, conocedor: 1, curador: 2, cronista: 3,
+  };
+  const currentRank = TIER_ORDER[tier.tier] ?? 0;
+
+  const { data: allPartners, error: partnersErr } = await supabase
+    .from("partners")
+    .select("id, partner_type, name, redemption_method, min_tier_required, accent_color, notes");
+  if (partnersErr) {
+    res.status(500).json({ error: partnersErr.message });
+    return;
+  }
+
+  const eligiblePerks = (allPartners ?? []).filter(
+    (p: any) => (TIER_ORDER[p.min_tier_required] ?? 99) <= currentRank,
+  );
+
+  res.json({ ...tier, eligible_perks: eligiblePerks });
+});
+
 export default router;
