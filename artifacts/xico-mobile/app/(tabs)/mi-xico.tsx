@@ -23,6 +23,10 @@ import { GlifoMaya } from "@/components/GlifoMaya";
 import { LeafletMap } from "@/components/LeafletMap";
 import { StampNotification } from "@/components/StampNotification";
 import { Colors, getAccentColor } from "@/constants/colors";
+import { Fonts, lh, Space, Tracking, TypeSize } from "@/constants/editorial";
+import { Kicker, RevealOnMount, Rule, SectionOpener } from "@/components/editorial";
+import { Roseton, TierStatusBlock } from "@/components/pasaporte";
+import { useTier } from "@/hooks/useTier";
 import { getImage } from "@/constants/imageMap";
 import { INTERESTS } from "@/constants/interests";
 import { fetchJson, API_BASE } from "@/constants/api";
@@ -610,6 +614,14 @@ const ru = StyleSheet.create({
 });
 
 // ─── RECOMENDACIONES ──────────────────────────────────────────────────────────
+type EditorLetter = {
+  editor_name: string;
+  editor_role: string;
+  interest_match: string;
+  message_template: string;
+  accent_color?: string;
+};
+
 function RecomendacionesSection({ interests }: { interests: string[] }) {
   const INTEREST_TO_SUB: Record<string, string | string[]> = {
     "Arte Contemporáneo": ["Artes Visuales", "artes-visuales"],
@@ -622,9 +634,24 @@ function RecomendacionesSection({ interests }: { interests: string[] }) {
     "Diseño e Identidad": ["Moda", "moda"],
   };
 
+  const topInterest = interests[0];
+
   const { data: allArticles = [] } = useQuery<Article[]>({
     queryKey: ["articles", "all"],
     queryFn: () => fetchJson<Article[]>("/api/articles"),
+  });
+
+  const { data: letter } = useQuery<EditorLetter | null>({
+    queryKey: ["editor-letters", topInterest],
+    queryFn: async () => {
+      if (!topInterest) return null;
+      try {
+        return await fetchJson<EditorLetter>(`/api/editor-letters?interest=${encodeURIComponent(topInterest)}`);
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!topInterest,
   });
 
   const subcats = interests.flatMap(i => {
@@ -637,57 +664,135 @@ function RecomendacionesSection({ interests }: { interests: string[] }) {
     ? allArticles.filter(a => subcats.includes(a.subcategory ?? "")).slice(0, 4)
     : [];
 
+  const accent = letter?.accent_color ?? Colors.magenta;
+  const framing = letter?.message_template?.replace(/\{interest\}/g, topInterest ?? "") ?? null;
+
   return (
-    <View style={{ marginBottom: 20 }}>
-      <View style={rc.labelRow}>
-        <View style={rc.line} />
-        <Text style={rc.labelText}>SEGÚN TU CRITERIO</Text>
-        <View style={rc.line} />
+    <View style={rc.wrap}>
+      <View style={rc.headRow}>
+        <Kicker color={accent} withRule>Carta del Equipo XICO</Kicker>
       </View>
+
+      {framing ? (
+        <>
+          <Text style={rc.framing}>{framing}</Text>
+          {letter && (
+            <Text style={rc.signature}>— {letter.editor_name}, {letter.editor_role}</Text>
+          )}
+        </>
+      ) : (
+        <Text style={rc.framingMuted}>
+          {topInterest
+            ? "Aún no hay una carta del equipo para este interés. Vuelve pronto."
+            : "Configura tus intereses para recibir la próxima carta del equipo."}
+        </Text>
+      )}
+
       {recommended.length === 0 ? (
         <View style={rc.empty}>
-          <Text style={rc.emptyTitle}>Personaliza tus intereses</Text>
-          <Text style={rc.emptySub}>Tus recomendaciones curadas aparecerán aquí.</Text>
+          <Text style={rc.emptyTitle}>Aún no hay piezas para ti.</Text>
+          <Text style={rc.emptySub}>Configura tus intereses para recibir la próxima carta.</Text>
         </View>
       ) : (
-        recommended.map(art => {
-          const img = getImage(art.hero_image_url ?? art.imageKey);
-          const accent = getAccentColor(art.accentColor);
-          return (
-            <Pressable
-              key={art.id}
-              onPress={() => router.push(`/article/${art.id}` as any)}
-              style={({ pressed }) => [rc.row, pressed && { opacity: 0.82 }]}
-            >
-              <Image source={img} style={rc.img} resizeMode="cover" />
-              <View style={rc.body}>
-                <View style={[rc.bar, { backgroundColor: accent }]} />
-                <Text style={rc.type}>{(art.subcategory ?? art.type ?? "").toUpperCase()}</Text>
-                <Text style={rc.title} numberOfLines={2}>{art.title}</Text>
-                <Text style={rc.read}>{art.read_time_minutes ? `${art.read_time_minutes} min` : art.readTime}</Text>
-              </View>
-            </Pressable>
-          );
-        })
+        <View style={{ marginTop: Space.lg }}>
+          {recommended.map((art, i) => {
+            const img = getImage(art.hero_image_url ?? art.imageKey);
+            const rowAccent = getAccentColor(art.accentColor);
+            return (
+              <Pressable
+                key={art.id}
+                onPress={() => router.push(`/article/${art.id}` as any)}
+                style={({ pressed }) => [rc.row, pressed && { opacity: 0.82 }]}
+              >
+                <Image source={img} style={rc.img} resizeMode="cover" />
+                <View style={rc.body}>
+                  <Kicker color={rowAccent} size="small">{(art.subcategory ?? art.type ?? "")}</Kicker>
+                  <Text style={rc.title} numberOfLines={2}>{art.title}</Text>
+                  <Text style={rc.read}>
+                    {String(i + 1).padStart(2, "0")} · {art.read_time_minutes ? `${art.read_time_minutes} min` : art.readTime}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
       )}
     </View>
   );
 }
 
 const rc = StyleSheet.create({
-  labelRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
-  line: { flex: 1, height: 1, backgroundColor: Colors.border },
-  labelText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: Colors.textTertiary },
-  empty: { paddingHorizontal: 16, paddingVertical: 24, borderWidth: 1, borderColor: Colors.border, marginHorizontal: 16 },
-  emptyTitle: { fontFamily: "Newsreader_400Regular", fontSize: 20, color: Colors.textSecondary, marginBottom: 8 },
-  emptySub: { fontFamily: "Inter_400Regular", fontSize: 13, color: Colors.textTertiary, fontStyle: "italic" },
-  row: { flexDirection: "row", marginHorizontal: 16, marginBottom: 16, gap: 14, alignItems: "flex-start", borderBottomWidth: 1, borderBottomColor: Colors.border, paddingBottom: 16 },
+  wrap: { paddingHorizontal: Space.lg, paddingTop: Space.lg, paddingBottom: Space.xl, gap: Space.md },
+  headRow: { flexDirection: "row", alignItems: "center", marginBottom: Space.sm },
+  framing: {
+    fontFamily: Fonts.serifLight,
+    fontSize: TypeSize.lede - 1,
+    lineHeight: lh(TypeSize.lede - 1, 1.55),
+    color: Colors.textPrimary,
+    letterSpacing: Tracking.tight,
+    opacity: 0.92,
+  },
+  signature: {
+    fontFamily: Fonts.serifItalic,
+    fontStyle: "italic",
+    fontSize: TypeSize.caption,
+    color: Colors.textTertiary,
+    letterSpacing: Tracking.tight,
+    marginTop: Space.sm,
+  },
+  framingMuted: {
+    fontFamily: Fonts.serifLightItalic,
+    fontStyle: "italic",
+    fontSize: TypeSize.lede - 2,
+    lineHeight: lh(TypeSize.lede - 2, 1.6),
+    color: Colors.textSecondary,
+    letterSpacing: Tracking.tight,
+    opacity: 0.8,
+  },
+  empty: {
+    paddingHorizontal: Space.base,
+    paddingVertical: Space.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginTop: Space.lg,
+  },
+  emptyTitle: {
+    fontFamily: Fonts.serifRegular,
+    fontSize: TypeSize.subhead - 4,
+    color: Colors.textSecondary,
+    marginBottom: Space.sm,
+  },
+  emptySub: {
+    fontFamily: Fonts.serifLightItalic,
+    fontSize: TypeSize.caption + 1,
+    color: Colors.textTertiary,
+    fontStyle: "italic",
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: Space.base,
+    gap: Space.base,
+    alignItems: "flex-start",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.borderLight,
+    paddingBottom: Space.base,
+  },
   img: { width: 80, height: 108, backgroundColor: Colors.surfaceHigh },
-  body: { flex: 1, gap: 3 },
-  bar: { width: 22, height: 2, borderRadius: 1, marginBottom: 3 },
-  type: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2, color: Colors.textTertiary },
-  title: { fontFamily: "Newsreader_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
-  read: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginTop: 2 },
+  body: { flex: 1, gap: Space.xs },
+  title: {
+    fontFamily: Fonts.serifSemibold,
+    fontSize: TypeSize.subhead - 4,
+    lineHeight: lh(TypeSize.subhead - 4, 1.25),
+    color: Colors.textPrimary,
+    letterSpacing: Tracking.tight,
+  },
+  read: {
+    fontFamily: Fonts.sansMedium,
+    fontSize: TypeSize.small,
+    color: Colors.textTertiary,
+    marginTop: 2,
+    letterSpacing: Tracking.wide,
+  },
 });
 
 // ─── MAPA ─────────────────────────────────────────────────────────────────────
@@ -1062,6 +1167,7 @@ export default function MiXicoScreen() {
 
   const { stamps, newStamp, earn, dismissStamp } = usePassport();
   const { streak } = useStreak();
+  const { data: tier } = useTier();
 
   useFocusEffect(useCallback(() => {
     AsyncStorage.getItem("xico_interests").then(val => {
@@ -1180,12 +1286,70 @@ export default function MiXicoScreen() {
       >
         {activeTab === "mi-lectura" && (
           <>
-            <PassportSection stamps={stamps} streak={streak} companionName={companionName} />
-            <CriterionSection />
-            <SellosSection stamps={stamps} />
-            <MomentosInTab earn={earn} />
-            <RutaSection earn={earn} />
-            <RecomendacionesSection interests={interests} />
+            {/* 1 · Carta del Equipo XICO — Track A Phase 5 humanization, kept on top */}
+            <RevealOnMount index={0}>
+              <RecomendacionesSection interests={interests} />
+            </RevealOnMount>
+
+            {/* 2 · Rosetón centerpiece — Mexica cosmology, no points, ritual not engagement */}
+            <RevealOnMount index={1}>
+              <View style={{ alignItems: "center", paddingVertical: Space.xl }}>
+                <Roseton
+                  tier={tier?.tier ?? "iniciado"}
+                  totalSellos={tier?.total ?? 0}
+                  byRumbo={tier?.by_rumbo}
+                  onPetalPress={(slug) => {
+                    // v1: log only; v2 will open a bottom sheet with sellos in that rumbo.
+                    console.log("[mi-xico] rosetón petal pressed:", slug);
+                  }}
+                  onCenterPress={() => {
+                    console.log("[mi-xico] rosetón center pressed · tier detail in v2");
+                  }}
+                />
+                {(tier?.total ?? 0) === 0 ? (
+                  <Text
+                    style={{
+                      fontFamily: Fonts.serifItalic,
+                      fontStyle: "italic",
+                      fontSize: TypeSize.body,
+                      color: Colors.textSecondary,
+                      textAlign: "center",
+                      paddingHorizontal: Space.lg,
+                      paddingTop: Space.lg,
+                      lineHeight: TypeSize.body * 1.55,
+                    }}
+                  >
+                    Tu rosetón se llenará al caminar tu primera Ruta.
+                  </Text>
+                ) : null}
+              </View>
+            </RevealOnMount>
+
+            {/* 3 · TierStatusBlock — current tier + next-tier reqs + eligible perks */}
+            <RevealOnMount index={2}>
+              <TierStatusBlock tier={tier} loading={!tier} />
+            </RevealOnMount>
+
+            {/* 4 · Criterion + Ruta callout + Momentos · existing sections */}
+            <RevealOnMount index={3}>
+              <CriterionSection />
+            </RevealOnMount>
+            <RevealOnMount index={4}>
+              <RutaSection earn={earn} />
+            </RevealOnMount>
+            <RevealOnMount index={5}>
+              <MomentosInTab earn={earn} />
+            </RevealOnMount>
+
+            {/* 5 · Sellos del Lector · demoted to "archivo interno" per plan */}
+            <RevealOnMount index={6}>
+              <View style={{ paddingHorizontal: Space.lg, paddingTop: Space.xl }}>
+                <SectionOpener serial={6} label="Sellos del Lector · archivo interno" accent={Colors.textTertiary} />
+              </View>
+            </RevealOnMount>
+            <RevealOnMount index={7}>
+              <SellosSection stamps={stamps} />
+            </RevealOnMount>
           </>
         )}
         {activeTab === "mapa" && <MapaTab />}

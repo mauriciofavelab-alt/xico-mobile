@@ -3,14 +3,16 @@
 // NO el azul cobalto de la fachada — los interiores que nadie usa
 
 export const Colors = {
-  // BASE
-  background: "#080508",      // Negro XICO — toque cálido de magenta, no negro puro
-  surface: "#0e0a0c",         // Superficie ligeramente más cálida
-  surfaceHigh: "#16100e",     // Para cards y elementos elevados
-  surfaceHigher: "#1e1610",   // Para elementos interactivos
+  // BASE · brandbook §1 + §7.1 aligned
+  background: "#080508",      // Warm black, slight magenta tint. NEVER pure black.
+  surface: "#13101A",         // L1 — primary elevated (cards, sidebar, despacho header)
+  surfaceHigh: "#1C1822",     // L2 — secondary elevated (nested cards, hover)
+  surfaceHigher: "#26212C",   // L3 — overlay (modals, bottom sheets, banners)
 
-  border: "#1e1610",
-  borderLight: "rgba(240,236,230,0.08)",
+  border: "#1E1610",          // Default border (matches surface warmth)
+  borderLight: "rgba(240,236,230,0.06)",  // Hairline card separator
+  borderMedium: "rgba(240,236,230,0.10)", // Stronger divider
+  borderStrong: "rgba(240,236,230,0.18)", // Active state, focus ring
 
   // COLOR PRIMARIO — Magenta Barragán
   // Referencia: muro de la Casa Gilardi (1976), piscina magenta
@@ -62,10 +64,12 @@ export const Colors = {
   historias: "#1a3d8a",
   artePopular: "#8b3a1a",
 
-  // TIPOGRAFÍA
-  textPrimary: "#f0ece6",        // Blanco hueso cálido — no blanco puro
-  textSecondary: "rgba(240,236,230,0.55)",
-  textTertiary: "rgba(240,236,230,0.30)",
+  // TIPOGRAFÍA · brandbook §3 · discrete values (not alpha) so contrast holds
+  // when text crosses elevated surfaces.
+  textPrimary: "#F0ECE6",        // Warm bone white · 17.5:1 vs bg · AAA
+  textSecondary: "#C9C3B8",      // Captions, dek, byline, standfirst · 12:1 · AAA
+  textTertiary: "#8C887F",       // Timestamps, metadata, kicker · 6:1 · AA body
+  textQuaternary: "#5A574F",     // Disabled, watermarks, hairlines · 3.2:1 · AA large
 
   white: "#ffffff",
   black: "#000000",
@@ -145,6 +149,12 @@ export function getAccentColor(name: string): string {
       return Colors.primary;
   }
 }
+
+// Re-export rumbo helpers for ergonomic access alongside getAccentColor.
+// Rumbos are the gamification taxonomy (Mexica cardinal directions); pillars
+// are the editorial taxonomy. They are SEPARATE — never mix.
+export { Rumbos, getRumboColor, getRumboDef, RUMBO_ORDER, TIER_LABELS } from "./rumbos";
+export type { RumboSlug, RumboDef, TierKey } from "./rumbos";
 
 // Devuelve la versión dim/oscura del color de acento
 export function getAccentDim(name: string): string {

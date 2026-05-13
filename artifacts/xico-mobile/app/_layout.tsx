@@ -29,6 +29,7 @@ import { supabase } from "@/constants/supabase";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { TimeModeProvider } from "@/context/TimeModeContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -118,11 +119,13 @@ export default function RootLayout() {
       <ErrorBoundary>
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
+            <TimeModeProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </TimeModeProvider>
           </QueryClientProvider>
         </AuthProvider>
       </ErrorBoundary>
