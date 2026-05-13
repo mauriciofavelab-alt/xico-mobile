@@ -16,6 +16,7 @@ import eventsData from "./routes/events-data.js";
 import spotsData from "./routes/spots-data.js";
 import rutaData from "./routes/ruta-data.js";
 import DESPACHOS from "./routes/despacho-data.js";
+import { seedRutaRumbos } from "./seed-ruta-rumbos.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL as string,
@@ -34,9 +35,16 @@ async function run(label: string, fn: () => Promise<void>) {
 }
 
 // Clear existing data before seeding (order matters for FK constraints)
+// Ruta-domain tables (sellos_rumbo, ruta_stop_notes) depend on ruta_stops + rumbos.
+// We clear sellos/notes first, then ruta_stops, then ruta. rumbos is never cleared
+// (it's referenced FK + the 4 rows are managed via the migration upsert).
+// emotional_events depends on profiles only — clear it independently.
 await run("clearing tables", async () => {
   await supabase.from("saved_articles").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await supabase.from("event_rsvps").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  await supabase.from("sellos_rumbo").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  await supabase.from("ruta_stop_notes").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  await supabase.from("emotional_events").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await supabase.from("ruta_stops").delete().neq("id", "placeholder");
   await supabase.from("ruta").delete().neq("id", "placeholder");
   await supabase.from("articles").delete().neq("id", "placeholder");
@@ -48,6 +56,7 @@ await run("clearing tables", async () => {
   await supabase.from("companion_phrases").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await supabase.from("personalization_contexts").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await supabase.from("notas_editor").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  await supabase.from("madrid_pulse").delete().neq("date_key", "1900-01-01");
 });
 
 // ─────────────────────────────────────────
@@ -271,7 +280,11 @@ await run("companion_phrases", async () => {
     { level: "Cronista",  narration_style: "kinesthetic",  phrases: ["El cronista que no estuvo ahí, trabaja con lo que otros sintieron.","Hoy, ve a un lugar que vale la pena registrar antes de que cambie.","La memoria del cuerpo es el archivo más antiguo que tienes.","Lo que viviste en presencia, lo recuerdas distinto a lo que leíste.","El movimiento genera perspectiva. La inmovilidad, profundidad.","Haber estado ahí es un argumento que ningún texto puede reemplazar.","El cronista camina antes de escribir."] },
     { level: "Cronista",  narration_style: "conceptual",   phrases: ["La crónica que importa conecta lo particular con lo estructural.","Hoy, pregúntate qué sistema produce lo que estás observando.","Nombrar bien un fenómeno es ya la mitad del análisis.","Lo que documentas hoy, alguien lo interpretará distinto en veinte años.","El cronista sabe que el marco es tan importante como lo enmarcado.","La coherencia interna de un relato no garantiza que sea verdad.","Lo que decides no registrar también es una posición."] },
   ];
-  const { error } = await supabase.from("companion_phrases").upsert(rows, { onConflict: "level,narration_style" });
+  // After migration 2026-05-14, uniqueness includes time_mode. Existing rows here
+  // are 'dia' (default), so the new conflict target produces identical behavior.
+  const { error } = await supabase
+    .from("companion_phrases")
+    .upsert(rows, { onConflict: "level,narration_style,time_mode" });
   if (error) throw error;
 });
 
@@ -340,6 +353,16 @@ await run("notas_editor", async () => {
   ];
   const { error } = await supabase.from("notas_editor").upsert(rows, { onConflict: "rotation_key" });
   if (error) throw error;
+});
+
+// ─────────────────────────────────────────
+// Ruta + Rumbos · Week 1 of 2026-05-14 plan
+// Depends on migrations/2026-05-14-ruta-rumbos.sql being applied first.
+// Updates ruta-001 + 5 stops with geo/rumbo/text, seeds madrid_pulse + time-mode
+// companion phrases.
+// ─────────────────────────────────────────
+await run("ruta + rumbos (Week 1)", async () => {
+  await seedRutaRumbos();
 });
 
 console.log("\n✓ All data seeded into Supabase.");

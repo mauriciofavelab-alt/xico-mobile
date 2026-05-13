@@ -499,3 +499,33 @@ VALUES
 (6,'El primer alimento sagrado','Amarillo Maiz','#D4A820','Tlayolli','maiz desgranado','La base. Lo esencial sin el ornamento. El nucleo de una civilizacion en una semilla.','La Lucerna','Chueca','Tlayudas oaxaquenas autenticas. El maiz viene del mismo valle donde se cultivo por primera vez.','Mexico es el centro de diversidad genetica del maiz con mas de 59 razas nativas.','El maiz no es un cultivo: es una creacion. Fue disenado por el ser humano hace 9,000 anos en el valle de Tehuacan.','Que parte de tu dieta diaria vino de Mexico sin que lo supieras?','Manana: la institucion mas antigua de America.'),
 (7,'La democracia sin elecciones','Terracota Mercado','#8B4513','Tianguis','mercado','Del nahuatl tianquiztli. La palabra resistio la conquista.','Mercado de La Paz','Salamanca','Menos turistico. El pescado llega de Huelva y hay un puesto de mezcal en la entrada.','En Mexico se celebran mas de 50,000 tianguis semanales.','El tianguis funcionaba sin moneda oficial, sin propiedad privada y sin horario fijo. El intercambio no es solo de mercancia. Es de presencia.','Cuando fue la ultima vez que compraste algo mirando a los ojos de quien lo hizo?','Manana: lo que la muerte no cancela.')
 ON CONFLICT (rotation_key) DO NOTHING;
+
+-- ─── editor_letters ──────────────────────────────────────────────────────────
+-- Personalized editor framing for the "Carta del Equipo XICO" section in Mi XICO.
+-- One row per (editor × interest). API: GET /api/editor-letters?interest=<label>
+-- message_template may include the literal {interest} which the client replaces.
+CREATE TABLE IF NOT EXISTS editor_letters (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  editor_name TEXT NOT NULL,
+  editor_role TEXT NOT NULL,
+  interest_match TEXT UNIQUE NOT NULL,
+  message_template TEXT NOT NULL,
+  accent_color TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+INSERT INTO editor_letters (editor_name, editor_role, interest_match, message_template, accent_color)
+VALUES
+('María Vázquez','editora cultural','Arte Contemporáneo','Te propongo estas piezas porque sigues mirando arte contemporáneo. No son sugerencias del algoritmo: son elecciones del equipo, hechas con el ojo en lo que pasa entre CDMX y Madrid.','#9c1a47'),
+('Andrés Felipe Solano','editor de Iberoamérica','Cine y Literatura','Si {interest} aparece en tu lectura, esta selección te toca de cerca. Aquí hay novelas y películas que cruzan el Atlántico sin pedir permiso.','#1a3d8a'),
+('Sofía Niño de Rivera','editora del despacho','Gastronomía','La cocina mexicana en Madrid se está reescribiendo. Estos textos son los más rigurosos del último mes, sin discurso ni nostalgia.','#b8820a'),
+('Damián Ortega','editor de arte','Fotografía y Memoria','La foto mexicana en Europa es otro idioma. Empieza por la última: explica el resto.','#1a3d8a'),
+('María Vázquez','editora cultural','Diseño e Identidad','El diseño mexicano contemporáneo cabe en una ciudad como Madrid sin perder acento. Aquí, tres piezas que lo prueban.','#9c1a47'),
+('Sofía Niño de Rivera','editora del despacho','Arte Popular y Artesanía','Lo artesanal no es lo nostálgico. Es lo que la maquinaria global todavía no puede falsificar.','#8b3a1a'),
+('Damián Ortega','editor de arte','Arte Mesoamericano','Mesoamérica no es prehistoria: es una gramática que sigue activa. Estas piezas te enseñan a leerla en Madrid.','#1a4a1a'),
+('Andrés Felipe Solano','editor de Iberoamérica','Artes Escénicas','El cuerpo en escena dice cosas que la página no. Las funciones más vivas que ha cubierto el equipo este mes.','#8b3a1a')
+ON CONFLICT (interest_match) DO UPDATE SET
+  editor_name = EXCLUDED.editor_name,
+  editor_role = EXCLUDED.editor_role,
+  message_template = EXCLUDED.message_template,
+  accent_color = EXCLUDED.accent_color;

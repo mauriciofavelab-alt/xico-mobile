@@ -12,6 +12,7 @@ import ttsRouter from "./tts.js";
 import despachoRouter from "./despacho.js";
 import companionRouter from "./companion.js";
 import personalizationRouter from "./personalization.js";
+import editorLettersRouter from "./editor-letters.js";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use("/profile", profileRouter);
 router.use("/despacho", despachoRouter);
 router.use("/companion", companionRouter);
 router.use("/personalization", personalizationRouter);
+router.use("/editor-letters", editorLettersRouter);
 
 export default router;
