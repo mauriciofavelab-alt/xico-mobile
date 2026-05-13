@@ -30,6 +30,9 @@ import { supabase } from "@/constants/supabase";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { TimeModeProvider } from "@/context/TimeModeContext";
+import { ReEntryWelcome } from "@/components/pasaporte";
+import { useLastOpen } from "@/hooks/useLastOpen";
+import { useSessionLifecycleEvents } from "@/hooks/useEmotionalEvent";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,6 +41,21 @@ const queryClient = new QueryClient();
 function RootLayoutNav() {
   const { session, loading } = useAuth();
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+  const [reEntryShown, setReEntryShown] = useState(false);
+  const { daysSinceLastOpen, ready: lastOpenReady, touch } = useLastOpen();
+
+  // Re-entrada gate: when days_since_last_open >= 7, show ReEntryWelcome
+  // ONCE per session. After dismissal, touch() writes the new last_open_ts.
+  const showReEntry =
+    !!session &&
+    !!onboardingDone &&
+    lastOpenReady &&
+    typeof daysSinceLastOpen === "number" &&
+    daysSinceLastOpen >= 7 &&
+    !reEntryShown;
+
+  // Fire session_open / re_entry / late_night_open / quiet_return events.
+  useSessionLifecycleEvents();
 
   useEffect(() => {
     AsyncStorage.getItem("xico_onboarding_done").then(v => setOnboardingDone(!!v));
@@ -53,6 +71,19 @@ function RootLayoutNav() {
   }, [session, loading, onboardingDone]);
 
   if (loading || onboardingDone === null) return null;
+
+  // Re-entrada emocional · one-time welcome before tabs render
+  if (showReEntry) {
+    return (
+      <ReEntryWelcome
+        daysSinceLastOpen={daysSinceLastOpen!}
+        onContinue={() => {
+          setReEntryShown(true);
+          void touch();
+        }}
+      />
+    );
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
