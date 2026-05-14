@@ -1,7 +1,21 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useReducedMotion } from "react-native-reanimated";
 import type { Stamp } from "@/hooks/usePassport";
+import { Fonts, lh, Space, Tracking, TypeSize } from "@/constants/editorial";
+
+const STAMP_ROMAN: Record<string, string> = {
+  "primera-lectura": "I",
+  "explorador":      "II",
+  "conocedor":       "III",
+  "momentos":        "IV",
+  "agenda":          "V",
+  "ruta":            "VI",
+  "guardado":        "VII",
+  "madrugador":      "VIII",
+  "despacho":        "IX",
+};
 
 interface Props {
   stamp: Stamp | null;
@@ -12,19 +26,34 @@ export function StampNotification({ stamp, onDismiss }: Props) {
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(-120)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  // ui-ux-pro-max CRITICAL · sello-earn fires every time the user finishes
+  // a stop. Vestibular-sensitive users need this to render statically.
+  // When reduced-motion is set, jump to the final state without the spring.
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (stamp) {
-      Animated.parallel([
-        Animated.spring(translateY, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 200 }),
-        Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
-      ]).start();
+      if (reducedMotion) {
+        translateY.setValue(0);
+        opacity.setValue(1);
+      } else {
+        Animated.parallel([
+          Animated.spring(translateY, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 200 }),
+          Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+        ]).start();
+      }
 
       const timer = setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(translateY, { toValue: -120, duration: 300, useNativeDriver: true }),
-          Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }),
-        ]).start(() => onDismiss());
+        if (reducedMotion) {
+          translateY.setValue(-120);
+          opacity.setValue(0);
+          onDismiss();
+        } else {
+          Animated.parallel([
+            Animated.timing(translateY, { toValue: -120, duration: 300, useNativeDriver: true }),
+            Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }),
+          ]).start(() => onDismiss());
+        }
       }, 3000);
 
       return () => clearTimeout(timer);
@@ -32,30 +61,35 @@ export function StampNotification({ stamp, onDismiss }: Props) {
       translateY.setValue(-120);
       opacity.setValue(0);
     }
-  }, [stamp]);
+  }, [stamp, reducedMotion]);
 
   if (!stamp) return null;
+
+  const numeral = STAMP_ROMAN[stamp.id] ?? "✦";
 
   return (
     <Animated.View
       style={[
         styles.container,
-        { top: insets.top + 12, transform: [{ translateY }], opacity },
+        { top: insets.top + Space.md, transform: [{ translateY }], opacity },
       ]}
       pointerEvents="box-none"
     >
       <Pressable onPress={onDismiss} style={styles.inner}>
-        <View style={[styles.icon, { backgroundColor: stamp.color }]}>
-          <Text style={styles.iconText}>✦</Text>
-        </View>
-        <View style={styles.textBlock}>
-          <Text style={styles.label}>NUEVO SELLO</Text>
-          <Text style={styles.titulo}>{stamp.titulo}</Text>
-          <Text style={styles.desc} numberOfLines={1}>{stamp.descripcion}</Text>
-        </View>
-        <View style={styles.pts}>
-          <Text style={[styles.ptsNum, { color: stamp.color }]}>+{stamp.pts}</Text>
-          <Text style={styles.ptsSub}>pts</Text>
+        <View style={[styles.topAccent, { backgroundColor: stamp.color }]} />
+        <View style={styles.contentRow}>
+          <View style={[styles.numeralBox, { borderColor: stamp.color }]}>
+            <Text style={[styles.numeral, { color: stamp.color }]}>{numeral}</Text>
+          </View>
+          <View style={styles.textBlock}>
+            <Text style={[styles.kicker, { color: stamp.color }]}>SELLO OBTENIDO</Text>
+            <Text style={styles.titulo}>{stamp.titulo}</Text>
+            <Text style={styles.desc} numberOfLines={1}>{stamp.descripcion}</Text>
+          </View>
+          <View style={styles.pts}>
+            <Text style={[styles.ptsNum, { color: stamp.color }]}>+{stamp.pts}</Text>
+            <Text style={styles.ptsSub}>puntos</Text>
+          </View>
         </View>
       </Pressable>
     </Animated.View>
@@ -65,63 +99,77 @@ export function StampNotification({ stamp, onDismiss }: Props) {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    left: 16,
-    right: 16,
+    left: Space.base,
+    right: Space.base,
     zIndex: 9999,
   },
   inner: {
-    backgroundColor: "#0f0f0f",
+    backgroundColor: "#0f0d0f",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
-    borderRadius: 4,
+    borderColor: "rgba(255,255,255,0.1)",
+    borderRadius: 0,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.55,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  topAccent: {
+    height: 3,
+    width: "100%",
+  },
+  contentRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 8,
+    paddingHorizontal: Space.base,
+    paddingVertical: Space.md,
+    gap: Space.md,
   },
-  icon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  numeralBox: {
+    width: 40,
+    height: 40,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  iconText: { fontSize: 16, color: "#fff" },
+  numeral: {
+    fontFamily: Fonts.serifSemibold,
+    fontSize: TypeSize.subhead - 2,
+    letterSpacing: Tracking.wide,
+  },
   textBlock: { flex: 1, gap: 2 },
-  label: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 8,
-    letterSpacing: 2,
-    color: "rgba(255,255,255,0.35)",
+  kicker: {
+    fontFamily: Fonts.sansSemibold,
+    fontSize: TypeSize.micro,
+    letterSpacing: Tracking.widest,
   },
   titulo: {
-    fontFamily: "Newsreader_600SemiBold",
-    fontSize: 16,
+    fontFamily: Fonts.serifSemibold,
+    fontSize: TypeSize.body,
     color: "#fff",
-    lineHeight: 19,
-    letterSpacing: -0.2,
+    lineHeight: lh(TypeSize.body, 1.15),
+    letterSpacing: Tracking.tight,
   },
   desc: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
+    fontFamily: Fonts.serifItalic,
+    fontStyle: "italic",
+    fontSize: TypeSize.caption,
     color: "rgba(255,255,255,0.5)",
+    letterSpacing: Tracking.tight,
   },
-  pts: { alignItems: "center" },
+  pts: { alignItems: "flex-end", gap: 2 },
   ptsNum: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
-    lineHeight: 20,
+    fontFamily: Fonts.serifLight,
+    fontSize: TypeSize.subhead,
+    lineHeight: TypeSize.subhead,
+    letterSpacing: Tracking.tight,
   },
   ptsSub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 9,
+    fontFamily: Fonts.sansMedium,
+    fontSize: TypeSize.micro,
     color: "rgba(255,255,255,0.4)",
-    letterSpacing: 1,
+    letterSpacing: Tracking.wide,
+    textTransform: "uppercase",
   },
 });

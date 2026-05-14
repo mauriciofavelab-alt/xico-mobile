@@ -1,7 +1,7 @@
 import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { Easing, FadeIn } from "react-native-reanimated";
+import Animated, { Easing, FadeIn, useReducedMotion } from "react-native-reanimated";
 
 import { Colors } from "@/constants/colors";
 import { Fonts, Hairline, Space, Tracking, TypeSize } from "@/constants/editorial";
@@ -34,6 +34,10 @@ function pluralDias(n: number): string {
 export function ReEntryWelcome({ daysSinceLastOpen, displayName, onContinue }: Props) {
   const insets = useSafeAreaInsets();
   const pulse = useMadridPulse();
+  // ui-ux-pro-max CRITICAL · respect Settings → Accessibility → Reduce Motion.
+  // Re-entry is unavoidable for users with vestibular sensitivity, so the
+  // fade-in MUST be skippable. When set, render content instantly.
+  const reducedMotion = useReducedMotion();
 
   const greeting = displayName
     ? `Hola, ${displayName.split(" ")[0]}.`
@@ -46,7 +50,7 @@ export function ReEntryWelcome({ daysSinceLastOpen, displayName, onContinue }: P
       </View>
 
       <View style={s.body}>
-        <Animated.View entering={FadeIn.duration(400)}>
+        <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(400)}>
           <Kicker>Bienvenida de vuelta</Kicker>
           <Text style={s.greeting}>{greeting}</Text>
           <Text style={s.intro}>
@@ -57,7 +61,7 @@ export function ReEntryWelcome({ daysSinceLastOpen, displayName, onContinue }: P
         <View style={s.divider} />
 
         {/* Madrid pulse · atmospheric line about Madrid since they were gone */}
-        <Animated.View entering={FadeIn.delay(200).duration(600)}>
+        <Animated.View entering={reducedMotion ? undefined : FadeIn.delay(200).duration(600)}>
           <Kicker>Madrid · esta semana</Kicker>
           {pulse.isLoading ? (
             <Text style={s.pulseTextLoading}>Cargando contexto…</Text>

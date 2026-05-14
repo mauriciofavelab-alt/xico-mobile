@@ -9,7 +9,11 @@ import { Colors } from "@/constants/colors";
 function TabIcon({ active, color, children }: { active: boolean; color: string; children: React.ReactNode }) {
   return (
     <View style={tb.iconWrap}>
-      {active && <View style={[tb.pip, { backgroundColor: color }]} />}
+      <View style={tb.pipRow}>
+        {active && <View style={[tb.pipDot, { backgroundColor: color }]} />}
+        {active && <View style={[tb.pipRule, { backgroundColor: color }]} />}
+        {active && <View style={[tb.pipDot, { backgroundColor: color }]} />}
+      </View>
       {children}
     </View>
   );
@@ -17,7 +21,15 @@ function TabIcon({ active, color, children }: { active: boolean; color: string; 
 
 const tb = StyleSheet.create({
   iconWrap: { alignItems: "center", paddingTop: 2 },
-  pip: { width: 18, height: 2, borderRadius: 1, marginBottom: 6 },
+  pipRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    height: 4,
+    marginBottom: 6,
+  },
+  pipDot: { width: 2, height: 2 },
+  pipRule: { width: 16, height: 1 },
 });
 
 function IconIndice({ active }: { active: boolean }) {
@@ -96,11 +108,13 @@ export default function TabLayout() {
           height: isWeb ? 74 : 66,
         },
         tabBarLabelStyle: {
-          fontFamily: "Inter_500Medium",
-          fontSize: 9,
-          letterSpacing: 1.5,
+          fontFamily: "Inter_600SemiBold",
+          // Per Apple HIG, tab bar labels must be ≥10pt; 11pt with reduced
+          // tracking reads cleaner on 6.1"+ devices and at largest Dynamic Type.
+          fontSize: 11,
+          letterSpacing: 1.8,
           textTransform: "uppercase",
-          marginBottom: 4,
+          marginBottom: 6,
         },
         tabBarBackground: () =>
           isIOS ? (

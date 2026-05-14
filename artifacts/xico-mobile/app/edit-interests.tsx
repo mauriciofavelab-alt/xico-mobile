@@ -56,6 +56,10 @@ function InterestButton({
       onPress={onPress}
       disabled={isDisabled && !isSelected}
       style={({ pressed }) => [{ opacity: isDisabled && !isSelected ? 0.22 : pressed ? 0.78 : 1 }]}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: isSelected, disabled: isDisabled && !isSelected }}
+      accessibilityLabel={`${id}${isSelected ? ", seleccionado" : isDisabled ? ", máximo alcanzado" : ""}`}
+      accessibilityHint={isSelected ? "Toca para quitar este interés" : "Toca para añadir este interés"}
     >
       <Animated.View style={[ob.btn, {
         borderColor: anim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(255,255,255,0.08)", colorHex] }),
