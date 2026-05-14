@@ -61,8 +61,13 @@ const m = StyleSheet.create({
   flexRule: { flex: 1, height: Hairline.thin, opacity: 0.5 },
   upperText: {
     fontFamily: Fonts.sansSemibold,
-    fontSize: TypeSize.micro + 1,
-    letterSpacing: Tracking.widest,
+    // Lifted from TypeSize.micro+1 (9pt, below the iOS HIG 11pt readability
+    // floor) to TypeSize.caption (11). Letter-spacing trimmed from widest
+    // (3) to wider (2.5) so the tracked-caps proportions stay tight at the
+    // larger size. Masthead is the editorial header on Cultura, Mi XICO,
+    // Ruta, and the Stop screen — this lift propagates everywhere.
+    fontSize: TypeSize.caption,
+    letterSpacing: Tracking.wider,
   },
   title: {
     fontFamily: Fonts.serifSemibold,

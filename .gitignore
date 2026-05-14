@@ -4,3 +4,8 @@ dist/
 .expo/
 *.log
 *.tsbuildinfo
+
+# Per-developer dev tooling (Claude Preview launch configs, etc.)
+# Paths inside are environment-specific (Windows cmd, /Users/<name>/, etc.)
+.claude/
+artifacts/*/.claude/

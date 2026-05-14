@@ -32,34 +32,35 @@ export function StampNotification({ stamp, onDismiss }: Props) {
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (stamp) {
-      if (reducedMotion) {
-        translateY.setValue(0);
-        opacity.setValue(1);
-      } else {
-        Animated.parallel([
-          Animated.spring(translateY, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 200 }),
-          Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
-        ]).start();
-      }
-
-      const timer = setTimeout(() => {
-        if (reducedMotion) {
-          translateY.setValue(-120);
-          opacity.setValue(0);
-          onDismiss();
-        } else {
+    // When Reduce Motion is enabled, skip the spring/fade entirely and snap
+    // to the target state — equivalent visual outcome, no vestibular trigger.
+    const snap = (yTo: number, opacityTo: number, done?: () => void) => {
+      translateY.setValue(yTo);
+      opacity.setValue(opacityTo);
+      done?.();
+    };
+    const animateIn = reducedMotion
+      ? () => snap(0, 1)
+      : () => {
           Animated.parallel([
+            Animated.spring(translateY, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 200 }),
+            Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+          ]).start();
+        };
+    const animateOut = (done: () => void) =>
+      reducedMotion
+        ? snap(-120, 0, done)
+        : Animated.parallel([
             Animated.timing(translateY, { toValue: -120, duration: 300, useNativeDriver: true }),
             Animated.timing(opacity, { toValue: 0, duration: 250, useNativeDriver: true }),
-          ]).start(() => onDismiss());
-        }
-      }, 3000);
+          ]).start(done);
 
+    if (stamp) {
+      animateIn();
+      const timer = setTimeout(() => animateOut(() => onDismiss()), 3000);
       return () => clearTimeout(timer);
     } else {
-      translateY.setValue(-120);
-      opacity.setValue(0);
+      snap(-120, 0);
     }
   }, [stamp, reducedMotion]);
 
