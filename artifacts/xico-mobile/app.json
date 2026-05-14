@@ -17,7 +17,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.xico.app",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "XICO necesita saber que estás en cada parada de La Ruta para abrir el apunte in situ. Tu ubicación nunca se guarda."
       }
     },
     "android": {
