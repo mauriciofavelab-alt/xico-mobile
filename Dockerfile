@@ -56,13 +56,10 @@ COPY --from=builder /repo/artifacts/api-server/dist /app/dist
 # dist/index.mjs, so the COPY above already includes it.
 
 # Runtime needs no pnpm — only Node.
-# Tiny start script keeps the start surface predictable and matches
-# railway.json `startCommand: "/start.sh"`.
-COPY <<'SH' /start.sh
-#!/bin/sh
-set -e
-exec node --enable-source-maps /app/dist/index.mjs
-SH
+# /start.sh is a standalone file in the repo (not a heredoc) so this works on
+# both classic Docker and BuildKit. Railway uses BuildKit but this is more
+# portable.
+COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 # Railway sets $PORT at runtime; the server reads process.env.PORT.
