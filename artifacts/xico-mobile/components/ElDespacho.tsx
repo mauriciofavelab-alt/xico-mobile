@@ -250,15 +250,17 @@ const s = StyleSheet.create({
   },
   eyebrow: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 7,
-    letterSpacing: 3.5,
+    // 7pt failed Apple HIG readability + Dynamic Type. Bumped to 11pt
+    // (TypeSize.caption equivalent) with tracking trimmed to compensate.
+    fontSize: 11,
+    letterSpacing: 2.5,
     textTransform: "uppercase",
   },
   fecha: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
-    letterSpacing: 0.5,
-    color: "rgba(255,255,255,0.2)",
+    fontSize: 11,
+    letterSpacing: 0.3,
+    color: Colors.textTertiary,
     textTransform: "capitalize",
   },
   subtitulo: {
@@ -299,9 +301,9 @@ const s = StyleSheet.create({
   },
   tapHint: {
     fontFamily: "Inter_400Regular",
-    fontSize: 8,
-    letterSpacing: 2.5,
-    color: "rgba(255,255,255,0.18)",
+    fontSize: 11,
+    letterSpacing: 2,
+    color: Colors.textTertiary,
     textTransform: "uppercase",
   },
 

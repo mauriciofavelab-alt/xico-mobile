@@ -231,8 +231,8 @@ const ob = StyleSheet.create({
   header: { paddingHorizontal: 28, paddingTop: 24, paddingBottom: 32 },
   eyebrow: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 8,
-    letterSpacing: 3,
+    fontSize: 11,
+    letterSpacing: 2.5,
     color: Colors.primary,
     textTransform: "uppercase",
     marginBottom: 20,
@@ -296,9 +296,9 @@ const ob = StyleSheet.create({
   },
   counter: {
     fontFamily: "Inter_400Regular",
-    fontSize: 9,
-    letterSpacing: 2,
-    color: "rgba(255,255,255,0.25)",
+    fontSize: 11,
+    letterSpacing: 1.5,
+    color: Colors.textTertiary,
   },
   dots: { flexDirection: "row", gap: 6 },
   dotIndicator: { width: 16, height: 2, backgroundColor: "rgba(255,255,255,0.12)" },

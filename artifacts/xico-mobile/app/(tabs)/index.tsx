@@ -179,9 +179,9 @@ const ib = StyleSheet.create({
   },
   boxLight: { borderColor: "rgba(255,255,255,0.18)" },
   boxDark: { borderColor: "rgba(255,255,255,0.18)" },
-  text: { fontFamily: "Inter_400Regular", fontSize: 8, lineHeight: 10 },
-  textLight: { color: "rgba(255,255,255,0.35)" },
-  textDark: { color: "rgba(255,255,255,0.35)" },
+  text: { fontFamily: "Inter_400Regular", fontSize: 11, lineHeight: 13 },
+  textLight: { color: Colors.textTertiary },
+  textDark: { color: Colors.textTertiary },
 });
 
 function ArticleCard({
@@ -238,7 +238,7 @@ const ac = StyleSheet.create({
   content: { flex: 1, minWidth: 0, gap: 4 },
   tag: {
     fontFamily: "Inter_400Regular",
-    fontSize: 9,
+    fontSize: 11,
     letterSpacing: 2.5,
     textTransform: "uppercase",
   },
@@ -313,7 +313,7 @@ const mh = StyleSheet.create({
   dot: { width: 5, height: 5, backgroundColor: "hsl(335, 85%, 45%)" },
   stripText: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 2.5,
     color: "hsl(335, 85%, 45%)",
     textTransform: "uppercase",
@@ -326,9 +326,9 @@ const mh = StyleSheet.create({
   },
   tagText: {
     fontFamily: "Inter_400Regular",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 1.5,
-    color: "rgba(255,255,255,0.35)",
+    color: Colors.textTertiary,
   },
   bottom: {
     flexDirection: "row",
@@ -353,9 +353,9 @@ const mh = StyleSheet.create({
   },
   edicion: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 1.2,
-    color: "rgba(255,255,255,0.3)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
   },
 });
@@ -448,9 +448,9 @@ const aw = StyleSheet.create({
   eyebrowRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
   eyebrow: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 3.5,
-    color: "rgba(255,255,255,0.28)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
   },
   streakBadge: {
@@ -468,8 +468,8 @@ const aw = StyleSheet.create({
   },
   streakLabel: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
-    color: "rgba(255,255,255,0.3)",
+    fontSize: 11,
+    color: Colors.textTertiary,
     letterSpacing: 1,
   },
   nameLine: { flexDirection: "row", alignItems: "baseline", gap: 10, marginBottom: 10 },
@@ -480,9 +480,9 @@ const aw = StyleSheet.create({
   },
   levelTag: {
     fontFamily: "Inter_700Bold",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 2,
-    color: "rgba(255,255,255,0.25)",
+    color: Colors.textTertiary,
   },
   colorBar: { width: 24, height: 1.5, marginBottom: 12 },
   frase: {
@@ -495,8 +495,8 @@ const aw = StyleSheet.create({
   },
   fecha: {
     fontFamily: "Inter_400Regular",
-    fontSize: 8,
-    color: "rgba(255,255,255,0.22)",
+    fontSize: 11,
+    color: Colors.textTertiary,
     letterSpacing: 1.5,
   },
   geomAccent: {
@@ -558,24 +558,24 @@ const nd = StyleSheet.create({
   },
   saludoLugar: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 3,
-    color: "rgba(255,255,255,0.3)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
     flex: 1,
   },
   fecha: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 1,
-    color: "rgba(255,255,255,0.18)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
   },
   labelRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 20 },
   magentaLine: { width: 16, height: 1.5, backgroundColor: "hsl(335, 85%, 45%)" },
   eyebrow: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 3,
     color: "hsl(335, 85%, 45%)",
     textTransform: "uppercase",
@@ -669,9 +669,9 @@ const tc = StyleSheet.create({
   },
   headerLabel: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 3,
-    color: "rgba(255,255,255,0.35)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
   },
   grid: { flexDirection: "row", flexWrap: "wrap" },
@@ -685,11 +685,11 @@ const tc = StyleSheet.create({
   cellHeader: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" },
   cellLabel: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 2,
     textTransform: "uppercase",
   },
-  cellCount: { fontFamily: "Inter_400Regular", fontSize: 7, color: "rgba(255,255,255,0.25)" },
+  cellCount: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary },
   cellIntent: {
     fontFamily: "Newsreader_400Regular",
     fontSize: 16,
@@ -786,16 +786,16 @@ const hh = StyleSheet.create({
   badge: { paddingHorizontal: 12, paddingVertical: 6 },
   badgeText: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 2.5,
     color: "#fff",
     textTransform: "uppercase",
   },
   numText: {
     fontFamily: "Inter_400Regular",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 1.5,
-    color: "rgba(255,255,255,0.3)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
   },
   bottom: {
@@ -827,7 +827,7 @@ const hh = StyleSheet.create({
   meta: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   metaText: {
     fontFamily: "Inter_400Regular",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 1.5,
     color: "rgba(255,255,255,0.4)",
     textTransform: "uppercase",
@@ -928,7 +928,7 @@ const ma = StyleSheet.create({
   pingDot: { width: 6, height: 6, backgroundColor: "hsl(25, 80%, 45%)" },
   eyebrow: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 2.5,
     color: "hsl(25, 80%, 45%)",
     textTransform: "uppercase",
@@ -956,9 +956,9 @@ const ma = StyleSheet.create({
   },
   sub: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 2,
-    color: "rgba(255,255,255,0.3)",
+    color: Colors.textTertiary,
     paddingHorizontal: 24,
     textTransform: "uppercase",
     marginBottom: 4,
@@ -981,7 +981,7 @@ const ma = StyleSheet.create({
   carouselAccentBar: { width: 20, height: 2, marginBottom: 10 },
   carouselTag: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 2,
     color: "rgba(255,255,255,0.45)",
     textTransform: "uppercase",
@@ -996,9 +996,9 @@ const ma = StyleSheet.create({
   },
   carouselMeta: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
+    fontSize: 11,
     letterSpacing: 1.5,
-    color: "rgba(255,255,255,0.3)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
     marginTop: 10,
   },
@@ -1011,7 +1011,7 @@ const ma = StyleSheet.create({
   },
   linkText: {
     fontFamily: "Inter_400Regular",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 2,
     color: "hsl(25, 80%, 45%)",
     textTransform: "uppercase",
@@ -1072,13 +1072,13 @@ const pp = StyleSheet.create({
   dot: { width: 6, height: 6, backgroundColor: "hsl(220, 100%, 30%)" },
   label: {
     fontFamily: "Inter_400Regular",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 2,
     color: "hsl(220, 100%, 30%)",
     textTransform: "uppercase",
     flex: 1,
   },
-  readTime: { fontFamily: "Inter_400Regular", fontSize: 7, color: "rgba(255,255,255,0.3)" },
+  readTime: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary },
   imageWrap: {
     width: "100%",
     aspectRatio: 16 / 9,
@@ -1089,16 +1089,16 @@ const pp = StyleSheet.create({
   cornerLabel: { position: "absolute", bottom: 12, right: 12 },
   cornerText: {
     fontFamily: "Inter_400Regular",
-    fontSize: 9,
-    color: "rgba(255,255,255,0.3)",
+    fontSize: 11,
+    color: Colors.textTertiary,
     letterSpacing: 1.5,
     textTransform: "uppercase",
   },
   content: { paddingHorizontal: 24, paddingVertical: 20, gap: 10 },
   subcategory: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
-    letterSpacing: 2.5,
+    fontSize: 11,
+    letterSpacing: 2,
     color: "rgba(255,255,255,0.4)",
     textTransform: "uppercase",
   },
@@ -1126,8 +1126,8 @@ const pp = StyleSheet.create({
   },
   author: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
-    color: "rgba(255,255,255,0.3)",
+    fontSize: 11,
+    color: Colors.textTertiary,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
@@ -1201,7 +1201,7 @@ const mp = StyleSheet.create({
   dot: { width: 6, height: 6, backgroundColor: "hsl(160, 100%, 20%)" },
   eyebrow: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 8,
+    fontSize: 11,
     letterSpacing: 2,
     color: "hsl(160, 100%, 20%)",
     textTransform: "uppercase",
@@ -1230,9 +1230,9 @@ const mp = StyleSheet.create({
   content: { flex: 1, gap: 4 },
   sub: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
-    letterSpacing: 2.5,
-    color: "rgba(255,255,255,0.35)",
+    fontSize: 11,
+    letterSpacing: 2,
+    color: Colors.textTertiary,
     textTransform: "uppercase",
   },
   title: {
@@ -1241,7 +1241,7 @@ const mp = StyleSheet.create({
     lineHeight: 20,
     color: Colors.textPrimary,
   },
-  read: { fontFamily: "Inter_400Regular", fontSize: 7, color: "rgba(255,255,255,0.25)" },
+  read: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary },
   thumb: { width: 64, height: 88, flexShrink: 0 },
 });
 
@@ -1361,7 +1361,7 @@ const es = StyleSheet.create({
   sectionDot: { width: 6, height: 6, backgroundColor: "hsl(335, 85%, 45%)" },
   sectionLabel: {
     fontFamily: "Inter_400Regular",
-    fontSize: 9,
+    fontSize: 11,
     letterSpacing: 2.5,
     color: "rgba(255,255,255,0.5)",
     textTransform: "uppercase",
@@ -1369,8 +1369,8 @@ const es = StyleSheet.create({
   },
   sectionRight: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
-    color: "rgba(255,255,255,0.3)",
+    fontSize: 11,
+    color: Colors.textTertiary,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
@@ -1389,8 +1389,8 @@ const es = StyleSheet.create({
   gridContentSmall: { padding: 10 },
   gridTag: {
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
-    letterSpacing: 2.5,
+    fontSize: 11,
+    letterSpacing: 2,
     color: "rgba(255,255,255,0.4)",
     textTransform: "uppercase",
   },
@@ -1416,7 +1416,7 @@ const es = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  gridRead: { fontFamily: "Inter_400Regular", fontSize: 7, color: "rgba(255,255,255,0.3)" },
+  gridRead: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary },
   listRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -1430,7 +1430,7 @@ const es = StyleSheet.create({
   listContent: { flex: 1, gap: 4 },
   listTag: {
     fontFamily: "Inter_400Regular",
-    fontSize: 9,
+    fontSize: 11,
     letterSpacing: 2.5,
     color: "rgba(255,255,255,0.4)",
     textTransform: "uppercase",
