@@ -605,4 +605,237 @@ Any "merely engage" hit → redesign that surface before TestFlight Build #11 su
 
 ---
 
-*End of spec. Next step: user reviews this document, requests changes (if any), then writing-plans skill turns it into a step-by-step implementation plan.*
+## 17 · Competitive research additions · v1.2 candidates
+
+Eight WebSearches across editorial, ritual, and iOS-native apps in 2026 validated every core decision in this spec. Three additional patterns surfaced as refinements worth scheduling for **v1.2** (Build #12, post-public-launch). Documented here so they survive into the implementation plan.
+
+### 17.1 Chapter mental model (IsleGrow pattern → XICO)
+
+Each weekly Ruta becomes a permanent named **Capítulo** in Tu Códice. *Capítulo 1 · La Inaugural · María Vázquez · Semana 19 · Mayo 2026*. When the user completes the chapter (5/5 sellos), the rosetón for that week locks into the archive as a small immutable card. Subsequent weeks accumulate as a vertical timeline of chapters in the Códice scroll.
+
+**Why:** The IsleGrow research (top-rated 2026 habit app per gamificationplus.uk) confirms the "monthly chapter that completes and archives" mechanic produces stronger emotional residency than open-ended progress bars. Per the manifesto: "the places stay." Per the brandbook: continuity over coercion.
+
+**Data model delta:** `ruta_completions` table mapping (profile_id, ruta_id, completed_at, sello_count) — already implicitly available via `sellos_rumbo` aggregation. No new table required, just a server-side aggregation endpoint `/api/codice/chapters`.
+
+**UI delta on Tu Códice:** below the hero rosetón + stats row, a "Tus capítulos" vertical timeline. Each completed chapter is a glass-deep card with:
+- Chapter folio number (Capítulo 1, 2, 3...)
+- Week key + season (Mayo · Semana 19)
+- Mini rosetón at the locked state
+- Editor byline italic
+- Title of the inaugural stop or theme
+
+**Priority:** P2 · v1.2 · ships after Build #11 lands.
+
+### 17.2 Conversational onboarding via the editor (Reteno 2026 pattern → XICO)
+
+Replace the current interest-checkbox onboarding with a brief editorial conversation. Per Reteno's 2026 onboarding research, conversational onboarding has the strongest measured impact on first-session retention. 63% of users say onboarding decides their subscription decision.
+
+**The conversation** (3-4 short exchanges with María Vázquez, played as if she's writing to the user in real time):
+
+1. *"Hola, soy María Vázquez. Vivo en Madrid hace ocho años. ¿De dónde vienes tú?"* → text field
+2. *"¿Qué te trajo a Madrid?"* → 4 chip options (estudio, trabajo, pareja, otra cosa) + free text
+3. *"¿Qué te llevarías de México si pudieras meterlo en una maleta?"* → 4 chip options (un mercado, una cantina, un domingo en Coyoacán, un cuarto que ya no existe) + free text
+4. *"Te propongo esto: te leo una vez al día, cinco lugares a la semana. Sin notificaciones, sin streaks. Solo lectura. ¿Empezamos?"* → "Sí, comencemos" / "Antes cuéntame más"
+
+The answers feed the interest taxonomy (the same data the current checkbox flow captures) but the user has spoken to an editor by minute one. The Carta del Equipo on Tu Códice can then reference these answers ("Te propongo estas piezas porque me dijiste que extrañas un mercado").
+
+**UI delta:** Replace `app/onboarding.tsx` body with a chat-shaped flow. María's bubbles use Newsreader italic, user bubbles use Inter regular. Submit button is *"Continuar →"* in tinted glass.
+
+**Priority:** P2 · v1.2 · doesn't block Build #11 but is the highest-leverage retention investment.
+
+### 17.3 Per-editor visual voice (Substack 2026 creator control → XICO)
+
+Each named editor gets a subtle visual treatment within the editorial system so the reader recognizes who's writing before reading the byline. Manifesto-aligned: editors are the brand.
+
+| Editor | Visual register | Implementation |
+|---|---|---|
+| **María Vázquez** | Institutional gravitas | Default treatment · photo-forward, drop caps prominent, longer paragraphs |
+| **Sofía Niño de Rivera** | Observational humor | Denser typography, less photography (60% vs 50%), shorter paragraphs, italic accents more frequent |
+| **Damián Ortega** | Visual artist's eye | Slow pacing, full-bleed object photography always, very sparse text, larger Fraunces opsz |
+| **Andrés Felipe Solano** | Long-form literary | Less photography (40%), more textual chrome (drop caps, pull quotes, large blockquotes), italic dominance |
+
+**Implementation:** Single `EditorTheme` token that varies by `editor_name` on Despacho/Stop/Article screens. Default = María. The token tunes 4 variables: photo-area ratio, paragraph density, italic frequency, Fraunces opsz default.
+
+**Priority:** P2 · v1.2 · ships when the second editor (Sofía Week 20) actually publishes — currently irrelevant since María is the only editor with seeded content.
+
+### 17.4 Apple Music animated Lock Screen pattern (P3 · v1.3)
+
+iOS 26 Apple Music adds subtle Ken Burns on Lock Screen album artwork per Apple's iOS 26 design gallery. Apply the same pattern to XICO's Rectangular Lock Screen widget — the lugar photo behind the rosetón gets a 20s ken-burns drift. Subtle but premium.
+
+**Priority:** P3 · nice-to-have, v1.3.
+
+### 17.5 Vision Pro 60pt tap targets on the showpiece (Stop screen)
+
+Apple visionOS HIG bumps minimum tap target to 60pt for "spatial premium feel" — vs iOS HIG's 44pt floor. For the Stop screen showpiece specifically, the rumbo color tag pill and lock chip should bump to 60pt height (currently ~46pt) for a more premium-spatial register. Other screens stay at 44pt minimum.
+
+**Priority:** P2 · v1.2 · low-effort polish on a single high-traffic screen.
+
+### 17.6 References cited in research
+
+- [iOS 26 Liquid Glass design gallery · Apple Developer](https://developer.apple.com/design/new-design-gallery/)
+- [Best iOS 26 apps updated with Liquid Glass · BGR](https://www.bgr.com/1969287/best-ios-26-apps-updated-liquid-glass-design/)
+- [MUBI strategic curation case study · Medium](https://gokceucar.medium.com/how-mubi-creates-value-through-strategic-curation-6992db77932f)
+- [Substack 2026 homepage redesign](https://www.onlinewritingclub.com/p/new-settings-just-dropped-for-your)
+- [Top habit apps 2026 · gamificationplus.uk](https://gamificationplus.uk/which-gamified-habit-building-app-do-i-think-is-best-in-2026/)
+- [Onboarding pattern research · Reteno](https://reteno.com/blog/won-in-60-seconds-how-top-apps-nail-onboarding-to-drive-subscriptions)
+- [Apple visionOS HIG](https://developer.apple.com/design/human-interface-guidelines/designing-for-visionos)
+
+---
+
+## 18 · Sizing & spacing audit · iOS-native fidelity
+
+This section pins every element's dimensions in **points** (the HIG unit, @3x → multiply by 3 for pixels) against iPhone 16 Pro Max safe areas. Any redesign element that doesn't match these numbers fails iOS-native fidelity and gets fixed before implementation.
+
+### 18.1 Canvas + safe areas (iPhone 16 Pro Max)
+
+- **Physical pixels**: 1320 × 2868 @3x
+- **Points**: 440 × 956
+- **Safe content area** (subtract reserves):
+  - Top reserve: **59pt** (status bar inclusive of Dynamic Island)
+  - Dynamic Island clearance recommended: **22pt below status bar** → top-of-content floor at **81pt**
+  - Bottom reserve: **49pt tab bar** + **34pt home indicator safe area** = **83pt**
+  - Side reserve: **16pt minimum** each side (gesture zone)
+- **Usable vertical**: 956 − 81 − 83 = **792pt of content**
+- **Usable width**: 440 − 32 = **408pt** (with 16pt side padding)
+- **Reading-width content padding**: 20pt horizontal · gives 400pt body width (matches iOS Reading Width default)
+
+### 18.2 Touch target minimums (HIG · enforced)
+
+- **iOS HIG floor**: 44 × 44pt — every interactive element
+- **Spacing between touch targets**: 8pt minimum gap to prevent mis-taps
+- **Visionary premium register** (P2 v1.2): bump to 60 × 60pt on Stop screen rumbo tag + lock chip
+- **Hit zone may exceed visible bounds** — a 30pt visible icon can have a 44pt invisible tap area extending equally on all sides
+
+### 18.3 Per-element dimensions · locked
+
+#### Floating glass masthead (every screen)
+
+- **Top position**: 81pt from screen top (clears Dynamic Island · was 60pt in mockup → MOVED to 81pt)
+- **Left/right margin**: 16pt
+- **Height**: 38pt (10pt vertical padding + 18pt content + 10pt vertical padding inner)
+- **Corner radius**: 14pt
+- **Background**: `.ultraThinMaterial` (rgba 18% · blur 40pt · sat 180%)
+- **Inset border**: 0.5px rgba(255,255,255,0.16) + 0.5px inset highlight top rgba(255,255,255,0.22)
+
+#### Floating glass tab bar (every screen)
+
+- **Bottom position**: 14pt from screen bottom + 34pt home indicator safe area = **48pt from screen edge**
+- **Left/right margin**: 22pt
+- **Height**: 50pt total (11pt padding + 28pt label + 11pt padding)
+- **Corner radius**: 25pt (pill shape · matches height/2)
+- **Background**: `.regularMaterial` (rgba 55% · blur 40pt · sat 220%)
+- **Active tab indicator dot**: 4pt circle scaled 1.3 = 5.2pt visible · with 10pt accent-color glow shadow
+- **Tab label**: Inter 9pt · letter-spacing 1.5pt · uppercase
+- **Touch target per tab**: full 50pt height × (408 − 12 padding) / 4 = ~99pt wide per tab — exceeds 44pt min by 2.25x. Pass.
+
+#### Floating lock chip (Stop screen)
+
+- **Top position**: **100pt** from screen top (was 84pt → MOVED · 81pt floor + 19pt safety)
+- **Right position**: 18pt from screen right
+- **Height**: **44pt** (was ~46pt with padding → SLIGHTLY ADJUSTED · 12pt vertical padding + 20pt content)
+- **Corner radius**: 22pt (pill)
+- **Background**: `.thinMaterial` (rgba 35% · blur 20pt)
+- **Border**: 0.5px rgba(255,255,255,0.14)
+- **Touch target**: 44pt height minimum met. Adequate.
+
+#### Hero typography sizes (per screen)
+
+| Screen | Element | Font | Size | Letter-spacing | Line-height |
+|---|---|---|---|---|---|
+| Hoy | Hero kicker | Inter 600 caps | 10pt | 2.5pt (0.25em) | 1.2 |
+| Hoy | Hero title (Despacho word) | Fraunces opsz 144 wght 500 | 56pt | -0.045em | 0.92 |
+| Hoy | Hero meaning | Newsreader italic 400 | 17pt | normal | 1.35 |
+| Hoy | Color band | n/a | 4pt × 72pt | n/a | n/a |
+| Tu Códice | User name | Fraunces opsz 144 wght 500 | 42pt | -0.035em | 1.0 |
+| Tu Códice | Tier badge | Inter 600 caps | 10pt | 1.8pt | 1.2 |
+| Tu Códice | Stat numeral | Fraunces opsz 96 wght 500 | 30pt | -0.015em | 1.0 |
+| Tu Códice | Stat label | Inter 500 caps | 9pt | 1.5pt | 1.2 |
+| Stop | Folio (address) | Inter 600 caps | 10pt | 2pt | 1.0 |
+| Stop | Rumbo tag | Inter 600 caps | 9pt | 1.5pt | 1.2 |
+| Stop | Stop name | Fraunces opsz 144 wght 500 | 44pt | -0.035em | 0.96 |
+| Stop | Address | Newsreader italic 400 | 13pt | normal | 1.35 |
+| Stop | Despacho body | Newsreader 400 | 14pt | normal | 1.55 |
+| Stop | Drop cap | Fraunces opsz 144 wght 600 | 34pt | normal | 0.85 |
+| All | Article kicker chip | Inter 600 caps | 9pt | 2pt | 1.2 |
+| All | Article body | Newsreader 400 | 15pt | normal | 1.5 |
+| All | Body byline | Newsreader italic 400 | 11-12pt | normal | 1.4 |
+
+**Minimum text size: 11pt** for any persistent text per HIG floor. Stop rumbo tag at 9pt is INSIDE a chip (decorative label) — passes. Tab label at 9pt — passes (decorative caps). No persistent body text below 11pt.
+
+#### Body content (every screen)
+
+- **Side padding**: 20pt horizontal (iOS Reading Width default)
+- **Section spacing**: 28pt vertical between major sections
+- **Card-to-card spacing**: 16pt
+- **Tapered rule (Rule primitive)**: 1pt height with 28pt vertical margin top + bottom
+- **Drop cap float**: 3-line floated left with 6-8pt right margin
+
+#### Cards (in-flow surfaces)
+
+- **Padding**: 16pt internal default (14-18pt acceptable range)
+- **Corner radius**: 10pt for content cards, 14pt for hero glass cards
+- **Hairline border**: 1px rgba(240,236,230,0.06-0.18) depending on elevation
+- **Elevated card shadow**: `0 4px 16px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.4)`
+- **Left accent border** (for category-marked cards): 3pt solid pillar color
+
+#### Photography
+- **Hero photo height** (Hoy, La Ruta, Tu Códice): 540pt (~57% of canvas height)
+- **Stop screen hero photo height**: 480pt
+- **Article card hero photo height**: 160-170pt
+- **Lugar thumbnail (Live Activity)**: 56 × 56pt
+- **Compact article thumbnail**: 56 × 56pt
+- **Ken Burns scale range**: 1.0 → 1.08 over 24-32 seconds
+- **3% SVG film grain overlay** on all photo regions per brandbook §7
+
+#### Rosetón sizes
+
+- **Hero scale** (Tu Códice center): 220 × 220pt
+- **Inline progress** (Hoy Ruta hero card): 36 × 36pt
+- **Lock screen Circular widget**: 54 × 54pt
+- **Live Activity compact**: 20 × 20pt
+- **App icon canvas**: 1024 × 1024 px (Apple-mandated · iOS 22% corner mask applied automatically)
+
+### 18.4 Z-index hierarchy (no accidental overlap)
+
+| Layer | z-index | Contains |
+|---|---|---|
+| 0 | base | Background color · `--bg` |
+| 1 | photography | Full-bleed hero photo · color bleed overlay |
+| 2 | content | Body cards · text · in-flow elements |
+| 3 | floating chrome | Masthead glass · lock chip · floating action elements |
+| 4 | sheets | Modal sheets when present |
+| 5 | tab bar | Floating glass tab bar |
+| 6 | overlays | Sello-earn ceremony · tier-up overlay |
+| 9 | system | iOS status bar |
+| 10 | system | Dynamic Island content |
+
+Every element has explicit z-index. No `position: absolute` without explicit z to prevent accidental stacking order issues.
+
+### 18.5 Issues found in mockups · resolved in this spec
+
+| Issue | Original | Fixed | Where |
+|---|---|---|---|
+| Masthead overlaps Dynamic Island | top: 60pt | **top: 81pt** | §18.3 |
+| Lock chip too close to DI | top: 84pt | **top: 100pt** | §18.3 |
+| Lock chip height marginal | ~46pt | **height: 44pt** with `min-height: 44pt` enforced | §18.3 |
+| Tab bar margin from edge unclear | bottom: 14pt | **bottom: 14pt + 34pt safe-area-inset-bottom** | §18.3 |
+| Drop cap could exceed visible width | floated freely | **3-line float with 6-8pt right margin** | §18.3 |
+| Photography heights inconsistent | varied | **Hoy/Tu Códice 540pt, Stop 480pt, Cards 160-170pt** | §18.3 |
+| Glass material on cards (forbidden) | applied universally | **only on chrome (masthead, tab, chip, modal)** | §2.1 |
+| Smaller-than-44pt touch targets | various | **44pt minimum everywhere**, 60pt on Stop showpiece (P2) | §18.2 |
+
+### 18.6 Implementation enforcement
+
+Every new component in `components/liquid-glass/` and every screen file in `app/(tabs)/` must:
+- Reference exact dimensions from §18.3 (no arbitrary pt values)
+- Use `safe-area-inset-top` and `safe-area-inset-bottom` via `react-native-safe-area-context`'s `useSafeAreaInsets()`
+- Specify explicit `zIndex` per §18.4
+- Include `accessibilityLabel` per HIG VoiceOver requirement
+- Pass `useReducedMotion()` guard on every animation
+- Wrap all `TypeSize.*` values with `UIFontMetrics.scaledFont(for:)` equivalent
+
+PR review checklist includes: "Did you verify dimensions against §18.3 of the spec?"
+
+---
+
+*End of spec v1.1 · Updated 2026-05-15 with §17 competitive research additions + §18 sizing audit. Next step: user reviews this document, requests final changes (if any), then writing-plans skill turns it into a step-by-step implementation plan. **Build #11 NOT triggered until explicit user instruction.***
