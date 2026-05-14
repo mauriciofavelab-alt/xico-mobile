@@ -132,7 +132,7 @@ function LoteriaSello({ def, earned }: { def: SelloDef; earned: boolean }) {
         <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.28)", marginHorizontal: 13 }} />
 
         <View style={{ paddingVertical: 10, paddingHorizontal: 10, alignItems: "center", backgroundColor: "rgba(0,0,0,0.3)" }}>
-          <Text numberOfLines={1} style={{ fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 2.5, color: "#fff", textTransform: "uppercase", textAlign: "center" }}>{def.titulo}</Text>
+          <Text numberOfLines={1} style={{ fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2.5, color: "#fff", textTransform: "uppercase", textAlign: "center" }}>{def.titulo}</Text>
           <Text style={{ fontFamily: "Inter_400Regular", fontSize: 5.5, color: "rgba(255,255,255,0.6)", letterSpacing: 0.5, marginTop: 3 }}>+{def.pts} pts</Text>
         </View>
       </LinearGradient>
@@ -263,7 +263,7 @@ const cr = StyleSheet.create({
   wrap: { marginBottom: 4 },
   labelRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
   line: { flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.08)" },
-  labelText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: "rgba(255,255,255,0.3)" },
+  labelText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: "rgba(255,255,255,0.3)" },
   cards: {
     marginHorizontal: 16,
     backgroundColor: "#0e0a0c",
@@ -343,7 +343,7 @@ const pp = StyleSheet.create({
   passportLeft: { flex: 1 },
   passportRight: { alignItems: "center", justifyContent: "flex-start" },
   passportEye: {
-    fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 3,
+    fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3,
     color: "rgba(255,255,255,0.3)", textTransform: "uppercase", marginBottom: 10,
   },
   levelName: {
@@ -368,21 +368,21 @@ const pp = StyleSheet.create({
     fontSize: 24, color: "#f0ece6", lineHeight: 26,
   },
   ageLabel: {
-    fontFamily: "Inter_400Regular", fontSize: 8,
+    fontFamily: "Inter_400Regular", fontSize: 11,
     color: "rgba(255,255,255,0.3)", letterSpacing: 1,
     textTransform: "uppercase", marginTop: 2,
   },
   progressWrap: {},
   progressBg: { height: 2, backgroundColor: "rgba(255,255,255,0.08)", overflow: "hidden", marginBottom: 6 },
   progressFill: { height: 2 },
-  progressLabel: { fontFamily: "Inter_400Regular", fontSize: 8, color: "rgba(255,255,255,0.3)", letterSpacing: 0.5 },
+  progressLabel: { fontFamily: "Inter_400Regular", fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 0.5 },
   ptsStamp: {
     width: 78, height: 78, borderRadius: 39,
     borderWidth: 2, alignItems: "center", justifyContent: "center",
     backgroundColor: "rgba(0,0,0,0.3)",
   },
   ptsStampLabel: {
-    fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2,
+    fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2,
     color: "rgba(255,255,255,0.3)", textTransform: "uppercase",
   },
   ptsStampNum: {
@@ -394,7 +394,7 @@ const pp = StyleSheet.create({
     paddingHorizontal: 20, paddingVertical: 16, gap: 12,
   },
   sellosLine: { flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.08)" },
-  sellosEye: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: "rgba(255,255,255,0.3)" },
+  sellosEye: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: "rgba(255,255,255,0.3)" },
   stampsScroll: { paddingHorizontal: 16, gap: 10, paddingBottom: 24, paddingTop: 4 },
 });
 
@@ -498,13 +498,13 @@ function MomentosInTab({ earn }: { earn: (id: any) => Promise<void> }) {
 const ms = StyleSheet.create({
   labelRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
   line: { flex: 1, height: 1, backgroundColor: Colors.border },
-  labelText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: Colors.textTertiary },
-  labelRight: { fontFamily: "Inter_400Regular", fontSize: 9, color: Colors.textTertiary },
+  labelText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: Colors.textTertiary },
+  labelRight: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary },
   bubble: { width: 82 },
   bubbleCard: { width: 82, height: 116, overflow: "hidden", borderWidth: 1, marginBottom: 8, position: "relative" },
   bubbleBottom: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 10 },
   bubbleLine: { width: 18, height: 2 },
-  bubbleCat: { fontFamily: "Inter_500Medium", fontSize: 8, letterSpacing: 1, color: Colors.textTertiary, textTransform: "uppercase" },
+  bubbleCat: { fontFamily: "Inter_500Medium", fontSize: 11, letterSpacing: 1, color: Colors.textTertiary, textTransform: "uppercase" },
   storyTop: { paddingHorizontal: 16, paddingBottom: 8 },
   bars: { flexDirection: "row", gap: 4, marginBottom: 8 },
   barBg: { flex: 1, height: 2, backgroundColor: "rgba(255,255,255,0.3)", overflow: "hidden" },
@@ -514,7 +514,7 @@ const ms = StyleSheet.create({
   tapArea: { flex: 1, flexDirection: "row" },
   storyBottom: { paddingHorizontal: 20 },
   accentLine: { width: 28, height: 2, marginBottom: 12 },
-  storyCat: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, textTransform: "uppercase", marginBottom: 8 },
+  storyCat: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", marginBottom: 8 },
   storyHeadline: { fontFamily: "Newsreader_600SemiBold", fontSize: 32, lineHeight: 36, color: "#fff", marginBottom: 8 },
   storyCaption: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 16, lineHeight: 24, color: "rgba(255,255,255,0.8)" },
 });
@@ -592,10 +592,10 @@ function RutaSection({ earn }: { earn: (id: any) => Promise<void> }) {
 const ru = StyleSheet.create({
   labelRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
   line: { flex: 1, height: 1, backgroundColor: Colors.border },
-  labelText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: Colors.textTertiary },
+  labelText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: Colors.textTertiary },
   card: { marginHorizontal: 16, backgroundColor: "#0e0a0c", borderWidth: 1, borderColor: "rgba(255,255,255,0.06)", marginBottom: 8, overflow: "hidden" },
   top: { paddingHorizontal: 20, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" },
-  date: { fontFamily: "Inter_400Regular", fontSize: 8, color: "rgba(255,255,255,0.3)", letterSpacing: 2, marginBottom: 4 },
+  date: { fontFamily: "Inter_400Regular", fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 2, marginBottom: 4 },
   title: { fontFamily: "Newsreader_600SemiBold", fontSize: 24, lineHeight: 28, color: "#fff", marginBottom: 4 },
   sub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: "rgba(255,255,255,0.4)" },
   timeline: { paddingTop: 20, paddingLeft: 16, paddingRight: 16 },
@@ -608,12 +608,12 @@ const ru = StyleSheet.create({
   stopContent: { flex: 1, paddingBottom: 8 },
   stopImg: { width: "100%", height: 100, borderLeftWidth: 3, marginBottom: 10 },
   stopBody: { gap: 2 },
-  stopCat: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 2, marginBottom: 2 },
+  stopCat: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2, marginBottom: 2 },
   stopTitle: { fontFamily: "Inter_600SemiBold", fontSize: 15, color: "#fff", lineHeight: 19, marginBottom: 2 },
-  stopAddr: { fontFamily: "Inter_400Regular", fontSize: 9, color: "rgba(255,255,255,0.3)", letterSpacing: 0.3, marginBottom: 4 },
+  stopAddr: { fontFamily: "Inter_400Regular", fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 0.3, marginBottom: 4 },
   stopDesc: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 13, lineHeight: 19, color: "rgba(255,255,255,0.5)" },
   expandBtn: { alignItems: "center", padding: 14, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" },
-  expandText: { fontFamily: "Inter_400Regular", fontSize: 9, letterSpacing: 2, color: "rgba(255,255,255,0.35)", textTransform: "uppercase" },
+  expandText: { fontFamily: "Inter_400Regular", fontSize: 11, letterSpacing: 2, color: "rgba(255,255,255,0.35)", textTransform: "uppercase" },
 });
 
 // ─── RECOMENDACIONES ──────────────────────────────────────────────────────────
@@ -1002,21 +1002,21 @@ const mp = StyleSheet.create({
   mapPlaceholder: { alignItems: "center", justifyContent: "center" },
   mapPlaceholderText: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary, letterSpacing: 2 },
   mapOverlayLabel: { position: "absolute", bottom: 10, left: 12, backgroundColor: "rgba(10,10,10,0.75)", paddingHorizontal: 10, paddingVertical: 4 },
-  mapOverlayText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 2.5, color: "rgba(255,255,255,0.55)" },
+  mapOverlayText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2.5, color: "rgba(255,255,255,0.55)" },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderColor: Colors.border },
   chipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  chipText: { fontFamily: "Inter_500Medium", fontSize: 9, letterSpacing: 2, color: Colors.textTertiary, textTransform: "uppercase" },
+  chipText: { fontFamily: "Inter_500Medium", fontSize: 11, letterSpacing: 2, color: Colors.textTertiary, textTransform: "uppercase" },
   chipTextActive: { color: "#fff" },
   countRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, marginBottom: 12 },
-  countText: { fontFamily: "Inter_400Regular", fontSize: 9, color: Colors.textTertiary },
+  countText: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary },
   copilLegend: { flexDirection: "row", alignItems: "center", gap: 6 },
   copilDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#CA8A04", borderWidth: 1, borderColor: "#FDE047" },
   card: { marginHorizontal: 16, marginBottom: 12, backgroundColor: Colors.surface, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.06)" },
   cardAccent: { height: 3 },
   body: { padding: 16 },
-  type: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2 },
+  type: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2 },
   copilBadge: { borderWidth: 1, paddingHorizontal: 8, paddingVertical: 3 },
-  copilBadgeText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 1.5 },
+  copilBadgeText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 1.5 },
   name: { fontFamily: "Newsreader_500Medium", fontSize: 20, lineHeight: 25, color: Colors.textPrimary, marginBottom: 4 },
   address: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginBottom: 6 },
   desc: { fontFamily: "Inter_400Regular", fontSize: 12, lineHeight: 17, color: Colors.textSecondary },
@@ -1105,23 +1105,23 @@ function AgendaTab({ earn }: { earn: (id: any) => Promise<void> }) {
 const ag = StyleSheet.create({
   labelRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
   line: { flex: 1, height: 1, backgroundColor: Colors.border },
-  labelText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: Colors.textTertiary },
+  labelText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: Colors.textTertiary },
   countBadge: { borderWidth: 1, borderColor: "rgba(26,74,26,0.4)", paddingHorizontal: 8, paddingVertical: 3 },
-  countText: { fontFamily: "Inter_400Regular", fontSize: 9, color: "#1a4a1a" },
+  countText: { fontFamily: "Inter_400Regular", fontSize: 11, color: "#1a4a1a" },
   card: { flexDirection: "row", marginHorizontal: 16, marginBottom: 16, overflow: "hidden", borderBottomWidth: 1, borderBottomColor: Colors.border, paddingBottom: 16 },
   stripe: { width: 3, marginRight: 16 },
   body: { flex: 1 },
-  cat: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2 },
+  cat: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2 },
   freeBadge: { borderWidth: 1, borderColor: "rgba(26,74,26,0.4)", paddingHorizontal: 8, paddingVertical: 3 },
-  freeText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 1.5, color: "#1a4a1a" },
+  freeText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 1.5, color: "#1a4a1a" },
   priceBadge: { borderWidth: 1, borderColor: Colors.border, paddingHorizontal: 8, paddingVertical: 3 },
-  priceText: { fontFamily: "Inter_700Bold", fontSize: 7, letterSpacing: 1.5, color: Colors.textTertiary },
+  priceText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 1.5, color: Colors.textTertiary },
   title: { fontFamily: "Newsreader_500Medium", fontSize: 20, lineHeight: 24, color: Colors.textPrimary, marginBottom: 4 },
   meta: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textSecondary },
   desc: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: Colors.textTertiary },
   voyBtn: { borderWidth: 1, borderColor: Colors.border, paddingHorizontal: 16, paddingVertical: 8 },
   voyBtnActive: { backgroundColor: "#1a4a1a", borderColor: "#1a4a1a" },
-  voyText: { fontFamily: "Inter_700Bold", fontSize: 9, letterSpacing: 2, color: Colors.textPrimary, textTransform: "uppercase" },
+  voyText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2, color: Colors.textPrimary, textTransform: "uppercase" },
   voyTextActive: { color: "#fff" },
 });
 
@@ -1196,21 +1196,21 @@ function GuardadosTab() {
 const gu = StyleSheet.create({
   labelRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
   line: { flex: 1, height: 1, backgroundColor: Colors.border },
-  labelText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 3, color: Colors.textTertiary },
+  labelText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: Colors.textTertiary },
   countBadge: { backgroundColor: Colors.surface, paddingHorizontal: 8, paddingVertical: 3 },
-  countText: { fontFamily: "Inter_400Regular", fontSize: 9, color: Colors.textTertiary },
+  countText: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary },
   empty: { marginHorizontal: 16, padding: 24, borderWidth: 1, borderColor: Colors.border },
   emptyLine: { width: 20, height: 1.5, backgroundColor: Colors.magenta, marginBottom: 16 },
   emptyTitle: { fontFamily: "Newsreader_400Regular", fontSize: 18, color: Colors.textSecondary, lineHeight: 22, marginBottom: 8 },
   emptySub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 22, color: Colors.textTertiary, marginBottom: 16 },
-  emptyMono: { fontFamily: "Inter_400Regular", fontSize: 8, color: Colors.textTertiary, letterSpacing: 1.5, textTransform: "uppercase" },
+  emptyMono: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary, letterSpacing: 1.5, textTransform: "uppercase" },
   row: { flexDirection: "row", marginHorizontal: 16, marginBottom: 16, alignItems: "flex-start", borderBottomWidth: 1, borderBottomColor: Colors.border, paddingBottom: 16 },
   unsaveBtn: { paddingLeft: 12, paddingTop: 2 },
   unsaveX: { fontFamily: "Inter_300Light", fontSize: 18, color: "rgba(255,255,255,0.2)", lineHeight: 22 },
   img: { width: 80, height: 108, backgroundColor: Colors.surfaceHigh },
   body: { flex: 1, gap: 3 },
   bar: { width: 22, height: 2, borderRadius: 1, marginBottom: 3 },
-  type: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 2, color: Colors.textTertiary },
+  type: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2, color: Colors.textTertiary },
   title: { fontFamily: "Newsreader_600SemiBold", fontSize: 19, lineHeight: 23, color: Colors.textPrimary },
   read: { fontFamily: "Inter_400Regular", fontSize: 10, color: Colors.textTertiary, marginTop: 2 },
 });
@@ -1484,7 +1484,7 @@ const s = StyleSheet.create({
   },
   headerEye: {
     fontFamily: "Inter_700Bold",
-    fontSize: 9, letterSpacing: 3,
+    fontSize: 11, letterSpacing: 3,
     color: "rgba(255,255,255,0.35)",
     textTransform: "uppercase",
   },
@@ -1495,7 +1495,7 @@ const s = StyleSheet.create({
   nameRight: { paddingTop: 20, alignItems: "center" },
   accountLabel: {
     fontFamily: "Inter_400Regular",
-    fontSize: 9, color: "rgba(255,255,255,0.3)",
+    fontSize: 11, color: "rgba(255,255,255,0.3)",
     letterSpacing: 2, textTransform: "uppercase",
     marginBottom: 6,
   },
@@ -1516,7 +1516,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 10,
   },
   circleLabel: {
-    fontFamily: "Inter_400Regular", fontSize: 8, letterSpacing: 2,
+    fontFamily: "Inter_400Regular", fontSize: 11, letterSpacing: 2,
     color: "rgba(255,255,255,0.3)", textTransform: "uppercase", marginBottom: 2,
   },
   circleValue: {
@@ -1528,7 +1528,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 10,
   },
   levelBadgeXico: {
-    fontFamily: "Inter_400Regular", fontSize: 8, letterSpacing: 2,
+    fontFamily: "Inter_400Regular", fontSize: 11, letterSpacing: 2,
     color: "rgba(255,255,255,0.3)", textTransform: "uppercase",
   },
   levelBadgeDot: { width: 6, height: 6, borderRadius: 3 },
@@ -1537,11 +1537,11 @@ const s = StyleSheet.create({
   tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, alignItems: "center" },
   tag: { borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", paddingHorizontal: 9, paddingVertical: 4 },
   tagText: {
-    fontFamily: "Inter_400Regular", fontSize: 8,
+    fontFamily: "Inter_400Regular", fontSize: 11,
     color: "rgba(255,255,255,0.5)", letterSpacing: 1.5, textTransform: "uppercase",
   },
   tagsEditHint: {
-    fontFamily: "Inter_400Regular", fontSize: 8,
+    fontFamily: "Inter_400Regular", fontSize: 11,
     color: Colors.primary, letterSpacing: 1, marginLeft: 2,
   },
 
@@ -1553,7 +1553,7 @@ const s = StyleSheet.create({
   },
   tabBtn: { flex: 1, paddingVertical: 14, paddingHorizontal: 2, alignItems: "center", position: "relative" },
   tabBtnActive: {},
-  tabText: { fontFamily: "Inter_700Bold", fontSize: 9, letterSpacing: 1.8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase" },
+  tabText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 1.8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase" },
   tabTextActive: { color: Colors.magenta },
   tabIndicator: { position: "absolute", bottom: 0, left: 0, right: 0, height: 2, backgroundColor: "transparent" },
   tabIndicatorActive: { backgroundColor: Colors.magenta },

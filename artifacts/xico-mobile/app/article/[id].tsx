@@ -1,36 +1,53 @@
-﻿import { useQuery } from "@tanstack/react-query";
-import { Audio } from "expo-av";
+import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  Animated,
   Image,
   Platform,
   Pressable,
-  ScrollView,
   Share,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import Animated, {
+  runOnJS,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
-import { Colors } from "@/constants/colors";
+import { Colors, getAccentColor } from "@/constants/colors";
+import { Fonts, Hairline, lh, Space, Tracking, TypeSize } from "@/constants/editorial";
 import { fetchJson, API_BASE } from "@/constants/api";
 import { getImage } from "@/constants/imageMap";
 import { usePassport, trackArticleRead, trackSaved } from "@/hooks/usePassport";
 import { trackReadContext } from "@/hooks/useUserCriterion";
+import { AudioPlayer } from "@/components/AudioPlayer";
 import { StampNotification } from "@/components/StampNotification";
 import { XicoLoader } from "@/components/XicoLoader";
+import {
+  ByLine,
+  Caption,
+  DropCap,
+  FolioNumber,
+  Kicker,
+  PullQuote,
+  RevealOnMount,
+  Rule,
+  Standfirst,
+} from "@/components/editorial";
 
 type ApiArticle = {
   id: string; slug?: string; title?: string; subtitle?: string;
   excerpt?: string; body?: string; pillar?: string; subcategory?: string;
   author_name?: string; read_time_minutes?: number; is_featured?: boolean;
   created_at?: string | null; published_at?: string | null; hero_image_url?: string;
+  hero_caption?: string; photographer_credit?: string; translator_name?: string;
 };
 
 function getImageForArticle(a: ApiArticle) {
@@ -45,7 +62,7 @@ function getDateLabel(a: ApiArticle): string {
   if (!raw) return "2026";
   const d = new Date(raw);
   if (Number.isNaN(d.getTime())) return "2026";
-  return d.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
+  return d.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
 }
 
 function legacyIdMatches(a: ApiArticle, routeId: string): boolean {
@@ -56,18 +73,6 @@ function legacyIdMatches(a: ApiArticle, routeId: string): boolean {
     "art-005": "historias-migrantes",
   };
   return a.slug === map[routeId];
-}
-
-const ACCENT: Record<string, string> = {
-  cultura: "hsl(220, 100%, 55%)",
-  "mexico-ahora": "hsl(25, 90%, 55%)",
-  "mi-xico": "hsl(160, 80%, 45%)",
-  indice: "hsl(335, 85%, 60%)",
-  portada: "hsl(335, 85%, 60%)",
-};
-
-function getAccent(pillar?: string) {
-  return ACCENT[pillar ?? ""] ?? "hsl(335, 85%, 60%)";
 }
 
 function stripHtml(raw: string): string {
@@ -86,100 +91,138 @@ function stripHtml(raw: string): string {
     .trim();
 }
 
-function isQuote(para: string): boolean {
-  return para.startsWith('"') || para.startsWith('“') || para.startsWith('—') || para.startsWith('—') || para.startsWith('«');
+function isShortQuote(para: string): boolean {
+  return para.startsWith('"') || para.startsWith("“") || para.startsWith("—") || para.startsWith("«");
 }
 
-function ArticleBody({ body, accent }: { body: string; accent: string }) {
-  if (!body) return null;
+type BodyBlock =
+  | { kind: "para"; text: string }
+  | { kind: "subhead"; text: string }
+  | { kind: "pullquote"; text: string; attribution?: string }
+  | { kind: "caption"; text: string; credit?: string }
+  | { kind: "quote"; text: string };
+
+function parseBody(body: string): BodyBlock[] {
   const clean = stripHtml(body);
   const normalized = clean.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
   const paragraphs = normalized.includes("\n\n")
     ? normalized.split("\n\n").map(p => p.replace(/\n/g, " ").trim()).filter(Boolean)
-    : [normalized.replace(/\n/g, " ").trim()];
+    : [normalized.replace(/\n/g, " ").trim()].filter(Boolean);
+
+  return paragraphs.map<BodyBlock>((para) => {
+    if (para.startsWith("## ")) {
+      return { kind: "subhead", text: para.slice(3).trim() };
+    }
+    if (para.startsWith(">> ")) {
+      const rest = para.slice(3).trim();
+      const dashIdx = rest.lastIndexOf(" — ");
+      if (dashIdx > 0) {
+        return {
+          kind: "pullquote",
+          text: rest.slice(0, dashIdx).trim(),
+          attribution: rest.slice(dashIdx + 3).trim(),
+        };
+      }
+      return { kind: "pullquote", text: rest };
+    }
+    if (para.startsWith("[caption:") && para.endsWith("]")) {
+      const inner = para.slice(9, -1).trim();
+      const pipeIdx = inner.lastIndexOf(" | ");
+      if (pipeIdx > 0) {
+        return {
+          kind: "caption",
+          text: inner.slice(0, pipeIdx).trim(),
+          credit: inner.slice(pipeIdx + 3).trim(),
+        };
+      }
+      return { kind: "caption", text: inner };
+    }
+    if (isShortQuote(para)) {
+      return { kind: "quote", text: para };
+    }
+    return { kind: "para", text: para };
+  });
+}
+
+function ArticleBody({ body, accent, subcategory }: { body: string; accent: string; subcategory?: string }) {
+  if (!body) return null;
+  const blocks = parseBody(body);
+  let dropCapUsed = false;
 
   return (
     <View>
-      {paragraphs.map((para, i) => {
-        if (i === 0 && para.length > 0) {
-          const dropLetter = para.charAt(0);
-          const rest = para.slice(1);
+      {blocks.map((block, i) => {
+        if (block.kind === "para" && !dropCapUsed) {
+          dropCapUsed = true;
+          return <DropCap key={i} paragraph={block.text} accent={accent} />;
+        }
+        if (block.kind === "para") {
+          return <Text key={i} style={body_s.para}>{block.text}</Text>;
+        }
+        if (block.kind === "subhead") {
           return (
-            <View key={i} style={body_s.dropCapRow}>
-              <View style={body_s.dropCapBox}>
-                <Text style={[body_s.dropCap, { color: accent }]}>{dropLetter}</Text>
-              </View>
-              <View style={body_s.dropCapRest}>
-                <Text style={body_s.firstParaRest}>{rest}</Text>
-              </View>
+            <View key={i} style={body_s.subheadBlock}>
+              <Kicker color={accent} size="small">{subcategory ?? "Sección"}</Kicker>
+              <Text style={body_s.subhead}>{block.text}</Text>
             </View>
           );
         }
-        if (isQuote(para)) {
+        if (block.kind === "pullquote") {
           return (
-            <View key={i} style={[body_s.quoteBlock, { borderLeftColor: accent }]}>
-              <Text style={body_s.quoteText}>{para}</Text>
-            </View>
+            <PullQuote key={i} accent={accent} attribution={block.attribution}>
+              {block.text}
+            </PullQuote>
           );
         }
-        return <Text key={i} style={body_s.para}>{para}</Text>;
+        if (block.kind === "caption") {
+          return <Caption key={i} text={block.text} credit={block.credit} />;
+        }
+        return (
+          <View key={i} style={[body_s.quoteBlock, { borderLeftColor: accent }]}>
+            <Text style={body_s.quoteText}>{block.text}</Text>
+          </View>
+        );
       })}
     </View>
   );
 }
 
 const body_s = StyleSheet.create({
-  dropCapRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 22,
-    gap: 8,
+  para: {
+    fontFamily: Fonts.serifRegular,
+    fontSize: TypeSize.lede,
+    lineHeight: lh(TypeSize.lede, 1.65),
+    color: Colors.textPrimary,
+    opacity: 0.88,
+    letterSpacing: Tracking.body,
+    marginBottom: Space.lg,
   },
-  dropCapBox: {
-    width: 52,
-    height: 52,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    marginTop: 2,
+  subheadBlock: {
+    gap: Space.sm,
+    marginTop: Space.xl,
+    marginBottom: Space.md,
   },
-  dropCap: {
-    fontFamily: "Newsreader_600SemiBold",
-    fontSize: 72,
-    lineHeight: 60,
-  },
-  dropCapRest: {
-    flex: 1,
-    paddingTop: 4,
-  },
-  firstParaRest: {
-    fontFamily: "Newsreader_400Regular",
-    fontSize: 20,
-    lineHeight: 32,
-    color: "rgba(240,236,230,0.95)",
-    letterSpacing: 0.1,
+  subhead: {
+    fontFamily: Fonts.serifMedium,
+    fontSize: TypeSize.subhead,
+    lineHeight: lh(TypeSize.subhead, 1.25),
+    color: Colors.textPrimary,
+    letterSpacing: Tracking.tight,
   },
   quoteBlock: {
-    borderLeftWidth: 2,
-    paddingLeft: 16,
-    marginVertical: 8,
-    marginBottom: 22,
+    borderLeftWidth: Hairline.bold,
+    paddingLeft: Space.base,
+    marginVertical: Space.sm,
+    marginBottom: Space.lg,
   },
   quoteText: {
-    fontFamily: "Newsreader_400Regular_Italic",
+    fontFamily: Fonts.serifItalic,
     fontStyle: "italic",
-    fontSize: 21,
-    lineHeight: 31,
-    color: "rgba(240,236,230,0.88)",
-    letterSpacing: -0.1,
-  },
-  para: {
-    fontFamily: "Newsreader_400Regular",
-    fontSize: 18,
-    lineHeight: 30,
-    color: "rgba(220,215,208,0.88)",
-    letterSpacing: 0.1,
-    marginBottom: 22,
+    fontSize: TypeSize.subhead - 1,
+    lineHeight: lh(TypeSize.subhead - 1, 1.5),
+    color: Colors.textPrimary,
+    opacity: 0.85,
+    letterSpacing: Tracking.tight,
   },
 });
 
@@ -187,9 +230,6 @@ export default function ArticleScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 20 : insets.top;
   const [scrollPercent, setScrollPercent] = useState(0);
-  const [audioLoading, setAudioLoading] = useState(false);
-  const [sound, setSound] = useState<any>(null);
-  const [playing, setPlaying] = useState(false);
   const [saved, setSaved] = useState(false);
   const { earn, newStamp, dismissStamp } = usePassport();
 
@@ -204,23 +244,28 @@ export default function ArticleScreen() {
 
   const article = useMemo(() => {
     if (!routeId) return null;
-    return articles.find(a => a.id === routeId || a.slug === routeId || legacyIdMatches(a, routeId));
+    return articles.find((a: ApiArticle) => a.id === routeId || a.slug === routeId || legacyIdMatches(a, routeId));
   }, [articles, routeId]);
 
   useEffect(() => {
     if (!article) return;
     trackArticleRead(earn);
     trackReadContext(article.pillar, article.subcategory);
-    fetch(`${API_BASE}/api/saved/${article.id}/status`)
-      .then(r => r.json()).then(d => setSaved(d.saved)).catch(() => {});
+    fetchJson<{ saved: boolean }>(`/api/saved/${article.id}/status`)
+      .then(d => setSaved(d.saved))
+      .catch(() => {});
   }, [article]);
 
   const toggleSave = async () => {
     if (!article) return;
-    const method = saved ? "DELETE" : "POST";
-    await fetch(`${API_BASE}/api/saved/${article.id}`, { method });
-    if (!saved) await trackSaved(earn);
-    setSaved(!saved);
+    const wasSaved = saved;
+    setSaved(!wasSaved);
+    try {
+      await fetchJson(`/api/saved/${article.id}`, { method: wasSaved ? "DELETE" : "POST" });
+      if (!wasSaved) await trackSaved(earn);
+    } catch {
+      setSaved(wasSaved);
+    }
   };
 
   const handleShare = async () => {
@@ -228,63 +273,22 @@ export default function ArticleScreen() {
     try { await Share.share({ message: `${article.title} — XICO`, title: article.title }); } catch (_) {}
   };
 
-  const handleAudio = async () => {
-    if (playing) {
-      if (sound) {
-        try { await sound.stopAsync(); await sound.unloadAsync(); } catch (_) {}
-        setSound(null);
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      "worklet";
+      scrollY.value = e.contentOffset.y;
+      const total = e.contentSize.height - e.layoutMeasurement.height;
+      if (total > 0) {
+        const pct = Math.min(100, Math.max(0, (e.contentOffset.y / total) * 100));
+        runOnJS(setScrollPercent)(pct);
       }
-      setPlaying(false);
-      return;
-    }
-    if (!article) return;
-    const text = (article.body || article.excerpt || "").slice(0, 2000);
-    if (!text) return;
+    },
+  });
 
-    if (Platform.OS === "web") {
-      try {
-        setAudioLoading(true);
-        const uri = `${API_BASE}/api/tts?text=${encodeURIComponent(text)}`;
-        const audio = new (window as any).Audio();
-        audio.src = uri;
-        audio.oncanplay = () => { setAudioLoading(false); setPlaying(true); audio.play(); };
-        audio.onended = () => setPlaying(false);
-        audio.onerror = () => { setPlaying(false); setAudioLoading(false); };
-        audio.load();
-      } catch (e) { setPlaying(false); setAudioLoading(false); }
-      return;
-    }
-
-    try {
-      setAudioLoading(true);
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-      const uri = `${API_BASE}/api/tts?text=${encodeURIComponent(text)}`;
-      const response = await fetch(uri);
-      if (!response.ok) throw new Error(`TTS HTTP ${response.status}`);
-      const blob = await response.blob();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: `data:audio/mpeg;base64,${base64}` }
-      );
-      setSound(newSound);
-      setPlaying(true);
-      await newSound.playAsync();
-      newSound.setOnPlaybackStatusUpdate((status: any) => {
-        if (status.didJustFinish) {
-          setPlaying(false); setSound(null);
-          newSound.unloadAsync().catch(() => {});
-        }
-      });
-    } catch (e) {
-      console.error("TTS error", e);
-      setPlaying(false); setSound(null);
-    } finally { setAudioLoading(false); }
-  };
+  const heroParallax = useAnimatedStyle(() => ({
+    transform: [{ translateY: scrollY.value * 0.35 }],
+  }));
 
   if (isLoading) {
     return (
@@ -304,9 +308,9 @@ export default function ArticleScreen() {
     );
   }
 
-  const accent = getAccent(article.pillar);
+  const accent = getAccentColor(article.subcategory ?? article.pillar ?? "");
   const img = getImageForArticle(article);
-  const section = (article.subcategory || article.pillar || "Artículo").replace(/-/g, " ").toUpperCase();
+  const section = (article.subcategory || article.pillar || "Artículo").replace(/-/g, " ");
   const dateLabel = getDateLabel(article);
   const readTime = article.read_time_minutes || 4;
   const body = article.body || article.excerpt || "";
@@ -318,90 +322,117 @@ export default function ArticleScreen() {
     : article.pillar === "mexico-ahora" ? "México Ahora"
     : "Índice";
 
-  const nextArticle = useMemo(() => {
-    if (articles.length === 0) return null;
-    const sameSection = articles.filter(a => a.pillar === article.pillar && a.id !== article.id && a.slug !== routeId);
-    return sameSection[0] ?? null;
-  }, [articles, article]);
+  const articleIndex = articles.findIndex((a: ApiArticle) => a.id === article.id);
+  const folioNumber = articleIndex >= 0 ? articleIndex + 1 : undefined;
+
+  const nextArticle = articles.find(
+    (a: ApiArticle) => a.pillar === article.pillar && a.id !== article.id && a.slug !== routeId
+  ) ?? null;
 
   return (
     <View style={s.root}>
-      {/* Barra de progreso de lectura */}
       <View style={s.progressBg}>
         <View style={[s.progressFill, { width: `${scrollPercent}%` as any, backgroundColor: accent }]} />
       </View>
 
-      <ScrollView
+      <Animated.ScrollView
         style={s.scroll}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
-        onScroll={(e) => {
-          const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
-          const total = contentSize.height - layoutMeasurement.height;
-          if (total > 0) setScrollPercent(Math.min(100, (contentOffset.y / total) * 100));
-        }}
+        onScroll={scrollHandler}
       >
-        {/* HERO */}
-        <View style={s.heroWrap}>
-          <Image source={img} style={s.heroImg} resizeMode="cover" />
-          <LinearGradient
-            colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.1)", "rgba(8,5,8,0.98)"]}
-            locations={[0, 0.5, 1]}
-            style={StyleSheet.absoluteFill}
-          />
-          <Pressable onPress={() => router.back()} style={[s.backBtn, { top: topPad + 8 }]}>
-            <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} />
-            <Feather name="arrow-left" size={18} color="rgba(255,255,255,0.9)" />
-          </Pressable>
+        {/* HERO + caption */}
+        <View>
+          <View style={s.heroWrap}>
+            <Animated.View style={[s.heroParallaxWrap, heroParallax]}>
+              <Image source={img} style={s.heroImg} resizeMode="cover" />
+            </Animated.View>
+            <LinearGradient
+              colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.1)", "rgba(8,5,8,0.98)"]}
+              locations={[0, 0.5, 1]}
+              style={StyleSheet.absoluteFill}
+              pointerEvents="none"
+            />
+            <Pressable onPress={() => router.back()} style={[s.backBtn, { top: topPad + 8 }]}>
+              <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} />
+              <Feather name="arrow-left" size={18} color="rgba(255,255,255,0.9)" />
+            </Pressable>
+          </View>
+
+          {(article.hero_caption || article.photographer_credit) && (
+            <Caption text={article.hero_caption} credit={article.photographer_credit} />
+          )}
         </View>
 
         {/* HEADER */}
         <View style={s.headerWrap}>
-          <Text style={[s.sectionLabel, { color: accent }]}>{section}</Text>
-          <Text style={s.title}>{article.title}</Text>
-          {!!article.subtitle && <Text style={s.subtitle}>{article.subtitle}</Text>}
-
-          <View style={s.divider} />
-
-          <View style={s.metaRow}>
-            <View style={s.metaLeft}>
-              <Text style={s.authorName}>{article.author_name || "Equipo XICO"}</Text>
-              <Text style={s.dateMeta}>{dateLabel} · {readTime} min de lectura</Text>
+          <RevealOnMount index={0}>
+            <View style={s.folioRow}>
+              <Kicker color={accent}>{section}</Kicker>
+              {folioNumber !== undefined && (
+                <FolioNumber number={folioNumber} total={articles.length} align="right" />
+              )}
             </View>
-            <Pressable
-              onPress={handleAudio}
-              disabled={audioLoading}
-              style={({ pressed }) => [
-                s.audioPill,
-                { borderColor: accent },
-                pressed && { opacity: 0.7 },
-              ]}
-            >
-              <Feather name={playing ? "pause" : "headphones"} size={13} color="#fff" />
-              <Text style={s.audioPillText}>
-                {playing ? "Pausar" : "Escuchar"}
-              </Text>
-            </Pressable>
-          </View>
+          </RevealOnMount>
 
-          <View style={s.divider} />
+          <RevealOnMount index={1}>
+            <Text style={s.title}>{article.title}</Text>
+          </RevealOnMount>
 
-          <View style={s.actionsRow}>
-            <Pressable onPress={toggleSave} style={({ pressed }) => [s.actionBtn, pressed && { opacity: 0.6 }]}>
-              <Feather name="bookmark" size={16} color={saved ? accent : "rgba(255,255,255,0.3)"} />
-              <Text style={[s.actionLabel, saved && { color: accent }]}>{saved ? "Guardado" : "Guardar"}</Text>
-            </Pressable>
-            <Pressable onPress={handleShare} style={({ pressed }) => [s.actionBtn, pressed && { opacity: 0.6 }]}>
-              <Feather name="share" size={16} color="rgba(255,255,255,0.3)" />
-              <Text style={s.actionLabel}>Compartir</Text>
-            </Pressable>
-          </View>
+          {!!article.subtitle && (
+            <RevealOnMount index={2}>
+              <View style={{ marginTop: Space.md }}>
+                <Standfirst>{article.subtitle}</Standfirst>
+              </View>
+            </RevealOnMount>
+          )}
+
+          <RevealOnMount index={3}>
+            <Rule style={{ marginVertical: Space.lg }} />
+          </RevealOnMount>
+
+          <RevealOnMount index={4}>
+            <ByLine
+              author={article.author_name || "Equipo XICO"}
+              photographer={article.photographer_credit}
+              translator={article.translator_name}
+              date={dateLabel}
+              readTime={`${readTime} min`}
+              accent={accent}
+            />
+          </RevealOnMount>
+
+          <RevealOnMount index={5}>
+            <Rule style={{ marginVertical: Space.lg }} />
+          </RevealOnMount>
+
+          <RevealOnMount index={6}>
+            <View style={s.actionsRow}>
+              <Pressable onPress={toggleSave} style={({ pressed }) => [s.actionBtn, pressed && { opacity: 0.6 }]}>
+                <Feather name="bookmark" size={16} color={saved ? accent : "rgba(255,255,255,0.3)"} />
+                <Text style={[s.actionLabel, saved && { color: accent }]}>{saved ? "Guardado" : "Guardar"}</Text>
+              </Pressable>
+              <Pressable onPress={handleShare} style={({ pressed }) => [s.actionBtn, pressed && { opacity: 0.6 }]}>
+                <Feather name="share" size={16} color="rgba(255,255,255,0.3)" />
+                <Text style={s.actionLabel}>Compartir</Text>
+              </Pressable>
+            </View>
+          </RevealOnMount>
+
+          {!!(article.body || article.excerpt) && (
+            <RevealOnMount index={7}>
+              <AudioPlayer
+                ttsUri={`${API_BASE}/api/tts?text=${encodeURIComponent((article.body || article.excerpt || "").slice(0, 2000))}`}
+                accent={accent}
+              />
+            </RevealOnMount>
+          )}
         </View>
 
         {/* BODY */}
         <View style={s.bodyWrap}>
-          {body ? <ArticleBody body={body} accent={accent} /> : <Text style={s.noBody}>Contenido no disponible.</Text>}
+          {body ? <ArticleBody body={body} accent={accent} subcategory={article.subcategory} /> : <Text style={s.noBody}>Contenido no disponible.</Text>}
           <View style={s.endMarker}>
             <View style={[s.endLine, { backgroundColor: accent }]} />
             <Text style={[s.endText, { color: accent }]}>XICO</Text>
@@ -439,7 +470,7 @@ export default function ArticleScreen() {
             </Text>
           </Pressable>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       <StampNotification stamp={newStamp} onDismiss={dismissStamp} />
     </View>
@@ -447,111 +478,91 @@ export default function ArticleScreen() {
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#080508" },
+  root: { flex: 1, backgroundColor: Colors.background },
   scroll: { flex: 1 },
   progressBg: {
-    height: 2, backgroundColor: "rgba(255,255,255,0.05)",
+    height: Hairline.bold, backgroundColor: "rgba(255,255,255,0.05)",
     position: "absolute", top: 0, left: 0, right: 0, zIndex: 100,
   },
-  progressFill: { height: 2 },
+  progressFill: { height: Hairline.bold },
   center: {
-    flex: 1, backgroundColor: "#080508",
-    alignItems: "center", justifyContent: "center", paddingHorizontal: 24,
+    flex: 1, backgroundColor: Colors.background,
+    alignItems: "center", justifyContent: "center", paddingHorizontal: Space.lg,
   },
   errorTitle: {
-    fontFamily: "Newsreader_600SemiBold",
-    fontSize: 22, color: Colors.textPrimary, marginBottom: 20, textAlign: "center",
+    fontFamily: Fonts.serifSemibold,
+    fontSize: TypeSize.subhead, color: Colors.textPrimary, marginBottom: Space.lg, textAlign: "center",
   },
-  btn: { borderWidth: 1, borderColor: Colors.border, paddingHorizontal: 20, paddingVertical: 10 },
-  btnText: { fontFamily: "Inter_400Regular", color: Colors.textPrimary, fontSize: 13, letterSpacing: 1 },
+  btn: { borderWidth: 1, borderColor: Colors.border, paddingHorizontal: Space.lg, paddingVertical: 10 },
+  btnText: { fontFamily: Fonts.sansRegular, color: Colors.textPrimary, fontSize: TypeSize.meta, letterSpacing: Tracking.wide },
   heroWrap: { width: "100%", height: 480, backgroundColor: "#000", overflow: "hidden" },
+  heroParallaxWrap: { width: "100%", height: "115%" },
   heroImg: { width: "100%", height: "100%" },
   backBtn: {
     position: "absolute", left: 14, zIndex: 10,
     width: 44, height: 44, alignItems: "center", justifyContent: "center",
     borderRadius: 22, overflow: "hidden",
   },
-  headerWrap: { paddingHorizontal: 24, paddingTop: 28, paddingBottom: 4 },
-  sectionLabel: {
-    fontFamily: "Inter_700Bold", fontSize: 9,
-    letterSpacing: 3.5, textTransform: "uppercase", marginBottom: 14,
+  headerWrap: { paddingHorizontal: Space.lg, paddingTop: Space.xl, paddingBottom: Space.xs },
+  folioRow: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    marginBottom: Space.base,
   },
   title: {
-    fontFamily: "Newsreader_600SemiBold", fontSize: 34,
-    lineHeight: 40, color: "#f8f4ee", letterSpacing: -0.4, marginBottom: 14,
+    fontFamily: Fonts.serifSemibold, fontSize: TypeSize.display - 2,
+    lineHeight: lh(TypeSize.display - 2, 1.12), color: Colors.textPrimary,
+    letterSpacing: Tracking.tight,
   },
-  subtitle: {
-    fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic",
-    fontSize: 18, lineHeight: 27, color: "rgba(220,215,205,0.58)", marginBottom: 20,
-  },
-  divider: { height: 1, backgroundColor: "rgba(255,255,255,0.07)", marginVertical: 16 },
-  metaRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
-  metaLeft: { flex: 1, gap: 4 },
-  authorName: {
-    fontFamily: "Newsreader_400Regular_Italic", fontStyle: "italic",
-    fontSize: 16, color: "rgba(240,236,230,0.72)", lineHeight: 20,
-  },
-  dateMeta: {
-    fontFamily: "Inter_400Regular", fontSize: 9,
-    color: "rgba(255,255,255,0.22)", letterSpacing: 0.5,
-  },
-  audioPill: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
-    backgroundColor: "transparent",
-  },
-  audioPillText: { fontFamily: "Inter_500Medium", fontSize: 11, letterSpacing: 0.3, color: "#fff" },
-  actionsRow: { flexDirection: "row", gap: 24, paddingVertical: 4 },
+  actionsRow: { flexDirection: "row", gap: Space.lg, paddingVertical: Space.xs },
   actionBtn: { flexDirection: "row", alignItems: "center", gap: 7 },
   actionLabel: {
-    fontFamily: "Inter_400Regular", fontSize: 11,
-    color: "rgba(255,255,255,0.28)", letterSpacing: 0.5,
+    fontFamily: Fonts.sansRegular, fontSize: TypeSize.caption,
+    color: "rgba(255,255,255,0.32)", letterSpacing: 0.5,
   },
-  bodyWrap: { paddingHorizontal: 26, paddingTop: 32, paddingBottom: 60 },
+  bodyWrap: { paddingHorizontal: Space.lg + 2, paddingTop: Space.xl, paddingBottom: 60 },
   noBody: {
-    fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic",
-    fontSize: 18, color: "rgba(255,255,255,0.35)",
+    fontFamily: Fonts.serifLightItalic, fontStyle: "italic",
+    fontSize: TypeSize.lede, color: Colors.textTertiary,
   },
-  endMarker: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 40, marginBottom: 20 },
+  endMarker: { flexDirection: "row", alignItems: "center", gap: Space.md, marginTop: Space.xxl, marginBottom: Space.lg },
   endLine: { flex: 1, height: 1, opacity: 0.35 },
-  endText: { fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 4, opacity: 0.55 },
-  sectionLink: { alignItems: "center", paddingVertical: 20 },
+  endText: { fontFamily: Fonts.sansBold, fontSize: TypeSize.micro, letterSpacing: 4, opacity: 0.55 },
+  sectionLink: { alignItems: "center", paddingVertical: Space.lg },
   sectionLinkText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 9,
-    letterSpacing: 2.5,
+    fontFamily: Fonts.sansRegular,
+    fontSize: 11,
+    letterSpacing: Tracking.wider,
     textTransform: "uppercase",
     opacity: 0.6,
   },
   nextCard: {
-    marginTop: 24,
+    marginTop: Space.lg,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
-    padding: 20,
-    backgroundColor: "#0e0a0c",
+    padding: Space.lg,
+    backgroundColor: Colors.surface,
   },
   nextEye: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 8,
-    letterSpacing: 3,
+    fontFamily: Fonts.sansBold,
+    fontSize: TypeSize.micro,
+    letterSpacing: Tracking.widest,
     color: "rgba(255,255,255,0.25)",
     textTransform: "uppercase",
-    marginBottom: 16,
+    marginBottom: Space.base,
   },
-  nextInner: { flexDirection: "row", gap: 16, alignItems: "flex-start" },
+  nextInner: { flexDirection: "row", gap: Space.base, alignItems: "flex-start" },
   nextImg: { width: 72, height: 96, backgroundColor: Colors.surfaceHigh },
   nextBody: { flex: 1, gap: 4 },
-  nextAccent: { width: 20, height: 2, marginBottom: 4 },
-  nextTag: { fontFamily: "Inter_600SemiBold", fontSize: 8, letterSpacing: 2 },
+  nextAccent: { width: 20, height: Hairline.bold, marginBottom: 4 },
+  nextTag: { fontFamily: Fonts.sansSemibold, fontSize: TypeSize.micro, letterSpacing: Tracking.wider },
   nextTitle: {
-    fontFamily: "Newsreader_600SemiBold",
-    fontSize: 20, lineHeight: 25,
-    color: "#f0ece6",
+    fontFamily: Fonts.serifSemibold,
+    fontSize: TypeSize.subhead - 2, lineHeight: 25,
+    color: Colors.textPrimary,
   },
   nextRead: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 9,
+    fontFamily: Fonts.sansRegular,
+    fontSize: 11,
     color: "rgba(255,255,255,0.28)",
     letterSpacing: 0.5,
     marginTop: 4,
