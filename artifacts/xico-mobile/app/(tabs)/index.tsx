@@ -22,6 +22,8 @@ import { XicoAvatar } from "@/components/XicoAvatar";
 import { XicoLoader } from "@/components/XicoLoader";
 import { StampNotification } from "@/components/StampNotification";
 import { ElDespacho } from "@/components/ElDespacho";
+import { DropCap, RevealOnMount } from "@/components/editorial";
+import { RutaHeroCard } from "@/components/ruta/RutaHeroCard";
 import { Colors } from "@/constants/colors";
 import { getImage } from "@/constants/imageMap";
 import { fetchJson, API_BASE } from "@/constants/api";
@@ -533,7 +535,7 @@ function NotaDelEditor({ nota }: { nota: { lugar: string; texto: string } | null
         <View style={nd.magentaLine} />
         <Text style={nd.eyebrow}>Nota del editor</Text>
       </View>
-      <Text style={nd.texto}>{nota.texto}</Text>
+      <DropCap paragraph={nota.texto} accent="hsl(335, 85%, 45%)" />
       <View style={nd.separator} />
     </View>
   );
@@ -689,11 +691,11 @@ const tc = StyleSheet.create({
   },
   cellCount: { fontFamily: "Inter_400Regular", fontSize: 7, color: "rgba(255,255,255,0.25)" },
   cellIntent: {
-    fontFamily: "Newsreader_300Light_Italic",
-    fontStyle: "italic",
-    fontSize: 13,
-    lineHeight: 18,
-    color: "rgba(255,255,255,0.5)",
+    fontFamily: "Newsreader_400Regular",
+    fontSize: 16,
+    lineHeight: 22,
+    color: "rgba(255,255,255,0.82)",
+    letterSpacing: -0.1,
   },
 });
 
@@ -1576,38 +1578,66 @@ export default function IndexScreen() {
           />
         }
       >
-        <Masthead topPad={topPad} />
+        <RevealOnMount index={0}>
+          <Masthead topPad={topPad} />
+        </RevealOnMount>
 
-        <ElDespacho onOpen={() => earn("despacho")} />
+        <RevealOnMount index={1}>
+          <ElDespacho onOpen={() => earn("despacho")} />
+        </RevealOnMount>
+
+        {/* La Ruta de esta semana · hero card at position 2 per spec.
+            Self-hides when no active ruta — never breaks the Índice flow. */}
+        <RevealOnMount index={2}>
+          <RutaHeroCard />
+        </RevealOnMount>
 
         {hero && (
-          <HeroSection article={hero} savedIds={savedIds} onToggleSave={toggleSave} />
+          <RevealOnMount index={3}>
+            <HeroSection article={hero} savedIds={savedIds} onToggleSave={toggleSave} />
+          </RevealOnMount>
         )}
 
-        <TuXicoWidget
-          companionName={companionName}
-          levelNombre={level.nombre}
-          levelColor={level.color}
-          dailyFrase={dailyFrase}
-          level={level}
-          streak={streak}
-        />
+        <RevealOnMount index={3}>
+          <TuXicoWidget
+            companionName={companionName}
+            levelNombre={level.nombre}
+            levelColor={level.color}
+            dailyFrase={dailyFrase}
+            level={level}
+            streak={streak}
+          />
+        </RevealOnMount>
 
-        <NotaDelEditor nota={notaEditor} />
-        <TablaContenidos />
+        <RevealOnMount index={4}>
+          <NotaDelEditor nota={notaEditor} />
+        </RevealOnMount>
+        <RevealOnMount index={5}>
+          <TablaContenidos />
+        </RevealOnMount>
 
         {mexicoAhoraArticles.length > 0 && (
-          <MexicoAhoraPreview articles={mexicoAhoraArticles} />
+          <RevealOnMount index={6}>
+            <MexicoAhoraPreview articles={mexicoAhoraArticles} />
+          </RevealOnMount>
         )}
 
-        {piezaProfunda && <PiezaProfunda article={piezaProfunda} />}
+        {piezaProfunda && (
+          <RevealOnMount index={7}>
+            <PiezaProfunda article={piezaProfunda} />
+          </RevealOnMount>
+        )}
 
         {interests.length > 0 && personalizados.length > 0 && (
-          <ModuloPersonalizado articles={personalizados} interests={interests} narrationStyle={narrationStyle} contexts={personalizationContexts} />
+          <RevealOnMount index={8}>
+            <ModuloPersonalizado articles={personalizados} interests={interests} narrationStyle={narrationStyle} contexts={personalizationContexts} />
+          </RevealOnMount>
         )}
 
         {(gridPair.length > 0 || listaArticulos.length > 0) && (
-          <EstaSemana gridPair={gridPair} listaArticulos={listaArticulos} />
+          <RevealOnMount index={9}>
+            <EstaSemana gridPair={gridPair} listaArticulos={listaArticulos} />
+          </RevealOnMount>
         )}
       </ScrollView>
 

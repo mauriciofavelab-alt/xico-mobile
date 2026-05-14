@@ -27,6 +27,8 @@ import { Fonts, lh, Space, Tracking, TypeSize } from "@/constants/editorial";
 import { Kicker, RevealOnMount, Rule, SectionOpener } from "@/components/editorial";
 import { Roseton, TierStatusBlock } from "@/components/pasaporte";
 import { useTier } from "@/hooks/useTier";
+import { useCurrentRuta } from "@/hooks/useCurrentRuta";
+import { Rumbos } from "@/constants/rumbos";
 import { getImage } from "@/constants/imageMap";
 import { INTERESTS } from "@/constants/interests";
 import { fetchJson, API_BASE } from "@/constants/api";
@@ -813,13 +815,25 @@ const SPOT_TYPE_LABEL: Record<string, string> = {
   galeria: "Galería", tienda: "Tienda",
 };
 
-function buildLeafletHTML(spots: Spot[]) {
+type RutaStopMarker = {
+  id: string;
+  order: number;
+  name: string;
+  address: string;
+  lat: number | null;
+  lng: number | null;
+  rumboHex: string;
+  rumboName: string;
+};
+
+function buildLeafletHTML(spots: Spot[], rutaStops: RutaStopMarker[] = []) {
   const colorMap: Record<string, string> = {
     restaurante: Colors.magenta, mezcal: Colors.ochre, cultural: Colors.cobalt,
     galeria: Colors.cobalt, tienda: "#1a4a1a",
   };
   const spotsJson = JSON.stringify(spots);
   const colorMapJson = JSON.stringify(colorMap);
+  const rutaJson = JSON.stringify(rutaStops.filter(s => s.lat != null && s.lng != null));
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -836,8 +850,17 @@ function buildLeafletHTML(spots: Spot[]) {
     .leaflet-popup-content b{font-size:12px;color:#fff;display:block;margin-bottom:4px}
     .leaflet-popup-content small{font-size:10px;color:rgba(255,255,255,0.4)}
     .leaflet-popup-content .badge{display:inline-block;font-size:9px;color:#CA8A04;letter-spacing:1px;margin-top:4px}
+    .leaflet-popup-content .rumbo{display:inline-block;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
     .leaflet-control-attribution{display:none!important}
     .leaflet-control-zoom a{background:#141414!important;color:#fff!important;border-color:rgba(255,255,255,0.15)!important}
+    .ruta-marker{
+      width:28px;height:28px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-family:Georgia,serif;font-size:12px;font-weight:500;
+      color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.7);
+      border:1.5px solid rgba(255,255,255,0.85);
+      box-shadow:0 2px 6px rgba(0,0,0,0.55);
+    }
   </style>
 </head>
 <body>
@@ -846,6 +869,7 @@ function buildLeafletHTML(spots: Spot[]) {
   <script>
     var spots=${spotsJson};
     var colorMap=${colorMapJson};
+    var rutaStops=${rutaJson};
     var map=L.map('map',{center:[40.416,-3.703],zoom:13,zoomControl:true,attributionControl:false});
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
     spots.forEach(function(spot){
@@ -862,6 +886,27 @@ function buildLeafletHTML(spots: Spot[]) {
       var badge=spot.copil?'<span class="badge">✦ SELLO COPIL</span>':'';
       m.bindPopup('<b>'+spot.name+'</b><small>'+spot.address+'</small>'+badge);
     });
+    // Ruta stops · numbered markers in rumbo color · drawn ABOVE spots so they
+    // never sit hidden underneath the standard map points.
+    rutaStops.forEach(function(stop){
+      var icon=L.divIcon({
+        className:'',
+        html:'<div class="ruta-marker" style="background:'+stop.rumboHex+'">'+stop.order+'</div>',
+        iconSize:[28,28],
+        iconAnchor:[14,14],
+      });
+      var m=L.marker([stop.lat,stop.lng],{icon:icon,zIndexOffset:1000}).addTo(map);
+      m.bindPopup(
+        '<b>'+stop.name+'</b>'+
+        '<small>'+stop.address+'</small>'+
+        '<span class="rumbo" style="color:'+stop.rumboHex+'">'+stop.rumboName+'</span>'
+      );
+    });
+    // If we have ruta stops, fit the map to include all of them.
+    if(rutaStops.length>=2){
+      var bounds=L.latLngBounds(rutaStops.map(function(s){return [s.lat,s.lng];}));
+      map.fitBounds(bounds,{padding:[40,40]});
+    }
   </script>
 </body>
 </html>`;
@@ -872,9 +917,28 @@ function MapaTab() {
     queryKey: ["spots"],
     queryFn: () => fetchJson<Spot[]>("/api/spots"),
   });
+  const ruta = useCurrentRuta();
   const [filter, setFilter] = useState<SpotFilter>("todos");
   const filtered = filter === "todos" ? spots : spots.filter(s => s.type === filter);
-  const leafletHTML = buildLeafletHTML(filtered);
+
+  // Project the current Ruta stops onto the map as numbered, rumbo-colored
+  // markers per spec §Modified screens · Mapa tab.
+  const rutaMarkers: RutaStopMarker[] = (ruta.data?.stops ?? []).map((s, i) => {
+    const rumboSlug = s.rumbo?.slug;
+    const rumbo = rumboSlug ? Rumbos[rumboSlug] : null;
+    return {
+      id: s.id,
+      order: s.order ?? i + 1,
+      name: s.name,
+      address: s.address,
+      lat: s.lat,
+      lng: s.lng,
+      rumboHex: s.rumbo?.color_hex ?? rumbo?.hex ?? "#9C1A47",
+      rumboName: s.rumbo?.nahuatl_name ?? rumbo?.mexica ?? "",
+    };
+  });
+
+  const leafletHTML = buildLeafletHTML(filtered, rutaMarkers);
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
