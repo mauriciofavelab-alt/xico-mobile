@@ -10,18 +10,31 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { Colors } from "@/constants/colors";
+import { GrainOverlay } from "@/components/pasaporte/GrainOverlay";
 
 /**
- * StopVeil · veiled hero overlay for the Stop screen.
+ * StopVeil · veiled hero region for the Stop screen.
  *
- * State 1 (en camino): veiled — LinearGradient with rumbo accent tint covers
- *   the hero image. Implies "there's something behind this, but you can't
+ * State 1 (en camino): veiled — translucent layer with rumbo accent tint covers
+ *   the hero content. Implies "there's something behind this, but you can't
  *   read it from here yet."
  * State 2 (llegada): veil lifts in 600ms cubic-out (brandbook §7.6 editorial
  *   easing). Reduced motion → instant fade.
  *
- * Wraps the hero image content as children; positions the veil as an
- * absolutely-positioned overlay sibling.
+ * v1.1 (2026-05-14 evening · post ui-ux-pro-max P2 audit): grew from 280pt
+ * to 340pt default, expanded the layer stack to support a textual hero
+ * (display-type stop name + rumbo Kicker) instead of a flat surface. Layer
+ * order back→front:
+ *
+ *   1. Solid surface base                 (Colors.surface)
+ *   2. Rumbo accent wash                  (LinearGradient · top 14% → bottom 4%)
+ *   3. Grain texture                      (<GrainOverlay opacity={0.04} />)
+ *   4. Hero content (children)            (display name, rumbo, etc.)
+ *   5. Veil overlay                       (lifts on `lifted=true`)
+ *   6. Atmosphere wash                    (optional · atardecer warm gold)
+ *
+ * The Stop screen wraps this in an Animated.ScrollView and applies a parallax
+ * translateY to this whole region — see app/ruta/stop/[id].tsx.
  */
 
 type Props = ViewProps & {
@@ -33,7 +46,15 @@ type Props = ViewProps & {
   atmosphereOverlay?: string | null;
 };
 
-export function StopVeil({ accent, lifted, height = 280, atmosphereOverlay, children, style, ...rest }: Props) {
+export function StopVeil({
+  accent,
+  lifted,
+  height = 340,
+  atmosphereOverlay,
+  children,
+  style,
+  ...rest
+}: Props) {
   const opacity = useSharedValue(1);
   const reducedMotion = useReducedMotion();
 
@@ -53,19 +74,34 @@ export function StopVeil({ accent, lifted, height = 280, atmosphereOverlay, chil
   }));
 
   return (
-    <View style={[{ height, position: "relative", overflow: "hidden" }, style]} {...rest}>
+    <View style={[{ height, position: "relative", overflow: "hidden", backgroundColor: Colors.surface }, style]} {...rest}>
+      {/* Layer 2 · rumbo accent wash — sets the place's color identity even
+          before the veil lifts. Top 14% alpha fading to 4% at bottom gives a
+          subtle vertical light source feel without using shadow. */}
+      <LinearGradient
+        colors={[`${accent}24`, `${accent}14`, `${accent}0A`]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Layer 3 · grain texture · brandbook §7.6 tactile print feel */}
+      <GrainOverlay opacity={0.04} />
+
+      {/* Layer 4 · hero content (passed in by Stop screen) */}
       {children}
+
+      {/* Layer 5 · the veil itself · lifts on llegada */}
       <Animated.View style={[StyleSheet.absoluteFill, veilStyle]} pointerEvents="none">
-        {/* Base near-black layer for legibility */}
+        {/* Near-black layer for legibility while the content is hidden */}
         <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.background, opacity: 0.55 }]} />
-        {/* Rumbo accent tint at ≤10% per brandbook §6 — one accent per surface */}
+        {/* Extra accent tint, diagonal direction for movement */}
         <LinearGradient
           colors={[`${accent}1A`, "transparent", `${accent}10`]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
-        {/* Bottom shadow for text legibility */}
+        {/* Bottom shadow gradient to ground the despacho text below */}
         <LinearGradient
           colors={["transparent", "rgba(8,5,8,0.85)"]}
           start={{ x: 0.5, y: 0.55 }}
@@ -73,8 +109,8 @@ export function StopVeil({ accent, lifted, height = 280, atmosphereOverlay, chil
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
-      {/* Modo hora atmosphere overlay · always painted, never animated. Atardecer
-          adds a warm Cihuatlampa-bone wash; madrugada has no overlay. */}
+
+      {/* Layer 6 · Modo hora atmosphere overlay · atardecer warm wash etc. */}
       {atmosphereOverlay ? (
         <View
           style={[StyleSheet.absoluteFill, { backgroundColor: atmosphereOverlay }]}

@@ -25,6 +25,26 @@ export type RumboDef = {
   hex: string;
   light: string;
   dim: string;
+  /**
+   * Glyph id (consumed by `<GlifoMaya id={...} />`) used as the rumbo's
+   * stamp imagery when a sello is earned at a stop in this rumbo.
+   *
+   * Mapped by semantic resonance:
+   *   norte (Mictlampa · memoria/antepasados) → `conocedor` (RAÍZ · axis mundi,
+   *     tree of ancestors)
+   *   sur (Huitzlampa · sol guerrero / fuego celeste) → `momentos` (DESTELLO ·
+   *     lightning, captured celestial energy)
+   *   este (Tlapallan · amanecer / renovación) → `madrugador` (ALBA · sunrise,
+   *     the new day)
+   *   oeste (Cihuatlampa · oficio / cosecha / atardecer) → `agenda` (PRESENCIA ·
+   *     body present, oficio)
+   *   center (Tlalxicco · fuego / tiempo) → `ruta` (PEREGRINO · spiral, the
+   *     sacred journey through time)
+   *
+   * Reuses the existing 8-glyph catalog in `components/GlifoMaya.tsx`; no new
+   * artwork required for v1.
+   */
+  glyphId: "primera-lectura" | "explorador" | "conocedor" | "momentos" | "agenda" | "ruta" | "guardado" | "madrugador";
 };
 
 export const Rumbos: Record<RumboSlug | "center", RumboDef> = {
@@ -35,6 +55,7 @@ export const Rumbos: Record<RumboSlug | "center", RumboDef> = {
     hex: "#0E1018",
     light: "#1A1D2E",
     dim: "#050507",
+    glyphId: "conocedor",
   },
   sur: {
     slug: "sur",
@@ -43,6 +64,7 @@ export const Rumbos: Record<RumboSlug | "center", RumboDef> = {
     hex: "#234698",
     light: "#3A65C0",
     dim: "#0E1A3D",
+    glyphId: "momentos",
   },
   este: {
     slug: "este",
@@ -51,6 +73,7 @@ export const Rumbos: Record<RumboSlug | "center", RumboDef> = {
     hex: "#D9357B",
     light: "#E66BA0",
     dim: "#5A1535",
+    glyphId: "madrugador",
   },
   oeste: {
     slug: "oeste",
@@ -59,6 +82,7 @@ export const Rumbos: Record<RumboSlug | "center", RumboDef> = {
     hex: "#EDE6D8",
     light: "#F5F0E5",
     dim: "#8B847B",
+    glyphId: "agenda",
   },
   center: {
     slug: "center",
@@ -67,6 +91,7 @@ export const Rumbos: Record<RumboSlug | "center", RumboDef> = {
     hex: "#3F5A3A",
     light: "#5A7855",
     dim: "#1A2418",
+    glyphId: "ruta",
   },
 };
 

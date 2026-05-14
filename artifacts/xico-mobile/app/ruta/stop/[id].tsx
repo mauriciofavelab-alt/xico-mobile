@@ -19,12 +19,16 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   Easing,
+  Extrapolation,
   FadeInUp,
+  interpolate,
+  useAnimatedScrollHandler,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withDelay,
   withSequence,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 
@@ -32,6 +36,7 @@ import { Colors } from "@/constants/colors";
 import { Fonts, Hairline, Space, Tracking, TypeSize } from "@/constants/editorial";
 import { Rumbos, type RumboSlug } from "@/constants/rumbos";
 import { ByLine, Kicker, RevealOnMount } from "@/components/editorial";
+import { GlifoMaya } from "@/components/GlifoMaya";
 import { ProgressRing } from "@/components/ruta/ProgressRing";
 import { StopVeil } from "@/components/ruta/StopVeil";
 import { fetchJson, API_BASE } from "@/constants/api";
@@ -180,28 +185,74 @@ export default function StopScreen() {
     );
   }, [visit.visit_token, stopId, selloMut, reducedMotion]);
 
-  // ─── Animations: glyph flash on state=sello_entregado ──────────────────
-  const glyphScale = useSharedValue(0.4);
+  // ─── Sello-earn animation: wax-seal medallion ──────────────────────────
+  // The emotional peak of the app. Spring-physics stamp lands center-screen
+  // with a slight rotation, settles, then fades out as the static sello disc
+  // at top-right takes over the role of "this is earned." Per ui-ux-pro-max
+  // critique (P3 · 2026-05-14 evening): the previous empty-ring glyph was the
+  // weakest visual at the strongest moment; this redesign borrows from the
+  // Mexica codex stamp tradition via the existing <GlifoMaya /> catalog.
+  const glyphScale = useSharedValue(0.35);
+  const glyphRotate = useSharedValue(-8); // degrees
   const glyphOpacity = useSharedValue(0);
 
   useEffect(() => {
     if (state !== "sello_entregado") return;
     if (reducedMotion) {
-      glyphOpacity.value = 1;
-      glyphScale.value = 1;
+      glyphOpacity.value = withTiming(1, { duration: 200 });
+      glyphScale.value = withTiming(1, { duration: 200 });
+      glyphRotate.value = 0;
+      // No bounce, no extended visibility — fade out after 1.2s
+      glyphOpacity.value = withDelay(1200, withTiming(0, { duration: 300 }));
       return;
     }
+    // Stamp lands: opacity in fast, scale springs from 0.35 → 1.0, rotation -8° → 0°
     glyphOpacity.value = withSequence(
-      withTiming(1, { duration: 200, easing: Easing.bezier(0.22, 1, 0.36, 1) }),
-      withDelay(900, withTiming(0, { duration: 300 })),
+      withTiming(1, { duration: 180, easing: Easing.bezier(0.22, 1, 0.36, 1) }),
+      withDelay(1100, withTiming(0, { duration: 360, easing: Easing.bezier(0.5, 0, 0.75, 0) })),
     );
-    glyphScale.value = withTiming(1.05, { duration: 800, easing: Easing.bezier(0.22, 1, 0.36, 1) });
-  }, [state, glyphOpacity, glyphScale, reducedMotion]);
+    glyphScale.value = withSpring(1, { damping: 12, stiffness: 100, mass: 0.8 });
+    glyphRotate.value = withSpring(0, { damping: 14, stiffness: 90, mass: 0.7 });
+  }, [state, glyphOpacity, glyphScale, glyphRotate, reducedMotion]);
 
   const glyphStyle = useAnimatedStyle(() => ({
     opacity: glyphOpacity.value,
-    transform: [{ scale: glyphScale.value }],
+    transform: [
+      { scale: glyphScale.value },
+      { rotate: `${glyphRotate.value}deg` },
+    ],
   }));
+
+  // ─── Scroll-driven motion (iOS-native hero feel) ───────────────────────
+  // Captures scrollY into a sharedValue, then drives three transforms on the
+  // hero: parallax translate, title fade, title shrink. State indicator at
+  // top-right stays absolutely positioned and does NOT participate — the
+  // user keeps a constant signal of state regardless of scroll position.
+  // Per ui-ux-pro-max P2 audit: "play with all sorts of transitions and
+  // designs adapted to what a modern app on iphone needs."
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      scrollY.value = e.contentOffset.y;
+    },
+  });
+
+  // Hero parallax — translates at half scroll speed.
+  const heroParallaxStyle = useAnimatedStyle(() => {
+    if (reducedMotion) return {};
+    return { transform: [{ translateY: scrollY.value * 0.5 }] };
+  });
+
+  // Display title — fades + shrinks as user scrolls into the despacho.
+  const heroTitleStyle = useAnimatedStyle(() => {
+    if (reducedMotion) return {};
+    const opacity = interpolate(scrollY.value, [0, 200], [1, 0.25], Extrapolation.CLAMP);
+    const scale = interpolate(scrollY.value, [0, 200], [1, 0.92], Extrapolation.CLAMP);
+    return {
+      opacity,
+      transform: [{ scale }],
+    };
+  });
 
   // ─── Annotation submission ─────────────────────────────────────────────
   const annotateMut = useMutation({
@@ -267,18 +318,45 @@ export default function StopScreen() {
       style={{ flex: 1, backgroundColor: Colors.background }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView
+      <Animated.ScrollView
         style={s.root}
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
-        {/* Hero · always shown; veil controls visibility. atardecer wash painted on top. */}
-        <StopVeil accent={accent} lifted={veilLifted} height={280} atmosphereOverlay={typo.atmosphereOverlay}>
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.surfaceHigh }]} />
-        </StopVeil>
+        {/* Hero · 340pt region with editorial display chrome. The whole region
+            parallaxes at half scroll speed (iOS-native feel). Inside, the
+            display name fades + shrinks slightly to "rise into the nav" as
+            the user scrolls. State indicator (lock/ring/sello) is pinned
+            absolutely OUTSIDE this region so it survives any scroll position. */}
+        <Animated.View style={heroParallaxStyle}>
+          <StopVeil accent={accent} lifted={veilLifted} height={340} atmosphereOverlay={typo.atmosphereOverlay}>
+            <Animated.View style={[s.heroContent, { paddingTop: insets.top + 56 }, heroTitleStyle]}>
+              <Text style={s.heroFolio}>
+                {String(data.order_num ?? 0).padStart(2, "0")}
+                {totalStops ? ` / ${String(totalStops).padStart(2, "0")}` : ""}
+              </Text>
+              <Text
+                style={s.heroName}
+                numberOfLines={3}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+              >
+                {data.name}
+              </Text>
+              {rumbo ? (
+                <View style={s.heroKicker}>
+                  <Kicker color={accent}>{rumbo.nahuatl_name}</Kicker>
+                </View>
+              ) : null}
+            </Animated.View>
+          </StopVeil>
+        </Animated.View>
 
-        {/* Close button + ring indicator overlay */}
-        <View style={[s.heroOverlay, { paddingTop: insets.top + 12 }]}>
+        {/* Pinned controls · close (top-left) + state indicator (top-right).
+            ABSOLUTE to the screen, NOT to the hero — they survive scroll. */}
+        <View style={[s.heroOverlay, { paddingTop: insets.top + 12 }]} pointerEvents="box-none">
           <Pressable
             onPress={handleClose}
             hitSlop={12}
@@ -313,20 +391,11 @@ export default function StopScreen() {
         </View>
 
         <View style={s.body}>
-          {/* Order + rumbo line · folio shape "01 / 05" */}
-          <View style={s.headerRow}>
-            <Text style={s.orderNum}>
-              {String(data.order_num ?? 0).padStart(2, "0")}
-              {totalStops ? ` / ${String(totalStops).padStart(2, "0")}` : ""}
-            </Text>
-            {rumbo ? <Kicker color={accent}>{rumbo.nahuatl_name}</Kicker> : null}
-          </View>
-
-          <Text style={s.name}>{data.name}</Text>
-          <Text style={s.address}>{data.address}</Text>
-
           {/* Despacho · always rendered. Modo hora: madrugada uses Newsreader 300
-              Light and drops body to secondary contrast; atardecer + dia use default. */}
+              Light and drops body to secondary contrast; atardecer + dia use default.
+              The order/name/rumbo header that used to live here now lives in the
+              hero region above — this body starts directly with the despacho. */}
+          <Text style={s.address}>{data.address}</Text>
           {data.despacho_text ? (
             <View style={s.despachoBlock}>
               <Text style={s.despachoLabel}>El despacho</Text>
@@ -431,18 +500,34 @@ export default function StopScreen() {
           ) : null}
         </View>
 
-        {/* Sello-earn glyph flash overlay · only visible briefly on state=sello_entregado */}
+        {/* Sello-earn wax-seal medallion · springs in center-screen, settles
+            into the static top-right disc as the stamp completes. The glyph
+            inside is the rumbo-specific Mayan glyph from the existing
+            GlifoMaya catalog (mapped via Rumbos[slug].glyphId). */}
         {state === "sello_entregado" || state === "anotacion" ? (
           <Animated.View
             style={[s.glyphOverlay, glyphStyle]}
             pointerEvents="none"
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={rumbo ? `Sello entregado · ${rumbo.nahuatl_name}` : "Sello entregado"}
           >
-            <View style={[s.glyphRing, { borderColor: accent }]}>
-              <View style={[s.glyphDot, { backgroundColor: accent }]} />
+            {/* Wax-seal disc: rumbo accent at full saturation, hairline ring,
+                grain to mimic the texture of wax pressed into paper. */}
+            <View style={[s.waxSeal, { backgroundColor: accent }]}>
+              <View style={[s.waxSealInner, { borderColor: `${accent}88` }]}>
+                <GlifoMaya
+                  id={rumbo && Rumbos[rumbo.slug as RumboSlug]
+                    ? Rumbos[rumbo.slug as RumboSlug].glyphId
+                    : "ruta"}
+                  size={52}
+                  color={Colors.textPrimary}
+                  opacity={0.95}
+                />
+              </View>
             </View>
           </Animated.View>
         ) : null}
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Tier-up overlay · stacks on top once unlocked */}
       {tierUpInfo ? (
@@ -505,12 +590,45 @@ const s = StyleSheet.create({
     color: Colors.textSecondary,
   },
 
+  // Hero content inside the StopVeil · display chrome that replaces the old
+  // gray surface. The whole hero region is 340pt; this content occupies the
+  // top ~70% of that with monumental type. parallaxes via heroParallaxStyle
+  // and individually fades+shrinks via heroTitleStyle when user scrolls.
+  heroContent: {
+    flex: 1,
+    paddingHorizontal: Space.lg,
+    paddingBottom: Space.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Space.sm,
+  },
+  heroFolio: {
+    fontFamily: Fonts.sansSemibold,
+    fontSize: TypeSize.micro + 1,
+    color: Colors.textTertiary,
+    letterSpacing: Tracking.widest,
+    textTransform: "uppercase",
+  },
+  heroName: {
+    fontFamily: Fonts.serifMedium,
+    fontSize: TypeSize.monumental,
+    color: Colors.textPrimary,
+    letterSpacing: Tracking.tight,
+    lineHeight: TypeSize.monumental * 1.05,
+    textAlign: "center",
+  },
+  heroKicker: {
+    marginTop: Space.sm,
+    alignItems: "center",
+  },
+
+  // Pinned controls overlay · absolute to the screen, top of stack.
+  // Stays put while the hero parallaxes underneath.
   heroOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 280,
     paddingHorizontal: Space.md,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -725,24 +843,35 @@ const s = StyleSheet.create({
 
   glyphOverlay: {
     position: "absolute",
-    top: 140,
+    top: 120,
     left: 0,
     right: 0,
     alignItems: "center",
     justifyContent: "center",
   },
-  glyphRing: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 2,
+  waxSeal: {
+    width: 108,
+    height: 108,
+    borderRadius: 54,
     alignItems: "center",
     justifyContent: "center",
+    // Subtle elevation only for this moment — the only place we use shadow
+    // in-flow on warm-dark, sanctioned by brandbook §2 ("Reserve shadows for
+    // floating elements only"). The seal IS floating during the stamp.
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 14,
   },
-  glyphDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+  waxSealInner: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(8,5,8,0.18)",
   },
 
   tierUpRoot: {

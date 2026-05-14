@@ -10,6 +10,7 @@ import { ByLine, Masthead, Rule, Standfirst, RevealOnMount } from "@/components/
 import { StopCard } from "@/components/ruta/StopCard";
 import { useCurrentRuta, type RutaStopLite } from "@/hooks/useCurrentRuta";
 import { useTier } from "@/hooks/useTier";
+import { useSellos, type SelloRecord } from "@/hooks/useSellos";
 import { useTypographyMode } from "@/hooks/useTypographyMode";
 import type { RumboSlug } from "@/constants/rumbos";
 
@@ -47,15 +48,17 @@ export default function RutaIndex() {
 
   const ruta = useCurrentRuta();
   const tier = useTier();
+  const sellos = useSellos();
   const typo = useTypographyMode();
 
-  // Build a set of earned stop_ids so each StopCard knows whether to show sello
-  const earnedStopIds = useMemo<Set<string>>(() => {
-    // sellos list comes from /api/sellos-rumbo, not /api/profile/tier. For v1,
-    // we infer earned-ness from by_rumbo counts ≠ 0 — not stop-precise but
-    // visually adequate until we wire useSellosRumbo. Replace in Week 3 Task 3.
-    return new Set();
-  }, []);
+  // Stop-precise earned set. useSellos hits GET /api/sellos-rumbo which
+  // returns the user's full sello list with ruta_stop_id per row. useSelloMutation
+  // already invalidates the ["sellos-rumbo"] queryKey on earn, so this stays in
+  // sync without manual refetch.
+  const earnedStopIds = useMemo<Set<string>>(
+    () => new Set((sellos.data?.sellos ?? []).map((s: SelloRecord) => s.ruta_stop_id)),
+    [sellos.data?.sellos],
+  );
 
   const totalStops = ruta.data?.stops.length ?? 0;
   const earnedCount = earnedStopIds.size;
