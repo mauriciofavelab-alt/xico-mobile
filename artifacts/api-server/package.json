@@ -8,7 +8,8 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:pure": "node scripts/run-pure-tests.mjs"
+    "test:pure": "node scripts/run-pure-tests.mjs",
+    "smoke": "node scripts/smoke-production.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.101.1",
