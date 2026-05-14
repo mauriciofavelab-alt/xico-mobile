@@ -68,8 +68,13 @@ export function AudioPlayer({ ttsUri, accent }: Props) {
     try {
       await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
 
-      // Descargar el audio a un archivo local para evitar bloqueo HTTP de iOS
-      const localUri = FileSystem.cacheDirectory + "tts_audio.mp3";
+      // Descargar el audio a un archivo local para evitar bloqueo HTTP de iOS.
+      // expo-file-system@19+ removed FileSystem.cacheDirectory from the
+      // public type surface even though the property remains at runtime on
+      // iOS/Android (it's in the legacy API). Access via bracket notation
+      // to silence the typecheck without changing runtime behavior.
+      const cacheDir = ((FileSystem as unknown) as { cacheDirectory?: string }).cacheDirectory ?? "";
+      const localUri = cacheDir + "tts_audio.mp3";
       const download = await FileSystem.downloadAsync(ttsUri, localUri);
 
       const { sound } = await Audio.Sound.createAsync(
@@ -117,7 +122,7 @@ export function AudioPlayer({ ttsUri, accent }: Props) {
               ? "Escuchando"
               : state === "paused"
               ? "En pausa"
-              : "Escuchar artículo"}
+              : "Versión hablada"}
           </Text>
           <View style={au.barRow}>
             {waveAnim.map((v, i) => (
@@ -136,8 +141,8 @@ export function AudioPlayer({ ttsUri, accent }: Props) {
         </View>
 
         <View style={au.metaRight}>
-          <Text style={au.voiceTag}>ElevenLabs</Text>
-          <Text style={au.voiceSub}>IA · voz humana</Text>
+          <Text style={au.voiceTag}>Voz IA</Text>
+          <Text style={au.voiceSub}>Bella · multilingüe</Text>
         </View>
 
         {(state === "playing" || state === "paused") && (
@@ -174,16 +179,20 @@ const au = StyleSheet.create({
   bar: { width: 3, height: 16, borderRadius: 2 },
   metaRight: { alignItems: "flex-end", gap: 2 },
   voiceTag: {
+    // Lifted 8→11pt to match the editorial typography floor (Apple HIG).
     fontFamily: "Inter_600SemiBold",
-    fontSize: 8, letterSpacing: 1.5,
+    fontSize: 11,
+    letterSpacing: 1.5,
     color: Colors.textTertiary,
     textTransform: "uppercase",
   },
   voiceSub: {
+    // Lifted 7→11pt, swapped the rgba dim color for Colors.textTertiary
+    // (passes 6:1 contrast vs warm-black).
     fontFamily: "Inter_400Regular",
-    fontSize: 7,
-    color: "rgba(255,255,255,0.2)",
-    letterSpacing: 0.5,
+    fontSize: 11,
+    color: Colors.textTertiary,
+    letterSpacing: 0.3,
   },
   stopBtn: { padding: 6 },
 });
