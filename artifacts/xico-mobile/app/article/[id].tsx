@@ -517,7 +517,7 @@ const s = StyleSheet.create({
   actionBtn: { flexDirection: "row", alignItems: "center", gap: 7 },
   actionLabel: {
     fontFamily: Fonts.sansRegular, fontSize: TypeSize.caption,
-    color: "rgba(255,255,255,0.32)", letterSpacing: 0.5,
+    color: Colors.textTertiary, letterSpacing: 0.5,
   },
   bodyWrap: { paddingHorizontal: Space.lg + 2, paddingTop: Space.xl, paddingBottom: 60 },
   noBody: {
@@ -546,7 +546,7 @@ const s = StyleSheet.create({
     fontFamily: Fonts.sansBold,
     fontSize: TypeSize.micro,
     letterSpacing: Tracking.widest,
-    color: "rgba(255,255,255,0.25)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
     marginBottom: Space.base,
   },
@@ -563,7 +563,7 @@ const s = StyleSheet.create({
   nextRead: {
     fontFamily: Fonts.sansRegular,
     fontSize: 11,
-    color: "rgba(255,255,255,0.28)",
+    color: Colors.textTertiary,
     letterSpacing: 0.5,
     marginTop: 4,
   },

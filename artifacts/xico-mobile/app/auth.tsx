@@ -147,11 +147,11 @@ const s = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     fontSize: 13,
     lineHeight: 20,
-    color: "rgba(255,255,255,0.38)",
+    color: Colors.textSecondary,
     letterSpacing: 0.1,
     textAlign: "center",
   },
-  emailLabel: { color: "rgba(255,255,255,0.65)", fontFamily: "Inter_500Medium" },
+  emailLabel: { color: Colors.textPrimary, fontFamily: "Inter_500Medium" },
   input: {
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.12)",
@@ -187,7 +187,7 @@ const s = StyleSheet.create({
   backText: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
-    color: "rgba(255,255,255,0.28)",
+    color: Colors.textTertiary,
     letterSpacing: 0.5,
   },
 });

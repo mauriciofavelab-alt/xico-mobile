@@ -263,7 +263,7 @@ const cr = StyleSheet.create({
   wrap: { marginBottom: 4 },
   labelRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
   line: { flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.08)" },
-  labelText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: "rgba(255,255,255,0.3)" },
+  labelText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: Colors.textTertiary },
   cards: {
     marginHorizontal: 16,
     backgroundColor: "#0e0a0c",
@@ -344,7 +344,7 @@ const pp = StyleSheet.create({
   passportRight: { alignItems: "center", justifyContent: "flex-start" },
   passportEye: {
     fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3,
-    color: "rgba(255,255,255,0.3)", textTransform: "uppercase", marginBottom: 10,
+    color: Colors.textTertiary, textTransform: "uppercase", marginBottom: 10,
   },
   levelName: {
     fontFamily: "Newsreader_600SemiBold", fontSize: 34,
@@ -369,13 +369,13 @@ const pp = StyleSheet.create({
   },
   ageLabel: {
     fontFamily: "Inter_400Regular", fontSize: 11,
-    color: "rgba(255,255,255,0.3)", letterSpacing: 1,
+    color: Colors.textTertiary, letterSpacing: 1,
     textTransform: "uppercase", marginTop: 2,
   },
   progressWrap: {},
   progressBg: { height: 2, backgroundColor: "rgba(255,255,255,0.08)", overflow: "hidden", marginBottom: 6 },
   progressFill: { height: 2 },
-  progressLabel: { fontFamily: "Inter_400Regular", fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 0.5 },
+  progressLabel: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary, letterSpacing: 0.5 },
   ptsStamp: {
     width: 78, height: 78, borderRadius: 39,
     borderWidth: 2, alignItems: "center", justifyContent: "center",
@@ -383,7 +383,7 @@ const pp = StyleSheet.create({
   },
   ptsStampLabel: {
     fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2,
-    color: "rgba(255,255,255,0.3)", textTransform: "uppercase",
+    color: Colors.textTertiary, textTransform: "uppercase",
   },
   ptsStampNum: {
     fontFamily: "Newsreader_600SemiBold",
@@ -394,7 +394,7 @@ const pp = StyleSheet.create({
     paddingHorizontal: 20, paddingVertical: 16, gap: 12,
   },
   sellosLine: { flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.08)" },
-  sellosEye: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: "rgba(255,255,255,0.3)" },
+  sellosEye: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: Colors.textTertiary },
   stampsScroll: { paddingHorizontal: 16, gap: 10, paddingBottom: 24, paddingTop: 4 },
 });
 
@@ -595,7 +595,7 @@ const ru = StyleSheet.create({
   labelText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 3, color: Colors.textTertiary },
   card: { marginHorizontal: 16, backgroundColor: "#0e0a0c", borderWidth: 1, borderColor: "rgba(255,255,255,0.06)", marginBottom: 8, overflow: "hidden" },
   top: { paddingHorizontal: 20, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" },
-  date: { fontFamily: "Inter_400Regular", fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 2, marginBottom: 4 },
+  date: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary, letterSpacing: 2, marginBottom: 4 },
   title: { fontFamily: "Newsreader_600SemiBold", fontSize: 24, lineHeight: 28, color: "#fff", marginBottom: 4 },
   sub: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 14, lineHeight: 20, color: "rgba(255,255,255,0.4)" },
   timeline: { paddingTop: 20, paddingLeft: 16, paddingRight: 16 },
@@ -610,10 +610,10 @@ const ru = StyleSheet.create({
   stopBody: { gap: 2 },
   stopCat: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 2, marginBottom: 2 },
   stopTitle: { fontFamily: "Inter_600SemiBold", fontSize: 15, color: "#fff", lineHeight: 19, marginBottom: 2 },
-  stopAddr: { fontFamily: "Inter_400Regular", fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 0.3, marginBottom: 4 },
+  stopAddr: { fontFamily: "Inter_400Regular", fontSize: 11, color: Colors.textTertiary, letterSpacing: 0.3, marginBottom: 4 },
   stopDesc: { fontFamily: "Newsreader_300Light_Italic", fontStyle: "italic", fontSize: 13, lineHeight: 19, color: "rgba(255,255,255,0.5)" },
   expandBtn: { alignItems: "center", padding: 14, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" },
-  expandText: { fontFamily: "Inter_400Regular", fontSize: 11, letterSpacing: 2, color: "rgba(255,255,255,0.35)", textTransform: "uppercase" },
+  expandText: { fontFamily: "Inter_400Regular", fontSize: 11, letterSpacing: 2, color: Colors.textTertiary, textTransform: "uppercase" },
 });
 
 // ─── RECOMENDACIONES ──────────────────────────────────────────────────────────
@@ -1485,7 +1485,7 @@ const s = StyleSheet.create({
   headerEye: {
     fontFamily: "Inter_700Bold",
     fontSize: 11, letterSpacing: 3,
-    color: "rgba(255,255,255,0.35)",
+    color: Colors.textTertiary,
     textTransform: "uppercase",
   },
   settingsBtn: { padding: 6 },
@@ -1495,7 +1495,7 @@ const s = StyleSheet.create({
   nameRight: { paddingTop: 20, alignItems: "center" },
   accountLabel: {
     fontFamily: "Inter_400Regular",
-    fontSize: 11, color: "rgba(255,255,255,0.3)",
+    fontSize: 11, color: Colors.textTertiary,
     letterSpacing: 2, textTransform: "uppercase",
     marginBottom: 6,
   },
@@ -1517,7 +1517,7 @@ const s = StyleSheet.create({
   },
   circleLabel: {
     fontFamily: "Inter_400Regular", fontSize: 11, letterSpacing: 2,
-    color: "rgba(255,255,255,0.3)", textTransform: "uppercase", marginBottom: 2,
+    color: Colors.textTertiary, textTransform: "uppercase", marginBottom: 2,
   },
   circleValue: {
     fontFamily: "Newsreader_500Medium", fontSize: 14, lineHeight: 16, color: Colors.textPrimary,
@@ -1529,7 +1529,7 @@ const s = StyleSheet.create({
   },
   levelBadgeXico: {
     fontFamily: "Inter_400Regular", fontSize: 11, letterSpacing: 2,
-    color: "rgba(255,255,255,0.3)", textTransform: "uppercase",
+    color: Colors.textTertiary, textTransform: "uppercase",
   },
   levelBadgeDot: { width: 6, height: 6, borderRadius: 3 },
   levelBadgeName: { fontFamily: "Inter_700Bold", fontSize: 10, letterSpacing: 1.5, textTransform: "uppercase" },
@@ -1553,7 +1553,7 @@ const s = StyleSheet.create({
   },
   tabBtn: { flex: 1, paddingVertical: 14, paddingHorizontal: 2, alignItems: "center", position: "relative" },
   tabBtnActive: {},
-  tabText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 1.8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase" },
+  tabText: { fontFamily: "Inter_700Bold", fontSize: 11, letterSpacing: 1.8, color: Colors.textTertiary, textTransform: "uppercase" },
   tabTextActive: { color: Colors.magenta },
   tabIndicator: { position: "absolute", bottom: 0, left: 0, right: 0, height: 2, backgroundColor: "transparent" },
   tabIndicatorActive: { backgroundColor: Colors.magenta },

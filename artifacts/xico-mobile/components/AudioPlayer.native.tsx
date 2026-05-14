@@ -3,6 +3,7 @@ import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import { Colors } from "@/constants/colors";
 
 type AudioState = "idle" | "loading" | "playing" | "paused";
@@ -15,6 +16,11 @@ type Props = {
 export function AudioPlayer({ ttsUri, accent }: Props) {
   const [state, setState] = useState<AudioState>("idle");
   const soundRef = useRef<Audio.Sound | null>(null);
+  // ui-ux-pro-max CRITICAL · the wave bars loop infinitely while audio
+  // plays. Vestibular-sensitive users need a static fallback. When set,
+  // the bars hold at a calm 0.5 baseline (no loop), preserving the visual
+  // affordance without the motion trigger.
+  const reducedMotion = useReducedMotion();
   const waveAnim = useRef([
     new Animated.Value(0.4),
     new Animated.Value(0.4),
@@ -30,7 +36,7 @@ export function AudioPlayer({ ttsUri, accent }: Props) {
 
   useEffect(() => {
     let anim: Animated.CompositeAnimation | null = null;
-    if (state === "playing") {
+    if (state === "playing" && !reducedMotion) {
       anim = Animated.loop(
         Animated.stagger(90, waveAnim.map(v =>
           Animated.sequence([
@@ -40,11 +46,14 @@ export function AudioPlayer({ ttsUri, accent }: Props) {
         ))
       );
       anim.start();
+    } else if (state === "playing" && reducedMotion) {
+      // Static "in-use" indication for reduced-motion: bars sit at half-height
+      waveAnim.forEach(v => v.setValue(0.5));
     } else {
       waveAnim.forEach(v => v.setValue(0.4));
     }
     return () => anim?.stop();
-  }, [state]);
+  }, [state, reducedMotion]);
 
   const stop = async () => {
     await soundRef.current?.stopAsync();
@@ -101,6 +110,15 @@ export function AudioPlayer({ ttsUri, accent }: Props) {
         <Pressable
           onPress={play}
           style={({ pressed }) => [au.playBtn, { backgroundColor: accent, opacity: pressed ? 0.85 : 1 }]}
+          accessibilityRole="button"
+          accessibilityLabel={
+            state === "loading" ? "Generando narración" :
+            state === "playing" ? "Pausar la narración" :
+            state === "paused"  ? "Reanudar la narración" :
+                                  "Escuchar la versión hablada"
+          }
+          accessibilityState={{ busy: state === "loading" }}
+          hitSlop={6}
         >
           {state === "loading" ? (
             <ActivityIndicator size="small" color="#fff" />
@@ -146,7 +164,13 @@ export function AudioPlayer({ ttsUri, accent }: Props) {
         </View>
 
         {(state === "playing" || state === "paused") && (
-          <Pressable onPress={stop} style={au.stopBtn}>
+          <Pressable
+            onPress={stop}
+            style={au.stopBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Detener la narración"
+            hitSlop={10}
+          >
             <Feather name="square" size={12} color={Colors.textTertiary} />
           </Pressable>
         )}
@@ -167,9 +191,10 @@ const au = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.02)",
   },
   playBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    // Lifted from 40×40 to 44×44 to meet the Apple HIG minimum touch target.
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
   },
