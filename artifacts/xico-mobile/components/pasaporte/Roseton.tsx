@@ -21,19 +21,32 @@ import { GrainOverlay } from "./GrainOverlay";
  * Design intelligence: vault/projects/xico/ui-recommendations-ruta-v1.md
  * Brandbook reference: vault/projects/xico/brandbook.md §5 (rumbo colors)
  *
- * Four Q-curve almond petals arranged at N/E/S/O (per RUMBO_ORDER).
- * - Each petal = closed Q-curve almond shape from center → tip → back to center.
- * - Each sello = 1 short radial tick line within its petal at increasing radii
- *   (max 13 ticks per petal — the cap aligns with Cronista (≥36 total, all 4
- *   rumbos, ≥5 each), allowing room above the threshold.
- * - Center disc shows tier name (Newsreader 500Medium) + total count (Inter).
- * - Empty petals render as hairline ghost outlines, never hidden.
+ * Two modes:
+ *
+ *   mode='lifetime' (legacy default) · aggregates ALL sellos a user has ever
+ *     earned. Ticks accumulate up to MAX_TICKS_PER_PETAL=13 per rumbo. Center
+ *     disc shows current tier (Iniciado → Cronista). NOTE: this mode has the
+ *     empty-state psychology issue flagged in the 2026-05-14 design-critique
+ *     audit — at 0 sellos the rosetón signals "1/52 done" which the manifesto
+ *     forbids. Kept for backward compat; prefer mode='week' for new screens.
+ *
+ *   mode='week' (PREFERRED · added 2026-05-14 post-critique reframe) · shows
+ *     ONLY this week's Ruta. Petals reflect rumbos PRESENT in this Ruta;
+ *     rumbos not in this Ruta render as extra-dim "absent" outlines. Ticks
+ *     scale to this Ruta's stop count per rumbo (e.g. 2 ticks max if Norte
+ *     has 2 stops). When earnedStops === totalStops, center disc gets a
+ *     subtle Tlalxicco-green ring to mark "Ruta completa" for the week.
+ *     Empty state never signals lifetime incompleteness — it always means
+ *     "walk this week's route and the rosetón fills." Per-week archive
+ *     (Tu Códice) is v2.
+ *
+ * Common to both modes:
+ * - Four Q-curve almond petals arranged at N/E/S/O (per RUMBO_ORDER).
+ * - Each sello = 1 short radial tick line within its petal at increasing radii.
  * - Grain overlay at 3% opacity for tactile print texture.
  *
  * Animation (all worklets on UI thread):
  * - Mount: rosetón scales 0.85→1.0 (600ms cubic-out)
- * - Tick draw: staggered 25ms per tick
- * - Petal pulse on new sello: scale 1.0→1.04→1.0 (200ms)
  * - All animations check useReducedMotion(); when set, single-fade fallback.
  */
 
@@ -50,7 +63,8 @@ type Sello = { id: string; ruta_stop_id: string; rumbo_id: string; earned_at: st
 
 type RumboMeta = { id: string; slug: string };
 
-type Props = {
+type LifetimeProps = {
+  mode?: "lifetime";
   size?: number;
   tier?: TierKey;
   totalSellos?: number;
@@ -62,18 +76,29 @@ type Props = {
   onCenterPress?: () => void;
 };
 
-export function Roseton({
-  size: sizeProp,
-  tier = "iniciado",
-  totalSellos = 0,
-  byRumbo,
-  rumboMeta = [],
-  sellos = [],
-  onPetalPress,
-  onCenterPress,
-}: Props) {
+type WeekProps = {
+  mode: "week";
+  size?: number;
+  // Stops in this Ruta tagged to each rumbo (e.g. inaugural: 2/1/1/1)
+  rutaStopsByRumbo: Record<RumboSlug, number>;
+  // Earned this week per rumbo (e.g. mid-walk: 1/0/0/0)
+  earnedByRumbo: Record<RumboSlug, number>;
+  totalStops: number;
+  earnedStops: number;
+  isComplete: boolean;
+  weekLabel?: string | null; // e.g. "Semana 19"
+  // Lifetime tier shown as a small secondary label in the center disc, since
+  // the week-mode center can't sensibly display "Iniciado · 0" anymore.
+  tier?: TierKey;
+  onPetalPress?: (slug: RumboSlug) => void;
+  onCenterPress?: () => void;
+};
+
+type Props = LifetimeProps | WeekProps;
+
+export function Roseton(props: Props) {
   const win = useWindowDimensions();
-  const size = sizeProp ?? Math.min(win.width - 48, 320);
+  const size = props.size ?? Math.min(win.width - 48, 320);
   const cx = size / 2;
   const cy = size / 2;
   const petalLength = size * 0.42;
@@ -83,18 +108,39 @@ export function Roseton({
   const tickEnd = petalLength - 6;
   const tickLen = 6;
 
-  // Derive byRumbo from sellos if not explicitly provided
+  const isWeek = props.mode === "week";
+
+  // Earned count per rumbo + cap (max ticks visible) per rumbo + presence
+  // (whether this rumbo participates in the current view at all).
+  // week mode · cap = this Ruta's stop count in that rumbo; present iff > 0
+  // lifetime mode · cap = MAX_TICKS_PER_PETAL (13); present = always true
   const distribution = useMemo<Record<RumboSlug, number>>(() => {
-    if (byRumbo) return byRumbo;
+    if (isWeek) return (props as WeekProps).earnedByRumbo;
+    const lp = props as LifetimeProps;
+    if (lp.byRumbo) return lp.byRumbo;
     const result: Record<RumboSlug, number> = { norte: 0, este: 0, sur: 0, oeste: 0 };
-    if (rumboMeta.length === 0) return result;
-    const slugById = Object.fromEntries(rumboMeta.map((r) => [r.id, r.slug]));
-    for (const s of sellos) {
+    if ((lp.rumboMeta ?? []).length === 0) return result;
+    const slugById = Object.fromEntries((lp.rumboMeta ?? []).map((r) => [r.id, r.slug]));
+    for (const s of lp.sellos ?? []) {
       const slug = slugById[s.rumbo_id] as RumboSlug | undefined;
       if (slug && slug in result) result[slug]++;
     }
     return result;
-  }, [byRumbo, rumboMeta, sellos]);
+  }, [props, isWeek]);
+
+  const caps: Record<RumboSlug, number> = useMemo(() => {
+    if (isWeek) return (props as WeekProps).rutaStopsByRumbo;
+    return { norte: MAX_TICKS_PER_PETAL, este: MAX_TICKS_PER_PETAL, sur: MAX_TICKS_PER_PETAL, oeste: MAX_TICKS_PER_PETAL };
+  }, [props, isWeek]);
+
+  // Petal opacity scales with earned-ratio in week mode for a sense of fill.
+  const fillRatio = (slug: RumboSlug): number => {
+    const cap = caps[slug] ?? 0;
+    if (cap === 0) return 0;
+    return Math.min(1, (distribution[slug] ?? 0) / cap);
+  };
+
+  const isPresent = (slug: RumboSlug): boolean => (caps[slug] ?? 0) > 0;
 
   // === Mount animation ===
   const mount = useSharedValue(0);
@@ -117,7 +163,9 @@ export function Roseton({
     <View style={[styles.root, { width: size, height: size }]}>
       <Animated.View style={[StyleSheet.absoluteFill, containerStyle]}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {/* Petals · drawn first so ticks render above */}
+          {/* Petals · drawn first so ticks render above. Three visual states:
+              absent (not in this view) · ghost (in view, not yet earned) ·
+              filled (earned, opacity scales with earned-ratio in week mode). */}
           {RUMBO_ORDER.map((slug) => (
             <Petal
               key={slug}
@@ -128,17 +176,25 @@ export function Roseton({
               width={petalWidth}
               rotation={PETAL_ROTATIONS[slug]}
               hasFill={distribution[slug] > 0}
+              fillRatio={fillRatio(slug)}
+              present={isPresent(slug)}
             />
           ))}
 
-          {/* Per-rumbo ticks · 1 per sello, increasing radii */}
+          {/* Per-rumbo ticks · 1 per earned sello, evenly distributed across
+              the petal length using the per-mode cap (week: ruta stop count,
+              lifetime: MAX_TICKS_PER_PETAL=13). */}
           {RUMBO_ORDER.map((slug) => {
-            const count = Math.min(distribution[slug] ?? 0, MAX_TICKS_PER_PETAL);
-            if (count === 0) return null;
+            const cap = caps[slug] ?? 0;
+            const count = Math.min(distribution[slug] ?? 0, cap);
+            if (count === 0 || cap === 0) return null;
             return (
               <G key={`ticks-${slug}`}>
                 {Array.from({ length: count }).map((_, i) => {
-                  const t = i / (MAX_TICKS_PER_PETAL - 1);
+                  // Distribute ticks evenly across the petal interior. When
+                  // cap=1 (single-stop rumbo this week), tick sits at petal
+                  // midpoint. When cap>1, ticks space evenly along the axis.
+                  const t = cap <= 1 ? 0.5 : i / (cap - 1);
                   const radius = tickStart + t * (tickEnd - tickStart - tickLen);
                   const angle = (PETAL_ROTATIONS[slug] - 90) * (Math.PI / 180);
                   const x1 = cx + Math.cos(angle) * radius;
@@ -163,24 +219,38 @@ export function Roseton({
             );
           })}
 
-          {/* Center disc */}
+          {/* Center disc · in week mode, the Tlalxicco-green ring appears
+              when the week's Ruta is COMPLETE (not just on Cronista). This
+              becomes a per-week ritual marker: "ruta completa · Semana 19". */}
           <Circle cx={cx} cy={cy} r={centerR} fill={Colors.background} />
           <Circle
             cx={cx}
             cy={cy}
             r={centerR}
             fill="transparent"
-            stroke={tier === "cronista" ? Rumbos.center.hex : Colors.textQuaternary}
-            strokeWidth={tier === "cronista" ? 1.5 : 1}
+            stroke={
+              isWeek
+                ? ((props as WeekProps).isComplete ? Rumbos.center.hex : Colors.textQuaternary)
+                : (((props as LifetimeProps).tier ?? "iniciado") === "cronista" ? Rumbos.center.hex : Colors.textQuaternary)
+            }
+            strokeWidth={
+              isWeek
+                ? ((props as WeekProps).isComplete ? 1.8 : 1)
+                : (((props as LifetimeProps).tier ?? "iniciado") === "cronista" ? 1.5 : 1)
+            }
           />
         </Svg>
 
         {/* Grain overlay · brandbook §7.6 */}
         <GrainOverlay opacity={0.03} />
 
-        {/* Center text — sits above SVG via absolute positioning */}
+        {/* Center text — sits above SVG via absolute positioning.
+            week mode: shows the week label + "X / Y" walked. Complete state
+            replaces the count line with the lifetime tier (so the user still
+            knows their long-term level, just not as the primary message).
+            lifetime mode: traditional tier + total sellos display. */}
         <Pressable
-          onPress={onCenterPress}
+          onPress={props.onCenterPress}
           hitSlop={12}
           style={[
             styles.center,
@@ -191,23 +261,57 @@ export function Roseton({
               height: centerR * 2,
             },
           ]}
+          accessibilityLabel={
+            isWeek
+              ? `${(props as WeekProps).weekLabel ?? "Esta semana"} · ${(props as WeekProps).earnedStops} de ${(props as WeekProps).totalStops} sellos`
+              : `${TIER_LABELS[((props as LifetimeProps).tier ?? "iniciado")]} · ${(props as LifetimeProps).totalSellos ?? 0} sellos`
+          }
+          accessibilityRole="button"
         >
-          <Text style={styles.tierLabel}>{TIER_LABELS[tier]}</Text>
-          <Text style={styles.tierCount}>{totalSellos}</Text>
+          {isWeek ? (
+            (props as WeekProps).isComplete ? (
+              <>
+                <Text style={styles.tierLabel}>Ruta completa</Text>
+                <Text style={styles.tierCount}>
+                  {(props as WeekProps).weekLabel ?? ""}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.tierLabel} numberOfLines={1} adjustsFontSizeToFit>
+                  {(props as WeekProps).weekLabel ?? "Esta semana"}
+                </Text>
+                <Text style={styles.tierCount}>
+                  {(props as WeekProps).earnedStops} / {(props as WeekProps).totalStops}
+                </Text>
+              </>
+            )
+          ) : (
+            <>
+              <Text style={styles.tierLabel}>{TIER_LABELS[((props as LifetimeProps).tier ?? "iniciado")]}</Text>
+              <Text style={styles.tierCount}>{(props as LifetimeProps).totalSellos ?? 0}</Text>
+            </>
+          )}
         </Pressable>
 
-        {/* Petal hit areas for tap-to-expand · absolute-positioned over each petal */}
-        {RUMBO_ORDER.map((slug) => {
+        {/* Petal hit areas · only render for petals that participate in the
+            current view (absent rumbos in week mode get no tap target). */}
+        {RUMBO_ORDER.filter((slug) => isPresent(slug)).map((slug) => {
           const angle = (PETAL_ROTATIONS[slug] - 90) * (Math.PI / 180);
           // Hit area centered on petal midpoint
           const midR = (centerR + petalLength) / 2;
           const hitX = cx + Math.cos(angle) * midR;
           const hitY = cy + Math.sin(angle) * midR;
           const hitSize = Math.max(petalWidth * 1.4, 44);
+          const earned = distribution[slug] ?? 0;
+          const cap = caps[slug] ?? 0;
+          const label = isWeek
+            ? `Pétalo ${slug} · ${Rumbos[slug].mexica} · ${earned} de ${cap} sellos esta semana`
+            : `Pétalo ${slug} · ${Rumbos[slug].mexica} · ${earned} sello${earned === 1 ? "" : "s"}`;
           return (
             <Pressable
               key={`hit-${slug}`}
-              onPress={() => onPetalPress?.(slug)}
+              onPress={() => props.onPetalPress?.(slug)}
               hitSlop={8}
               style={[
                 styles.petalHit,
@@ -218,7 +322,7 @@ export function Roseton({
                   height: hitSize,
                 },
               ]}
-              accessibilityLabel={`Pétalo ${slug} · ${Rumbos[slug].mexica} · ${distribution[slug] ?? 0} sello${(distribution[slug] ?? 0) === 1 ? "" : "s"}`}
+              accessibilityLabel={label}
               accessibilityRole="button"
             />
           );
@@ -241,6 +345,8 @@ function Petal({
   width,
   rotation,
   hasFill,
+  fillRatio = 0,
+  present = true,
 }: {
   slug: RumboSlug;
   cx: number;
@@ -249,6 +355,14 @@ function Petal({
   width: number;
   rotation: number;
   hasFill: boolean;
+  /** Earned/cap ratio (0..1). Scales fill opacity in week mode for a sense
+   *  of filling. Defaults to 0 in lifetime mode where the binary
+   *  hasFill→0.86 opacity remains the legacy behavior. */
+  fillRatio?: number;
+  /** Whether this rumbo participates in the current view. In week mode, a
+   *  rumbo with 0 stops in this Ruta gets a much dimmer ghost outline.
+   *  Default true (lifetime mode — all 4 cardinals always present). */
+  present?: boolean;
 }) {
   // Local coords: petal extends from (0,0) center up to (0,-length) tip
   // Control points at (±width/2, -length/2) shape the almond's belly.
@@ -261,16 +375,25 @@ function Petal({
 
   const color = Rumbos[slug].hex;
 
+  // Three visual states:
+  //   1. absent  (present=false · this rumbo isn't part of the current view) →
+  //      extra-dim outline 0.18 alpha so the petal silhouette is just barely
+  //      visible. Distinguishes "not earnable" from "earnable but empty."
+  //   2. ghost   (present=true, hasFill=false) → hairline outline 0.4 alpha
+  //      using the rumbo's light variant. The shape the user can fill.
+  //   3. filled  (present=true, hasFill=true) → solid color at opacity scaled
+  //      by fillRatio (0.55 base + 0.31 × ratio) so a 1/2-earned petal feels
+  //      different from a 2/2-earned petal.
+  const filledOpacity = 0.55 + 0.31 * Math.max(0, Math.min(1, fillRatio));
   return (
     <G transform={`translate(${cx}, ${cy}) rotate(${rotation})`}>
-      {/* Ghost outline always rendered for shape recognition even when empty */}
       <Path
         d={d}
         fill={hasFill ? color : "transparent"}
-        opacity={hasFill ? 0.86 : 0}
+        opacity={hasFill ? filledOpacity : 0}
         stroke={hasFill ? color : Rumbos[slug].light}
         strokeWidth={hasFill ? 0 : Hairline.thin}
-        strokeOpacity={hasFill ? 0 : 0.4}
+        strokeOpacity={hasFill ? 0 : (present ? 0.4 : 0.18)}
       />
     </G>
   );

@@ -28,6 +28,7 @@ import { Kicker, RevealOnMount, Rule, SectionOpener } from "@/components/editori
 import { Roseton, TierStatusBlock } from "@/components/pasaporte";
 import { useTier } from "@/hooks/useTier";
 import { useCurrentRuta } from "@/hooks/useCurrentRuta";
+import { useCurrentRutaProgress } from "@/hooks/useCurrentRutaProgress";
 import { Rumbos } from "@/constants/rumbos";
 import { getImage } from "@/constants/imageMap";
 import { INTERESTS } from "@/constants/interests";
@@ -1232,6 +1233,7 @@ export default function MiXicoScreen() {
   const { stamps, newStamp, earn, dismissStamp } = usePassport();
   const { streak } = useStreak();
   const { data: tier } = useTier();
+  const rutaProgress = useCurrentRutaProgress();
 
   useFocusEffect(useCallback(() => {
     AsyncStorage.getItem("xico_interests").then(val => {
@@ -1353,32 +1355,63 @@ export default function MiXicoScreen() {
               <RecomendacionesSection interests={interests} />
             </RevealOnMount>
 
-            {/* 2 · Rosetón centerpiece — Mexica cosmology, no points, ritual not engagement.
-                v1: read-only. Tap-to-expand petals + tier detail screen ship in v2 so we
-                don't surface a false affordance with placeholder handlers. */}
+            {/* 2 · Rosetón centerpiece — Mexica cosmology in WEEK mode.
+                Per the 2026-05-14 design-critique reframe (Option A): the
+                rosetón represents THIS WEEK'S RUTA, not lifetime accumulation.
+                Empty before the walk, complete after the walk, never signals
+                lifetime incompleteness. Lifetime tier lives separately in the
+                TierStatusBlock below. v1 read-only; petal sheet + tier detail
+                ship in v2 as Tu Códice. */}
             <RevealOnMount index={1}>
               <View style={{ alignItems: "center", paddingVertical: Space.xl }}>
                 <Roseton
+                  mode="week"
+                  rutaStopsByRumbo={rutaProgress.rutaStopsByRumbo}
+                  earnedByRumbo={rutaProgress.earnedByRumbo}
+                  totalStops={rutaProgress.totalStops}
+                  earnedStops={rutaProgress.earnedStops}
+                  isComplete={rutaProgress.isComplete}
+                  weekLabel={rutaProgress.weekLabel}
                   tier={tier?.tier ?? "iniciado"}
-                  totalSellos={tier?.total ?? 0}
-                  byRumbo={tier?.by_rumbo}
                 />
-                {(tier?.total ?? 0) === 0 ? (
-                  <Text
-                    style={{
-                      fontFamily: Fonts.serifItalic,
-                      fontStyle: "italic",
-                      fontSize: TypeSize.body,
-                      color: Colors.textSecondary,
-                      textAlign: "center",
-                      paddingHorizontal: Space.lg,
-                      paddingTop: Space.lg,
-                      lineHeight: TypeSize.body * 1.55,
-                    }}
-                  >
-                    Tu rosetón se llenará al caminar tu primera Ruta.
-                  </Text>
-                ) : null}
+                {(() => {
+                  // Three states drive three different atmospheric lines.
+                  // No streak, no "X / Y" celebration — the prose carries the
+                  // emotional weight that the visual already shows.
+                  if (rutaProgress.totalStops === 0) {
+                    return (
+                      <Text style={s.rosetonBlurb}>
+                        Aún no hay Ruta esta semana. La próxima edición se publica el domingo a las 9.
+                      </Text>
+                    );
+                  }
+                  if (rutaProgress.isComplete) {
+                    return (
+                      <Text style={s.rosetonBlurb}>
+                        Ruta completa. {rutaProgress.editorName ?? "El equipo"} ya prepara la siguiente.
+                      </Text>
+                    );
+                  }
+                  if (rutaProgress.earnedStops === 0) {
+                    const ed = rutaProgress.editorName ?? "el equipo";
+                    return (
+                      <Text style={s.rosetonBlurb}>
+                        Tu rosetón se llenará al caminar la Ruta de {ed} esta semana.
+                      </Text>
+                    );
+                  }
+                  // Mid-walk — earned > 0 but < totalStops
+                  const remaining = rutaProgress.totalStops - rutaProgress.earnedStops;
+                  return (
+                    <Text style={s.rosetonBlurb}>
+                      Llevas {rutaProgress.earnedStops} de {rutaProgress.totalStops}.
+                      {" "}
+                      {remaining === 1
+                        ? "Una parada más completa la Ruta."
+                        : `Te quedan ${remaining} paradas.`}
+                    </Text>
+                  );
+                })()}
               </View>
             </RevealOnMount>
 
@@ -1421,6 +1454,20 @@ export default function MiXicoScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
+
+  // Atmospheric copy under the week-mode Rosetón. Italic serif at secondary
+  // contrast carries the manifesto voice ("infraestructura emocional para la
+  // diáspora" — never imperative, always observational).
+  rosetonBlurb: {
+    fontFamily: Fonts.serifItalic,
+    fontStyle: "italic",
+    fontSize: TypeSize.body,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    paddingHorizontal: Space.lg,
+    paddingTop: Space.lg,
+    lineHeight: TypeSize.body * 1.55,
+  },
 
   header: {
     backgroundColor: Colors.background,
