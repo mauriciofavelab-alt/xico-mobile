@@ -65,20 +65,14 @@ mexico,madrid,cultura,ruta,mezcal,arte,gastronomia,español,editorial,casa de me
 ```
 *(99 chars ✓)*
 
-### What's New (4000 chars · per-build · for Build 5)
-```
-Build 5 — La inaugural Ruta de Madrid
+### What's New (4000 chars · per-build)
 
-· Cinco paradas escritas por María Vázquez: Casa de México, Punto MX, Barracuda MX, Corazón de Agave, La Tilica Mezcalería.
-· Cada parada tiene su despacho público y su apunte in situ — un texto que solo aparece cuando llegas al sitio.
-· El Pasaporte de los Cuatro Rumbos se llena al caminar.
-· Modo hora — la app cambia de voz entre madrugada, día y atardecer.
-· Re-entrada emocional — si vuelves después de siete días, te recibe sin pedirte explicaciones.
+For the current build, use the short or long copy from
+[`docs/brand/testflight-build-11-whats-new.md`](../../docs/brand/testflight-build-11-whats-new.md).
+Short version is sized for the App Store's "What's New" field; long version is
+for the Beta App Description and press notes.
 
-Esta es la primera Ruta. Habrá una nueva cada domingo.
-
-— María Vázquez, editora · Madrid
-```
+Pre-Build-10 history of this section is preserved in git.
 
 ### Support URL
 ```
