@@ -1301,13 +1301,11 @@ export default function MiXicoScreen() {
           </View>
         </View>
 
-        <View style={s.badgeRow}>
-          <View style={s.levelBadge}>
-            <Text style={s.levelBadgeXico}>NIVEL</Text>
-            <View style={[s.levelBadgeDot, { backgroundColor: level.color }]} />
-            <Text style={[s.levelBadgeName, { color: level.color }]}>{level.nombre}</Text>
-          </View>
-        </View>
+        {/* The old ALUX `NIVEL` badge has been removed — the new Mexica tier
+            (Iniciado / Conocedor / Curador / Cronista) is now shown ONCE on
+            Mi Lectura via the Rosetón centerpiece. Showing two tier systems
+            on one screen violated the manifesto's "non-childish progression
+            systems" principle (verified critique 2026-05-14). */}
 
         <Pressable
           onPress={() => router.push("/edit-interests" as any)}
@@ -1355,20 +1353,15 @@ export default function MiXicoScreen() {
               <RecomendacionesSection interests={interests} />
             </RevealOnMount>
 
-            {/* 2 · Rosetón centerpiece — Mexica cosmology, no points, ritual not engagement */}
+            {/* 2 · Rosetón centerpiece — Mexica cosmology, no points, ritual not engagement.
+                v1: read-only. Tap-to-expand petals + tier detail screen ship in v2 so we
+                don't surface a false affordance with placeholder handlers. */}
             <RevealOnMount index={1}>
               <View style={{ alignItems: "center", paddingVertical: Space.xl }}>
                 <Roseton
                   tier={tier?.tier ?? "iniciado"}
                   totalSellos={tier?.total ?? 0}
                   byRumbo={tier?.by_rumbo}
-                  onPetalPress={(slug) => {
-                    // v1: log only; v2 will open a bottom sheet with sellos in that rumbo.
-                    console.log("[mi-xico] rosetón petal pressed:", slug);
-                  }}
-                  onCenterPress={() => {
-                    console.log("[mi-xico] rosetón center pressed · tier detail in v2");
-                  }}
                 />
                 {(tier?.total ?? 0) === 0 ? (
                   <Text

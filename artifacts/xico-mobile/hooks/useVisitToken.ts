@@ -6,9 +6,16 @@ import { fetchJson, API_BASE } from "@/constants/api";
 import { supabase } from "@/constants/supabase";
 
 /**
- * useVisitToken · polls geo, requests POST /api/ruta-stops/:id/visit-token
+ * useVisitToken · subscribes to geo, requests POST /api/ruta-stops/:id/visit-token
  * when within 50m of the stop. The server enforces the 50m radius and the
  * 30s earliest_claim_ts; we just deliver position.
+ *
+ * Subscription model (Location.watchPositionAsync):
+ *   - Callback fires when user moves >= GEO_DISTANCE_INTERVAL_M (10m) OR
+ *     >= GEO_TIME_INTERVAL_MS (10s) elapses. Battery-efficient — no fixed
+ *     polling. Was switched from setInterval/getCurrentPositionAsync polling
+ *     to fix battery drain critique (SEV-2 audit 2026-05-14).
+ *   - Subscription is removed once a visit-token is acquired OR on unmount.
  *
  * UX contract from the spec:
  *   - Never expose the countdown number — only the ring filling
@@ -19,7 +26,8 @@ import { supabase } from "@/constants/supabase";
  *           visit_token, error, requestPermission }
  */
 
-const POLL_INTERVAL_MS = 4_000;
+const GEO_DISTANCE_INTERVAL_M = 10;
+const GEO_TIME_INTERVAL_MS = 10_000;
 
 export type VisitTokenState = {
   permission: "unknown" | "granted" | "denied";
@@ -49,7 +57,7 @@ async function authHeader(): Promise<Record<string, string>> {
 
 export function useVisitToken(stopId: string | null | undefined) {
   const [state, setState] = useState<VisitTokenState>(initial);
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const watchSubRef = useRef<Location.LocationSubscription | null>(null);
   const tokenRequestedRef = useRef(false);
 
   const requestPermission = useCallback(async () => {
@@ -82,10 +90,10 @@ export function useVisitToken(stopId: string | null | undefined) {
             visit_token: data.visit_token,
             error: null,
           }));
-          // Stop polling — we've crossed the threshold and have what we need.
-          if (pollingRef.current) {
-            clearInterval(pollingRef.current);
-            pollingRef.current = null;
+          // Stop subscribing — we've crossed the threshold and have what we need.
+          if (watchSubRef.current) {
+            watchSubRef.current.remove();
+            watchSubRef.current = null;
           }
         } else if (res.status === 403 && data?.reason === "too_far") {
           tokenRequestedRef.current = false; // allow retry as user walks closer
@@ -108,32 +116,56 @@ export function useVisitToken(stopId: string | null | undefined) {
     requestPermission();
   }, [stopId, requestPermission]);
 
-  // Start polling once permission is granted
+  // Subscribe to geo once permission is granted. watchPositionAsync only
+  // fires when the user moves >= GEO_DISTANCE_INTERVAL_M OR time interval
+  // elapses — battery-efficient compared to fixed-interval polling.
   useEffect(() => {
     if (state.permission !== "granted" || !stopId || state.visit_token) return;
 
     let cancelled = false;
-    const tick = async () => {
+
+    (async () => {
       try {
-        const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+        // First synchronous read so we can attempt the visit-token immediately
+        // (skip waiting up to GEO_TIME_INTERVAL_MS for the watch's first tick).
+        const initial = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
         if (cancelled) return;
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        setState((p) => ({ ...p, position: { lat, lng } }));
-        // Optimistically try visit-token; server will reject if too far and return distance.
-        requestVisitToken(lat, lng);
+        const lat0 = initial.coords.latitude;
+        const lng0 = initial.coords.longitude;
+        setState((p) => ({ ...p, position: { lat: lat0, lng: lng0 } }));
+        requestVisitToken(lat0, lng0);
+
+        // Then subscribe for movement-based updates.
+        const sub = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            distanceInterval: GEO_DISTANCE_INTERVAL_M,
+            timeInterval: GEO_TIME_INTERVAL_MS,
+          },
+          (pos) => {
+            if (cancelled) return;
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            setState((p) => ({ ...p, position: { lat, lng } }));
+            requestVisitToken(lat, lng);
+          },
+        );
+        if (cancelled) {
+          sub.remove();
+          return;
+        }
+        watchSubRef.current = sub;
       } catch (e: any) {
         if (cancelled) return;
         setState((p) => ({ ...p, error: e?.message ?? "Error de geolocalización" }));
       }
-    };
-    tick(); // immediate
-    pollingRef.current = setInterval(tick, POLL_INTERVAL_MS);
+    })();
+
     return () => {
       cancelled = true;
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
+      if (watchSubRef.current) {
+        watchSubRef.current.remove();
+        watchSubRef.current = null;
       }
     };
   }, [stopId, state.permission, state.visit_token, requestVisitToken]);
