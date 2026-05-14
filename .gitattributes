@@ -1,0 +1,6 @@
+# Force LF line endings on shell scripts so they execute on Linux
+# (Docker images, Railway runtime). Without this, Windows checkouts produce
+# CRLF and the shebang line breaks at runtime with "exec format error".
+*.sh           text eol=lf
+Dockerfile     text eol=lf
+.dockerignore  text eol=lf
