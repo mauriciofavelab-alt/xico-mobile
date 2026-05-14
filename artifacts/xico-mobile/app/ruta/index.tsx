@@ -10,6 +10,7 @@ import { ByLine, Masthead, Rule, Standfirst, RevealOnMount } from "@/components/
 import { StopCard } from "@/components/ruta/StopCard";
 import { useCurrentRuta, type RutaStopLite } from "@/hooks/useCurrentRuta";
 import { useTier } from "@/hooks/useTier";
+import { useTypographyMode } from "@/hooks/useTypographyMode";
 import type { RumboSlug } from "@/constants/rumbos";
 
 /**
@@ -46,6 +47,7 @@ export default function RutaIndex() {
 
   const ruta = useCurrentRuta();
   const tier = useTier();
+  const typo = useTypographyMode();
 
   // Build a set of earned stop_ids so each StopCard knows whether to show sello
   const earnedStopIds = useMemo<Set<string>>(() => {
@@ -60,6 +62,14 @@ export default function RutaIndex() {
 
   return (
     <View style={[s.root, { paddingTop: topPad }]}>
+      {/* Modo hora atmosphere overlay · atardecer = warm wash over entire screen */}
+      {typo.atmosphereOverlay ? (
+        <View
+          style={[StyleSheet.absoluteFill, { backgroundColor: typo.atmosphereOverlay }]}
+          pointerEvents="none"
+        />
+      ) : null}
+
       {/* Back / close affordance · top-left */}
       <Pressable
         onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)")}

@@ -37,6 +37,7 @@ import { fetchJson, API_BASE } from "@/constants/api";
 import { supabase } from "@/constants/supabase";
 import { useVisitToken } from "@/hooks/useVisitToken";
 import { useSelloMutation, type SelloEarnResult } from "@/hooks/useSelloMutation";
+import { useTypographyMode } from "@/hooks/useTypographyMode";
 
 /**
  * Stop screen · /ruta/stop/[id]
@@ -116,6 +117,7 @@ export default function StopScreen() {
   const rumbos = useRumbos();
   const visit = useVisitToken(stopId);
   const selloMut = useSelloMutation();
+  const typo = useTypographyMode();
 
   // Find the stop's rumbo
   const rumbo: RumboLite | null = useMemo(() => {
@@ -231,8 +233,8 @@ export default function StopScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero · always shown; veil controls visibility */}
-        <StopVeil accent={accent} lifted={veilLifted} height={280}>
+        {/* Hero · always shown; veil controls visibility. atardecer wash painted on top. */}
+        <StopVeil accent={accent} lifted={veilLifted} height={280} atmosphereOverlay={typo.atmosphereOverlay}>
           <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.surfaceHigh }]} />
         </StopVeil>
 
@@ -283,11 +285,14 @@ export default function StopScreen() {
           <Text style={s.name}>{data.name}</Text>
           <Text style={s.address}>{data.address}</Text>
 
-          {/* Despacho · always rendered */}
+          {/* Despacho · always rendered. Modo hora: madrugada uses Newsreader 300
+              Light and drops body to secondary contrast; atardecer + dia use default. */}
           {data.despacho_text ? (
             <View style={s.despachoBlock}>
               <Text style={s.despachoLabel}>El despacho</Text>
-              <Text style={s.despachoText}>{data.despacho_text}</Text>
+              <Text style={[s.despachoText, { fontFamily: typo.bodyFontFamily, color: typo.bodyColor }]}>
+                {data.despacho_text}
+              </Text>
             </View>
           ) : null}
 

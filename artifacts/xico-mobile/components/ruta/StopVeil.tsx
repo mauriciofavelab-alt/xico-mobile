@@ -28,9 +28,12 @@ type Props = ViewProps & {
   accent: string;
   lifted: boolean;
   height?: number;
+  /** Optional time-mode atmosphere wash (e.g. atardecer warm gold).
+   *  Painted on top of the veil so it persists even after `lifted=true`. */
+  atmosphereOverlay?: string | null;
 };
 
-export function StopVeil({ accent, lifted, height = 280, children, style, ...rest }: Props) {
+export function StopVeil({ accent, lifted, height = 280, atmosphereOverlay, children, style, ...rest }: Props) {
   const opacity = useSharedValue(1);
   const reducedMotion = useReducedMotion();
 
@@ -70,6 +73,14 @@ export function StopVeil({ accent, lifted, height = 280, children, style, ...res
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
+      {/* Modo hora atmosphere overlay · always painted, never animated. Atardecer
+          adds a warm Cihuatlampa-bone wash; madrugada has no overlay. */}
+      {atmosphereOverlay ? (
+        <View
+          style={[StyleSheet.absoluteFill, { backgroundColor: atmosphereOverlay }]}
+          pointerEvents="none"
+        />
+      ) : null}
     </View>
   );
 }

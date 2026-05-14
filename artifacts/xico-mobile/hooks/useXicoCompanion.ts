@@ -2,9 +2,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useEffect } from "react";
 import { getXicoLevel } from "./usePassport";
 import { fetchJson } from "@/constants/api";
+import { computeTimeMode } from "@/hooks/useTimeMode";
 
 const COMPANION_NAME_KEY = "xico_companion_name";
-const COMPANION_CACHE_KEY = `xico_companion_${new Date().toISOString().slice(0, 10)}`;
+// Cache key includes time_mode so madrugada/atardecer don't keep serving the
+// daytime phrase from earlier the same calendar day.
+const COMPANION_CACHE_KEY = (() => {
+  const date = new Date().toISOString().slice(0, 10);
+  const mode = computeTimeMode();
+  return `xico_companion_${date}_${mode}`;
+})();
 
 const NOMBRES_MAYAS = [
   "Ixchel", "Kukulcán", "Itzamná", "Chaac", "Hunahpú", "Xbalanqué",
@@ -40,14 +47,16 @@ export function useXicoCompanion(pts: number, streak: number) {
         return;
       }
 
+      const timeMode = computeTimeMode();
+      const tmQuery = `?time_mode=${timeMode}`;
       try {
-        const data = await fetchJson<CompanionResponse>("/api/companion");
+        const data = await fetchJson<CompanionResponse>(`/api/companion${tmQuery}`);
         setDailyFrase(data.phrase);
         await AsyncStorage.setItem(COMPANION_CACHE_KEY, JSON.stringify(data));
         await AsyncStorage.setItem("xico_narration_style", data.narration_style);
       } catch {
         try {
-          const data = await fetchJson<CompanionResponse>("/api/companion/public");
+          const data = await fetchJson<CompanionResponse>(`/api/companion/public${tmQuery}`);
           setDailyFrase(data.phrase);
           await AsyncStorage.setItem(COMPANION_CACHE_KEY, JSON.stringify(data));
         } catch {
