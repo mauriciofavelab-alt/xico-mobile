@@ -12,8 +12,11 @@
   "devDependencies": {
     "@esbuild/win32-x64": "0.27.3",
     "@types/node": "catalog:",
+    "getenv": "^2.0.0",
     "prettier": "^3.8.1",
+    "semver": "^7.7.4",
     "tsx": "catalog:",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "yallist": "^4.0.0"
   }
 }
