@@ -1,0 +1,58 @@
+# Slim the build context for Railway's Docker build.
+# Without this, Docker uploads several GB of node_modules to the daemon.
+
+# Workspaces · resolved fresh inside the image
+**/node_modules/
+**/dist/
+**/.next/
+**/build/
+**/.expo/
+
+# VCS
+.git/
+.github/
+
+# Local secrets — never bake into image
+**/.env
+**/.env.*
+.env.local
+.env.example
+**/.envrc
+
+# Mobile app build artifacts — not part of the api-server image
+artifacts/xico-mobile/.expo/
+artifacts/xico-mobile/web-build/
+artifacts/xico-mobile/ios/build/
+artifacts/xico-mobile/android/build/
+
+# Editor + OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs + tmp
+**/*.log
+**/tmp/
+**/.cache/
+**/coverage/
+
+# Test scratch
+**/__tests__/*.snap
+test-pg.mjs
+
+# Plan artifacts (vault is outside the repo anyway)
+.superpowers/
+.claude/
+docs/superpowers/
+
+# Documentation that doesn't ship in the runtime image
+*.md
+!artifacts/api-server/README.md
+HANDOFF_*.md
+FINAL_HANDOFF.md
+INTEGRATIONS_AND_ENV.md
+AGENTS.md
+
+# Large archives accidentally in tree
+ai-context-export.zip
