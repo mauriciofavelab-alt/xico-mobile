@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -38,6 +39,7 @@ import { supabase } from "@/constants/supabase";
 import { useVisitToken } from "@/hooks/useVisitToken";
 import { useSelloMutation, type SelloEarnResult } from "@/hooks/useSelloMutation";
 import { useTypographyMode } from "@/hooks/useTypographyMode";
+import { useCurrentRuta } from "@/hooks/useCurrentRuta";
 
 /**
  * Stop screen · /ruta/stop/[id]
@@ -118,6 +120,10 @@ export default function StopScreen() {
   const visit = useVisitToken(stopId);
   const selloMut = useSelloMutation();
   const typo = useTypographyMode();
+  // Used to compute the folio total (01 / 05). The /ruta listing already
+  // fetched this and React Query dedupes the request — no extra network.
+  const currentRuta = useCurrentRuta();
+  const totalStops = currentRuta.data?.stops.length ?? null;
 
   // Find the stop's rumbo
   const rumbo: RumboLite | null = useMemo(() => {
@@ -131,6 +137,10 @@ export default function StopScreen() {
   const [state, setState] = useState<StopState>("en_camino");
   const [note, setNote] = useState("");
   const [annotationSubmitted, setAnnotationSubmitted] = useState(false);
+  // Dismissing the annotation block doesn't exit the screen — the user still
+  // sees the apunte_in_situ and the earned sello disc above. They use the
+  // top-left close button when they're done lingering.
+  const [annotationDismissed, setAnnotationDismissed] = useState(false);
   const [tierUpInfo, setTierUpInfo] = useState<{ from: string; to: string } | null>(null);
   const haveFiredEarnRef = useRef(false);
 
@@ -204,6 +214,35 @@ export default function StopScreen() {
     annotateMut.mutate({ ruta_stop_id: stopId, text: note.trim() });
   }, [stopId, note, annotateMut]);
 
+  // Close the screen safely. If the user has typed an annotation but not
+  // submitted it, confirm before losing the text (ui-ux-pro-max
+  // sheet-dismiss-confirm rule). After explicit save OR dismiss, no guard.
+  const handleClose = useCallback(() => {
+    const hasUnsavedNote = !!note.trim() && !annotationSubmitted && !annotationDismissed;
+    if (!hasUnsavedNote) {
+      router.canGoBack() ? router.back() : router.replace("/ruta" as any);
+      return;
+    }
+    Alert.alert(
+      "¿Salir sin guardar la nota?",
+      "Tu línea se va a perder. El equipo no la verá.",
+      [
+        { text: "Volver a la nota", style: "cancel" },
+        {
+          text: "Salir igual",
+          style: "destructive",
+          onPress: () => (router.canGoBack() ? router.back() : router.replace("/ruta" as any)),
+        },
+      ],
+    );
+  }, [note, annotationSubmitted, annotationDismissed]);
+
+  // Dismiss the annotation block without exiting the screen. User still sees
+  // the apunte_in_situ + sello disc above. They use the close button when ready.
+  const dismissAnnotation = useCallback(() => {
+    setAnnotationDismissed(true);
+  }, []);
+
   // ─── Loading + error states ────────────────────────────────────────────
   if (!stopId || stop.isLoading) {
     return (
@@ -241,7 +280,7 @@ export default function StopScreen() {
         {/* Close button + ring indicator overlay */}
         <View style={[s.heroOverlay, { paddingTop: insets.top + 12 }]}>
           <Pressable
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/ruta" as any))}
+            onPress={handleClose}
             hitSlop={12}
             style={s.closeBtn}
             accessibilityLabel="Volver a La Ruta"
@@ -274,10 +313,11 @@ export default function StopScreen() {
         </View>
 
         <View style={s.body}>
-          {/* Order + rumbo line */}
+          {/* Order + rumbo line · folio shape "01 / 05" */}
           <View style={s.headerRow}>
             <Text style={s.orderNum}>
-              {String(data.order_num ?? 0).padStart(2, "0")} / {/* total filled by parent on /ruta */}
+              {String(data.order_num ?? 0).padStart(2, "0")}
+              {totalStops ? ` / ${String(totalStops).padStart(2, "0")}` : ""}
             </Text>
             {rumbo ? <Kicker color={accent}>{rumbo.nahuatl_name}</Kicker> : null}
           </View>
@@ -325,14 +365,16 @@ export default function StopScreen() {
             </View>
           ) : null}
 
-          {/* Annotation input · state=anotacion */}
-          {(state === "anotacion" || annotationSubmitted) && rumbo ? (
+          {/* Annotation block · visible during state=anotacion. Hides after the
+              user explicitly saves OR dismisses. Dismiss DOES NOT exit the
+              screen — user keeps reading the apunte + sello disc above. */}
+          {(state === "anotacion" || annotationSubmitted) && !annotationDismissed && rumbo ? (
             <Animated.View
               entering={reducedMotion ? undefined : FadeInUp.duration(400)}
               style={s.annotationBlock}
             >
               {annotationSubmitted ? (
-                <View>
+                <View accessibilityLiveRegion="polite" accessibilityRole="text">
                   <Text style={s.annotationDone}>Anotación guardada. El equipo la lee.</Text>
                 </View>
               ) : (
@@ -358,17 +400,29 @@ export default function StopScreen() {
                         (!note.trim() || annotateMut.isPending) && { opacity: 0.5 },
                       ]}
                       accessibilityRole="button"
+                      accessibilityState={{ disabled: !note.trim() || annotateMut.isPending, busy: annotateMut.isPending }}
+                      accessibilityLabel={annotateMut.isPending ? "Guardando anotación" : "Guardar la anotación de una línea"}
                     >
-                      <Text style={[s.annotationSaveText, { color: accent }]}>
-                        Guardar · 1 línea
-                      </Text>
+                      {annotateMut.isPending ? (
+                        <View style={s.annotationSaveBusy}>
+                          <ActivityIndicator size="small" color={accent} />
+                          <Text style={[s.annotationSaveText, { color: accent }]}>
+                            Guardando…
+                          </Text>
+                        </View>
+                      ) : (
+                        <Text style={[s.annotationSaveText, { color: accent }]}>
+                          Guardar · 1 línea
+                        </Text>
+                      )}
                     </Pressable>
                     <Pressable
-                      onPress={() => router.back()}
+                      onPress={dismissAnnotation}
                       style={s.annotationSkip}
                       accessibilityRole="button"
+                      accessibilityLabel="Cerrar el campo de anotación sin guardar"
                     >
-                      <Text style={s.annotationSkipText}>Sigo · sin anotar</Text>
+                      <Text style={s.annotationSkipText}>Cerrar</Text>
                     </Pressable>
                   </View>
                 </>
@@ -641,6 +695,13 @@ const s = StyleSheet.create({
     paddingVertical: Space.md,
     borderWidth: 1.5,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: 44, // touch-target-size · ui-ux-pro-max CRITICAL
+  },
+  annotationSaveBusy: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Space.sm,
   },
   annotationSaveText: {
     fontFamily: Fonts.sansSemibold,
