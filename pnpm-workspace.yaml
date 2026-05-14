@@ -103,3 +103,13 @@ overrides:
   "@expo/ngrok-bin>@expo/ngrok-bin-sunos-x64": "-"
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   esbuild: "0.27.3"
+  # Pin yallist to v4.x (CJS class) — yallist@5 is ESM-only and breaks
+  # `new Yallist()` constructor calls used by transitive deps that pre-date
+  # the v5 break (notably lru-cache@5.1.1, which @babel/core's compilation
+  # targets resolver still pulls in). Without this override, Metro fails with
+  # "Yallist is not a constructor" or "Cannot find module 'yallist'" during
+  # the iOS bundle export. yallist + getenv + semver are also pinned as
+  # direct devDeps of artifacts/xico-mobile so they're hoisted to
+  # node_modules/.pnpm/node_modules/ where the bundler-side require() sites
+  # need them.
+  yallist: "^4.0.0"
