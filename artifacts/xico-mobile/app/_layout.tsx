@@ -130,6 +130,10 @@ export default function RootLayout() {
 
   const fontsLoaded = interLoaded && newsreaderLoaded;
   const fontError = interError || newsreaderError;
+  // 8-second hard timeout · if Google Fonts hasn't resolved (slow connection,
+  // CDN issue, hung web client) we proceed with system fallback fonts instead
+  // of leaving the user staring at a blank screen forever.
+  const [fontTimeout, setFontTimeout] = useState(false);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -138,12 +142,17 @@ export default function RootLayout() {
   }, [fontsLoaded, fontError]);
 
   useEffect(() => {
+    const t = setTimeout(() => setFontTimeout(true), 8000);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
     Linking.getInitialURL().then(url => { if (url) handleAuthUrl(url); });
     const sub = Linking.addEventListener("url", ({ url }) => handleAuthUrl(url));
     return () => sub.remove();
   }, []);
 
-  if (!fontsLoaded && !fontError) return null;
+  if (!fontsLoaded && !fontError && !fontTimeout) return null;
 
   return (
     <SafeAreaProvider>
