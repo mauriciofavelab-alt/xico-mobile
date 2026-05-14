@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  /* XICO design tokens · mirrors artifacts/xico-mobile/constants/colors.ts */
+  --color-background: #080508;
+  --color-surface: #13101a;
+  --color-surface-high: #1c1822;
+  --color-text-primary: #f0ece6;
+  --color-text-secondary: #c9c3b8;
+  --color-text-tertiary: #8c887f;
+
+  --color-magenta: #9c1a47;
+  --color-cobalt: #1a3d8a;
+  --color-ochre: #b8820a;
+
+  --color-rumbo-norte: #0e1018;
+  --color-rumbo-este: #d9357b;
+  --color-rumbo-sur: #234698;
+  --color-rumbo-oeste: #ede6d8;
+  --color-rumbo-center: #3f5a3a;
+
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hairline-grade dividers, per brandbook §7.6 */
+.hairline {
+  height: 1px;
+  background: rgba(240, 236, 230, 0.1);
+}
+.hairline-strong {
+  height: 1px;
+  background: rgba(240, 236, 230, 0.18);
+}
+
+/* Editorial reset · no link underline by default; underline on hover only */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+/* Subtle text selection in the brand magenta */
+::selection {
+  background: rgba(156, 26, 71, 0.4);
+  color: var(--color-text-primary);
+}
