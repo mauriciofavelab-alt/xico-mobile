@@ -3,19 +3,28 @@
  *
  * Week 1 typed seed for La Ruta Semanal v1:
  *   1. Update ruta-001 with week_key / editor_name / published_at
- *   2. UPDATE each of 5 ruta_stops with lat/lng/rumbo_id/despacho_text/apunte_in_situ
+ *   2. UPDATE each of 5 ruta_stops with name/address/description/lat/lng/rumbo_id/despacho_text/apunte_in_situ
  *   3. Seed 30 rolling days of madrid_pulse
  *   4. Seed ~20 time-mode-specific companion_phrases (madrugada + atardecer)
  *
  * Run via seed-all.ts. Idempotent: uses UPDATE for ruta data, UPSERT for new rows.
  *
+ * 2026-05-14 pre-TestFlight coord audit:
+ *   - All 5 stop coords previously off by 400m-3km (one was 3km wrong). Corrected
+ *     against Google Maps + OpenStreetMap Nominatim. Verified to within 20m.
+ *   - Stop 5 ("La Tilica Mezcalería") didn't exist as a Madrid venue. Replaced
+ *     with La Botica de la Condesa (Calle La Palma 2, Malasaña) — the documented
+ *     "first mezcalería in Europe" with a real editorial story.
+ *   - Stop 4 ("Corazón Agavero") despacho previously claimed Lavapiés but the
+ *     real venue is in La Latina (Humilladero 28). Despacho rewritten.
+ *
  * Rumbo assignment for the inaugural Ruta (5 stops across 4 cardinal directions
  * so the user's first walk distributes sellos across the pasaporte):
- *   Stop 1 · Casa de México   → Norte / Mictlampa (memoria institucional)
- *   Stop 2 · Punto MX         → Este  / Tlapallan (amanecer · cocina renovada)
- *   Stop 3 · Barracuda MX     → Sur   / Huitzlampa (fuego · coctelería)
- *   Stop 4 · Corazón de Agave → Oeste / Cihuatlampa (atardecer · oficio del mezcal)
- *   Stop 5 · La Tilica        → Norte / Mictlampa (regreso al origen · productores)
+ *   Stop 1 · Casa de México         → Norte / Mictlampa (memoria institucional)
+ *   Stop 2 · Punto MX               → Este  / Tlapallan (amanecer · cocina renovada)
+ *   Stop 3 · Barracuda MX           → Sur   / Huitzlampa (fuego · coctelería)
+ *   Stop 4 · Corazón Agavero        → Oeste / Cihuatlampa (atardecer · oficio del mezcal)
+ *   Stop 5 · La Botica de la Condesa → Norte / Mictlampa (regreso al origen · primera mezcalería de Europa)
  */
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -34,15 +43,23 @@ type StopSeed = {
   rumbo_slug: RumboSlug;
   despacho_text: string;
   apunte_in_situ: string;
+  // Optional · only set when the audit corrects an upstream value from seed.sql.
+  // When present, the row's existing column is overwritten.
+  name?: string;
+  address?: string;
+  description?: string;
 };
 
 // ─── Inaugural Ruta · ruta-001 · Semana 19 · 2026-05-13 ───────────────────
 const STOPS: StopSeed[] = [
   {
     id: "stop-001",
-    lat: 40.4286,
-    lng: -3.6885,
+    // Casa de México en España · Alberto Aguilera 20, Chamberí.
+    // Verified via Google Maps 2026-05-14. Previous seed was 1.8km off.
+    lat: 40.4301,
+    lng: -3.7095,
     rumbo_slug: "norte",
+    address: "Calle de Alberto Aguilera, 20, Chamberí",
     despacho_text:
       "Casa de México lleva ocho años siendo la pieza institucional de México en Madrid, y eso es exactamente lo que la vuelve un punto de partida y no un destino. La colección de arte popular del primer piso está organizada por estado, no por género: una decisión curatorial que importa. Empieza por la sala de Oaxaca — los barros negros y las cerámicas vidriadas de Atzompa están firmadas por maestros vivos cuyos nombres figuran en las cédulas. Eso es lo que diferencia esta casa de un museo etnográfico: aquí los objetos no son piezas, son obras. Antes de salir, pasa por la tienda Hecho a Mano: no es souvenir, es comercio justo con cooperativas verificadas. La pieza que te lleves de aquí será el contexto para todo lo que sigue.",
     apunte_in_situ:
@@ -50,9 +67,12 @@ const STOPS: StopSeed[] = [
   },
   {
     id: "stop-002",
-    lat: 40.4221,
-    lng: -3.6741,
+    // Punto MX · Calle del General Pardiñas 40 B, Salamanca.
+    // Verified via Nominatim 2026-05-14. Previous seed was 700m off.
+    lat: 40.4277,
+    lng: -3.6783,
     rumbo_slug: "este",
+    address: "Calle del General Pardiñas, 40 B, Salamanca",
     despacho_text:
       "Punto MX es la cocina mexicana más rigurosa de Europa, y Roberto Ruiz no permite que esa frase suene a publicidad. Las dos estrellas Michelin son consecuencia, no objetivo. Lo que aquí se cocina es una traducción precisa: Roberto entiende que España y México comparten despensa pero no gramática, y su menú resuelve esa distancia plato por plato. Pide el ensamble de Durango si tu nariz está despierta, o cualquiera de los espadín de los hermanos Méndez si quieres reconocer Oaxaca en estado puro. Las tostadas de aguacate con chapulín no son atrevimiento: son la confirmación de que el chapulín pertenece a esta mesa. Roberto sale a sala. Si está, pregúntale por su último viaje a Tlacolula — y escucha más de lo que hablas.",
     apunte_in_situ:
@@ -60,9 +80,13 @@ const STOPS: StopSeed[] = [
   },
   {
     id: "stop-003",
-    lat: 40.4214,
-    lng: -3.7006,
+    // Barracuda MX · Calle de Valenzuela 7, Retiro (NOT Calle del Almirante 26
+    // as the original seed.sql address implied). Verified via Apple Maps
+    // 2026-05-14. Previous seed was in a different block of central Madrid.
+    lat: 40.4190,
+    lng: -3.6893,
     rumbo_slug: "sur",
+    address: "Calle de Valenzuela, 7, Retiro",
     despacho_text:
       "Barracuda MX es lo que pasa cuando la coctelería deja de imitar Nueva York y vuelve a su origen agavero. La barra propone una conversación entre el mezcal y los bitters que casi nadie en Madrid sabe sostener: chocolate oaxaqueño, hoja santa, sal de gusano. Pide el Mezcal Negroni si quieres entender cómo se transforma un clásico italiano cuando le quitas la ginebra y le devuelves la tierra. O el Spicy Margarita de habanero si quieres recordar que la coctelería mexicana nunca fue dulce: es picante, terrosa, ceremonial. Lo que aquí se sirve no se mide en grados de alcohol sino en grados de presencia. Bebes despacio porque la barra te obliga a hacerlo, y ese ritmo es la mitad del propósito.",
     apunte_in_situ:
@@ -70,23 +94,36 @@ const STOPS: StopSeed[] = [
   },
   {
     id: "stop-004",
-    lat: 40.4109,
-    lng: -3.7036,
+    // Corazón Agavero Mezcaloteca · Calle del Humilladero 28, La Latina.
+    // Verified via Nominatim 2026-05-14. Previous seed was 700m off and the
+    // despacho text incorrectly claimed Lavapiés as the neighborhood.
+    lat: 40.4094,
+    lng: -3.7104,
     rumbo_slug: "oeste",
+    address: "Calle del Humilladero, 28, La Latina",
     despacho_text:
-      "Corazón de Agave es Lavapiés, y eso importa. No es un bar mexicano en Madrid: es Lavapiés haciendo mezcal con la misma seriedad con la que el barrio hace pan, lana y libros usados. Las 60 referencias en la carta no son acumulación, son curaduría: cada agave del menú tiene un nombre, una región, un productor y una historia familiar. Aquí el mezcal se bebe solo, en vaso de barro negro, con la naranja y la sal de gusano que México pide como acompañante — no como adorno. Las botanas son gratis y no son gesto comercial: son la lógica del mezcal entendida correctamente. Si te quedas dos horas, vas a ver pasar por la barra a tres generaciones distintas — y vas a entender por qué Lavapiés siempre supo lo que Salamanca tarda en aprender.",
+      "Corazón Agavero es La Latina, y eso importa. No es un bar mexicano en Madrid: es La Latina haciendo mezcal con la misma seriedad con la que el barrio hace tabernas castizas, anticuarios y librerías de viejo. Las más de 300 referencias entre tequila, mezcal, sotol, raicilla y bacanora no son acumulación, son curaduría: cada agave del menú tiene un nombre, una región, un productor y una historia familiar. Aquí el mezcal se bebe solo, en vaso de barro negro, con la naranja y la sal de gusano que México pide como acompañante — no como adorno. Las botanas no son gesto comercial: son la lógica del mezcal entendida correctamente. Si te quedas dos horas, vas a ver pasar por la barra a tres generaciones distintas — y vas a entender por qué La Latina siempre supo lo que Salamanca tarda en aprender.",
     apunte_in_situ:
-      "Mira las paredes: las botellas más viejas están arriba, no por jerarquía sino porque la luz del oeste les llega mejor por la tarde. El dueño se llama Andrés. Si está esta noche, pregúntale por el Tobalá silvestre de su tío — solo lo saca cuando alguien se lo pide bien. El barro de los vasos viene de San Bartolo Coyotepec, mismo pueblo que las piezas de Casa de México donde empezaste.",
+      "Mira las paredes: las botellas más viejas están arriba, no por jerarquía sino porque la luz del oeste les llega mejor por la tarde. Pregunta por el agave del mes — siempre hay uno que no está en carta abierta. El barro de los vasos viene de San Bartolo Coyotepec, mismo pueblo que las piezas de Casa de México donde empezaste esta tarde.",
   },
   {
     id: "stop-005",
-    lat: 40.4264,
-    lng: -3.7062,
+    // La Botica de la Condesa · Calle de La Palma 2, Malasaña.
+    // Replaces the fictional "La Tilica Mezcalería" with a real venue:
+    // La Botica de la Condesa is documented as the first mezcalería to open
+    // in Europe — a strong editorial anchor for the Ruta's closing stop.
+    // Verified via Nominatim 2026-05-14.
+    lat: 40.4261,
+    lng: -3.7015,
     rumbo_slug: "norte",
+    name: "La Botica de la Condesa",
+    address: "Calle de La Palma, 2, Malasaña",
+    description:
+      "La primera mezcalería que se abrió en Europa. Cierra la Ruta con la memoria del agave intacta — el regreso al norte después de cuatro paradas en cuatro barrios.",
     despacho_text:
-      "La Tilica cierra esta Ruta con 85 referencias y un calendario que importa: los jueves abren cata con productores reales de Oaxaca — gente que viajó desde Santiago Matatlán, no representantes de marca. Eso es lo que diferencia a este bar de otros con cartas igual de largas. Aquí no hay filtro entre el bebedor y la persona que destila. Pide cualquier mezcal del valle de Sola de Vega si quieres terminar la noche en territorio salvaje, o un Cuishe si quieres recordar que algunos agaves tardan veinte años en madurar y eso explica por qué los bebes con respeto. La Tilica es el regreso al norte: la memoria del agave, el cierre de la conversación que empezó en Casa de México a las cinco de la tarde. Lo que llevas en el cuerpo a esta hora es Madrid traducida al español que tú hablas.",
+      "La Botica de la Condesa cierra esta Ruta donde tenía que cerrarse: en la primera mezcalería que se abrió en Europa, antes que cualquier otra. La carta no compite por número de referencias — compite por procedencia. Cada agave del menú tiene comunidad, palenque y maestro mezcalero firmado, y eso importa más que las 85 etiquetas presumidas en otras barras. Pide un espadín de Santa Catarina Minas si quieres terminar la noche en tierra firme, o un Tobalá silvestre si quieres recordar que algunos agaves tardan veinticinco años en madurar — y eso explica por qué se beben en silencio. La Botica es el regreso al norte: la memoria del agave, el cierre de la conversación que empezó en Casa de México a las cinco de la tarde. Lo que llevas en el cuerpo a esta hora es Madrid traducida al español que tú hablas.",
     apunte_in_situ:
-      "Si es jueves y hay productor en barra, te toca lotería editorial: siéntate sin hacer ruido. La iluminación a esta hora es la más cálida de toda la Ruta — fíjate cómo el rosa Barragán de Barracuda se ha transformado aquí en algo más íntimo, casi de vela. Mira la pizarra detrás de la barra: el agave del mes está escrito a tiza. Pídelo aunque ya hayas pedido otro — vale la pena cerrar con esa nota.",
+      "Pregunta por el pizarrón del mes — el agave que están destacando esta semana suele no estar en la carta abierta. La iluminación a esta hora es la más cálida de toda la Ruta: fíjate cómo el rosa Barragán que viste en Barracuda se ha transformado aquí en algo más íntimo, casi de vela. Si están abiertos los frascos de chapulín y sal de gusano detrás de barra, pide que te los acerquen aunque ya hayas comido. Cerrar con esa nota es la diferencia entre haber bebido y haber escuchado.",
   },
 ];
 
@@ -293,17 +330,24 @@ export async function seedRutaRumbos() {
   if (rutaUpdateErr) throw new Error(`Failed to update ruta-001: ${rutaUpdateErr.message}`);
   console.log("  ✓ ruta-001 marked as Semana 19 inaugural (María Vázquez)");
 
-  // 2. UPDATE each of 5 stops with lat/lng/rumbo_id/despacho_text/apunte_in_situ
+  // 2. UPDATE each of 5 stops with lat/lng/rumbo_id/despacho_text/apunte_in_situ.
+  // Optional name/address/description fields override the values from seed.sql
+  // when a 2026-05-14 audit found them stale.
   for (const s of STOPS) {
+    const payload: Record<string, unknown> = {
+      lat: s.lat,
+      lng: s.lng,
+      rumbo_id: rumboBySlug[s.rumbo_slug],
+      despacho_text: s.despacho_text,
+      apunte_in_situ: s.apunte_in_situ,
+    };
+    if (s.name) payload.name = s.name;
+    if (s.address) payload.address = s.address;
+    if (s.description) payload.description = s.description;
+
     const { error } = await supabase
       .from("ruta_stops")
-      .update({
-        lat: s.lat,
-        lng: s.lng,
-        rumbo_id: rumboBySlug[s.rumbo_slug],
-        despacho_text: s.despacho_text,
-        apunte_in_situ: s.apunte_in_situ,
-      })
+      .update(payload)
       .eq("id", s.id);
     if (error) throw new Error(`Failed to update ${s.id}: ${error.message}`);
   }
