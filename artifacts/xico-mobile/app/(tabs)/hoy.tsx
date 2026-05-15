@@ -166,14 +166,16 @@ function RutaHeroCardInline() {
   const tier = useTier();
 
   // Editorial fallback values for offline / loading state. The "INAUGURAL"
-  // label is intentional — this is the inaugural Ruta until next Sunday's
-  // refresh, and the spec's example string preserves the editorial voice.
+  // label is conditional on the actual inaugural week_key — future Rutas
+  // won't falsely claim to be inaugural.
   const week = progress.weekLabel ?? "Semana 19";
   const editor = progress.editorName ?? ruta.data?.editor_name ?? "María Vázquez";
+  const weekKey = ruta.data?.week_key;
+  const isInaugural = weekKey === "2026-W19";
 
   return (
     <View style={ruta_s.card}>
-      <Text style={ruta_s.kicker}>{`LA RUTA · ${week.toUpperCase()} · INAUGURAL`}</Text>
+      <Text style={ruta_s.kicker}>{`LA RUTA · ${week.toUpperCase()}${isInaugural ? " · INAUGURAL" : ""}`}</Text>
       <Text style={ruta_s.headline}>
         {"Cinco paradas "}
         <Text style={ruta_s.italicAccent}>en cinco barrios</Text>
@@ -218,7 +220,7 @@ function FeaturedArticlePlaceholder() {
         end={{ x: 1, y: 1 }}
         style={article_s.heroPlaceholder}
       >
-        <View style={[article_s.heroBorderLeft, { backgroundColor: Pillars.indice }]} />
+        <View style={[article_s.heroBorderLeft, { backgroundColor: Pillars.cultura }]} />
       </LinearGradient>
 
       <View style={article_s.body}>
