@@ -19,6 +19,7 @@ import { useFeaturedArticle, type FeaturedArticle } from "@/hooks/useFeaturedArt
 import { isInauguralWeek } from "@/constants/editorial-calendar";
 import { getImage } from "@/constants/imageMap";
 import { scaledFontSize } from "@/constants/editorial";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Task 2.2 · Hoy hero takeover (spec §7.1)
 // Task 2.3 · Body content below the hero — drop cap, Ruta card, featured article.
@@ -56,16 +57,18 @@ function dayLabel(): string {
 
 export default function HoyScreen() {
   const insets = useSafeAreaInsets();
-  const despacho: Despacho = useMemo(() => getDespachoForToday(), []);
-  // dayLabel() captures `new Date()` at call time. If the app sits open past
-  // midnight, a useMemo([], ...) would leave "VIERNES 15 MAY" stale on
-  // Saturday morning. We re-derive on AppState `active` transitions so the
-  // masthead always reflects the current day after returning from background.
-  // Per diagnostic §E-1.
+  // Both despacho AND day label are tracked in state so an AppState `active`
+  // transition past midnight refreshes BOTH together · previously the label
+  // updated but the Despacho (Nahuatl word, lugar, etc.) stayed on yesterday's
+  // entry until process restart. 2026-05-15 (focus-group review · Day-2 hook).
+  const [despacho, setDespacho] = useState<Despacho>(() => getDespachoForToday());
   const [todayLabel, setTodayLabel] = useState<string>(() => dayLabel());
   useEffect(() => {
     const sub = AppState.addEventListener("change", (s) => {
-      if (s === "active") setTodayLabel(dayLabel());
+      if (s === "active") {
+        setTodayLabel(dayLabel());
+        setDespacho(getDespachoForToday());
+      }
     });
     return () => sub.remove();
   }, []);
@@ -81,27 +84,30 @@ export default function HoyScreen() {
     },
   });
 
-  // Pull-to-refresh (Apple-patterns §4.5) — Hoy currently reads the
-  // local-only despacho corpus per ADR-001, so onRefresh re-derives the
-  // day label + lightly bumps the today getter to surface any AppState-
-  // missed midnight crossing. Cheap, table-stakes affordance — the spinner
-  // tint is pillar magenta (Indice) so it matches the surface chromatic
-  // anchor on Hoy.
+  // Pull-to-refresh (Apple-patterns §4.5). Re-derives day label + despacho
+  // (covers midnight crossings the user pulls through manually), AND
+  // invalidates every active React Query so the real network-backed
+  // surfaces refresh: featured article, current Ruta (in case Sunday's
+  // drop landed mid-session), Madrid Pulse, tier, sellos. The spinner
+  // tint is pillar magenta (Indice). 2026-05-15 (focus-group review · the
+  // previous 600ms setTimeout read as theatre to sharp testers).
+  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      // Refresh day label · the despacho is a memo by-day, but rendering
-      // the new label is a visible signal that the pull worked.
       setTodayLabel(dayLabel());
-      // 600ms theatre · long enough that the user sees the spinner do its
-      // work, short enough that it never feels broken. Real backend
-      // refetches land here when the editor-admin path ships per ADR-001.
-      await new Promise((r) => setTimeout(r, 600));
+      setDespacho(getDespachoForToday());
+      // Invalidate ALL active queries · React Query refetches the ones
+      // currently mounted and leaves the rest stale. Awaiting the
+      // promise drives the spinner duration so users see "the pull did
+      // something." Errors here are non-fatal (queries fall back to
+      // cached or empty states via their own retry/error handlers).
+      await queryClient.invalidateQueries({ refetchType: "active" });
     } finally {
       setRefreshing(false);
     }
-  }, []);
+  }, [queryClient]);
 
   return (
     <View style={[styles.root, { backgroundColor: Colors.background }]}>

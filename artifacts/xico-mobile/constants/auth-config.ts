@@ -83,7 +83,11 @@ if (googleConfigured && Platform.OS !== "web") {
 // (a rare corner case but Apple's own sample apps gate on it).
 
 export function useAppleAvailable(): boolean {
-  const [available, setAvailable] = useState(false);
+  // Optimistic default: on iOS we assume Sign In with Apple IS available,
+  // then ONLY set it to false if the async probe explicitly returns false.
+  // This removes the ~200ms "pop-in" flicker where the Apple button
+  // appeared after first paint · a focus-group-visible perception issue.
+  const [available, setAvailable] = useState(Platform.OS === "ios");
 
   useEffect(() => {
     if (Platform.OS !== "ios") {
@@ -96,7 +100,7 @@ export function useAppleAvailable(): boolean {
       const AppleAuthentication = require("expo-apple-authentication");
       AppleAuthentication.isAvailableAsync()
         .then((ok: boolean) => {
-          if (!cancelled) setAvailable(!!ok);
+          if (!cancelled && ok === false) setAvailable(false);
         })
         .catch(() => {
           if (!cancelled) setAvailable(false);

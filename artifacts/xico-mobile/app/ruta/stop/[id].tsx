@@ -5,6 +5,7 @@ import {
   Dimensions,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -597,6 +598,23 @@ export default function StopScreen() {
             accessibilityRole="text"
           >
             <Text style={s.selloErrorNoticeText}>{selloErrorMessage}</Text>
+            {/* Retry affordance · 2026-05-15 (pre-TestFlight crash hunt).
+                Previously the user was stuck after the first failure ·
+                the ring had already completed and wouldn't fire onRingComplete
+                again. This Pressable calls onRingComplete() directly, which
+                re-attempts the sello mutation (haveFiredEarnRef was already
+                reset to false by the onError handler above). */}
+            <Pressable
+              onPress={onRingComplete}
+              accessibilityRole="button"
+              accessibilityLabel="Volver a intentar el sello"
+              hitSlop={8}
+              style={s.selloErrorRetry}
+            >
+              <Text style={[s.selloErrorRetryText, { color: accent }]}>
+                Volver a intentar
+              </Text>
+            </Pressable>
           </View>
         ) : null}
 
@@ -605,11 +623,26 @@ export default function StopScreen() {
           {state === "en_camino" ? (
             <View style={s.geoBlock}>
               {visit.permission === "denied" ? (
-                <Pressable onPress={visit.requestPermission} style={s.geoLink}>
-                  <Text style={s.geoText}>
-                    Para abrir el apunte XICO necesita saber que estás aquí. Concede ubicación.
-                  </Text>
-                </Pressable>
+                <View>
+                  <Pressable onPress={visit.requestPermission} style={s.geoLink}>
+                    <Text style={s.geoText}>
+                      Para abrir el apunte XICO necesita saber que estás aquí. Concede ubicación.
+                    </Text>
+                  </Pressable>
+                  {/* Settings deep-link · iOS often denies permission
+                      permanently after the first refusal · requestPermission
+                      returns "denied" without showing a prompt. The user is
+                      stuck unless they open Settings manually. 2026-05-15. */}
+                  <Pressable
+                    onPress={() => { Linking.openSettings().catch(() => {}); }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Abrir Ajustes para conceder ubicación"
+                    hitSlop={8}
+                    style={{ marginTop: 10 }}
+                  >
+                    <Text style={s.geoSettingsLink}>Abrir Ajustes →</Text>
+                  </Pressable>
+                </View>
               ) : visit.distance_m != null && visit.distance_m > 50 ? (
                 <Text style={s.geoText}>Te faltan ~{Math.round(visit.distance_m)}m hasta el sitio.</Text>
               ) : visit.permission === "unknown" || visit.permission === "granted" ? (
@@ -992,6 +1025,19 @@ const s = StyleSheet.create({
     lineHeight: 14 * 1.45,
     color: Colors.textSecondary,
   },
+  // Retry affordance under the sello-earn error notice. Sits below the
+  // italic copy so the user reads the reason first, then the action.
+  // Tracked-caps so it reads as a button, not as part of the prose.
+  selloErrorRetry: {
+    marginTop: 8,
+    alignSelf: "flex-start",
+  },
+  selloErrorRetryText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: TypeSize.meta,
+    letterSpacing: Tracking.wider,
+    textTransform: "uppercase",
+  },
 
   geoBlock: {
     marginTop: Space.lg,
@@ -1007,6 +1053,13 @@ const s = StyleSheet.create({
     fontSize: TypeSize.meta,
     color: Colors.textSecondary,
     lineHeight: TypeSize.meta * 1.5,
+  },
+  geoSettingsLink: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: TypeSize.meta,
+    letterSpacing: Tracking.wider,
+    textTransform: "uppercase",
+    color: Colors.textPrimary,
   },
 
   annotationBlock: {

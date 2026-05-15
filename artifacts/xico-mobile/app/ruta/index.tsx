@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Platform, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { Alert, Linking, Platform, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -167,9 +167,19 @@ export default function RutaIndex() {
     try {
       const enabled = await LiveActivity.areEnabled();
       if (!enabled) {
+        // 2026-05-15 (focus-group review · the previous Alert was a
+        // dead-end: user saw text saying "go to Ajustes" but had no
+        // way to get there from the alert itself).
         Alert.alert(
           "Live Activities desactivadas",
           "Activa Live Activities en Ajustes para ver La Ruta en la Dynamic Island.",
+          [
+            { text: "Cancelar", style: "cancel" },
+            {
+              text: "Abrir Ajustes",
+              onPress: () => { Linking.openSettings().catch(() => {}); },
+            },
+          ],
         );
         return;
       }

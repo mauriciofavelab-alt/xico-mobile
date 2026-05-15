@@ -392,8 +392,18 @@ export default function AuthScreen() {
 
                 {/* Google button · iOS + Android · custom-styled white
                     surface with Google's 4-color G. SpringPressable for
-                    the press physics + haptic. */}
-                {googlePlatformSupported ? (
+                    the press physics + haptic.
+                    Build-#11 visibility gate: ALSO requires googleConfigured
+                    (real EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID env var set) ·
+                    when the env var is missing/placeholder the button
+                    hides entirely instead of showing "Configuración
+                    pendiente". Apple HIG 4.8 only requires Sign In with
+                    Apple as a peer to OTHER social sign-ins · with Google
+                    hidden, Apple stands alone as the social option and the
+                    requirement still holds. When Mauricio configures
+                    Google Cloud Console + adds the EAS secret, the next
+                    build automatically lights up the button. */}
+                {googlePlatformSupported && googleConfigured ? (
                   <>
                     {appleAvailable && Platform.OS === "ios" ? (
                       <View style={{ height: 12 }} />

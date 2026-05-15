@@ -64,7 +64,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SpringPressable } from "@/components/primitives/SpringPressable";
 import { Roseton } from "@/components/pasaporte/Roseton";
-import { Colors } from "@/constants/colors";
+import { Colors, Pillars } from "@/constants/colors";
 import { Fonts, Tracking } from "@/constants/editorial";
 import { haptic } from "@/constants/haptics";
 import { Rumbos, type RumboSlug } from "@/constants/rumbos";
@@ -94,15 +94,19 @@ const BACKDROP_BIENVENIDA = require("@/assets/lugares/028-tlatelolco.jpg");
 
 type PillarChip = {
   id: string;        // human label (also persisted as the interests array entry)
-  accent: string;    // magenta · single accent for all pillars in walkthrough mode
+  accent: string;    // per-pillar accent · mirrors the app-wide pillar identity
+                     // so chip selection feels like a preview of where the
+                     // pillar lives across the app (Hoy magenta, Cultura
+                     // cobalt, etc.). 2026-05-15 (focus-group review · the
+                     // previous "all magenta" reads as no-differentiation).
 };
 
 const PILLAR_CHIPS: PillarChip[] = [
-  { id: "Despacho", accent: Colors.primary },
-  { id: "Cultura", accent: Colors.primary },
-  { id: "México Ahora", accent: Colors.primary },
-  { id: "La Ruta", accent: Colors.primary },
-  { id: "Archivo", accent: Colors.primary },
+  { id: "Despacho",     accent: Pillars.indice },       // magenta
+  { id: "Cultura",      accent: Pillars.cultura },      // cobalt
+  { id: "México Ahora", accent: Pillars.mexicoAhora },  // ochre
+  { id: "La Ruta",      accent: Rumbos.este.hex },      // Tlapallan (rumbo)
+  { id: "Archivo",      accent: Pillars.archivo },      // verde
 ];
 
 // ============================================================================
@@ -413,10 +417,12 @@ function PillarChipButton({
   id,
   selected,
   onToggle,
+  accent,
 }: {
   id: string;
   selected: boolean;
   onToggle: () => void;
+  accent: string;
 }) {
   return (
     <SpringPressable
@@ -434,7 +440,10 @@ function PillarChipButton({
           styles.pillarChip,
           Shadow.cardLift,
           {
-            borderColor: selected ? Colors.primary : Colors.textQuaternary,
+            // Per-pillar accent · chip selection previews where the pillar
+            // lives in the app (Despacho magenta, Cultura cobalt, México
+            // Ahora ochre, La Ruta Tlapallan magenta, Archivo verde).
+            borderColor: selected ? accent : Colors.textQuaternary,
             borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
           },
         ]}
@@ -442,12 +451,14 @@ function PillarChipButton({
         <Text
           style={[
             styles.pillarChipLabel,
-            selected && { color: Colors.primaryLight },
+            selected && { color: accent },
           ]}
         >
           {id}
         </Text>
-        {selected && <View style={styles.pillarChipDot} />}
+        {selected && (
+          <View style={[styles.pillarChipDot, { backgroundColor: accent }]} />
+        )}
       </BlurView>
     </SpringPressable>
   );
@@ -768,6 +779,7 @@ export default function OnboardingScreen() {
                   id={chip.id}
                   selected={selected.includes(chip.id)}
                   onToggle={() => togglePillar(chip.id)}
+                  accent={chip.accent}
                 />
               ))}
             </View>

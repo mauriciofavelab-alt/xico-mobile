@@ -105,14 +105,36 @@ function RootLayoutNav() {
 }
 
 async function handleAuthUrl(url: string) {
-  if (!url.includes("access_token")) return;
-  const fragment = url.includes("#") ? url.split("#")[1] : url.split("?")[1];
-  if (!fragment) return;
-  const params = new URLSearchParams(fragment);
-  const access_token = params.get("access_token");
-  const refresh_token = params.get("refresh_token");
-  if (access_token && refresh_token) {
-    await supabase.auth.setSession({ access_token, refresh_token });
+  // Defensive: every step can throw on malformed input. We never want a
+  // bad magic-link URL to crash the app · silently no-op on parse errors
+  // and route setSession failures to a soft notice instead of unhandled
+  // rejection. 2026-05-15 (pre-TestFlight crash hunt).
+  try {
+    if (!url.includes("access_token")) return;
+    const fragment = url.includes("#") ? url.split("#")[1] : url.split("?")[1];
+    if (!fragment) return;
+    const params = new URLSearchParams(fragment);
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+    if (access_token && refresh_token) {
+      const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+      if (error) {
+        // Supabase rejected the tokens (expired, reused, malformed).
+        // The user is on a stale magic-link · drop them back at /auth
+        // with a query flag so auth.tsx can render a soft notice
+        // ("Este enlace ya caducó · pide uno nuevo.") rather than
+        // silently appearing un-logged-in with no explanation.
+        try {
+          router.replace("/auth?expired=1" as never);
+        } catch {
+          // router not ready yet · the user will see /auth on next paint
+          // without the expired flag · acceptable degradation.
+        }
+      }
+    }
+  } catch {
+    // URL parse / Supabase network error · stay on whatever screen the
+    // user was on. No crash, no error UI · silent recovery.
   }
 }
 
@@ -124,10 +146,14 @@ export default function RootLayout() {
   const [fontTimeout, setFontTimeout] = useState(false);
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
+    // Splash hides when fonts resolve · OR when the 8s timeout flag fires
+    // (slow CDN). Without the timeout branch the splash could stay up
+    // forever on a slow connection · the system-fallback fonts render is
+    // still preferable to a stuck splash. 2026-05-15.
+    if (fontsLoaded || fontError || fontTimeout) {
+      SplashScreen.hideAsync().catch(() => {});
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, fontTimeout]);
 
   useEffect(() => {
     const t = setTimeout(() => setFontTimeout(true), 8000);
@@ -135,8 +161,15 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    Linking.getInitialURL().then(url => { if (url) handleAuthUrl(url); });
-    const sub = Linking.addEventListener("url", ({ url }) => handleAuthUrl(url));
+    // Both branches catch any rejection · a malformed initial URL or a
+    // deep-link event with bad shape no longer logs an unhandled
+    // rejection / yellow box. 2026-05-15.
+    Linking.getInitialURL()
+      .then((url) => { if (url) handleAuthUrl(url); })
+      .catch(() => {});
+    const sub = Linking.addEventListener("url", ({ url }) => {
+      handleAuthUrl(url).catch(() => {});
+    });
     return () => sub.remove();
   }, []);
 
