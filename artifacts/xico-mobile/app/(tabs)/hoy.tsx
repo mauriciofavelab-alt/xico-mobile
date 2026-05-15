@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { Image, ScrollView, View, StyleSheet, Text } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { AppState, Image, ScrollView, View, StyleSheet, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { GlassMasthead, ColorBleedBackdrop } from "@/components/liquid-glass";
@@ -49,7 +49,18 @@ function dayLabel(): string {
 export default function HoyScreen() {
   const insets = useSafeAreaInsets();
   const despacho: Despacho = useMemo(() => getDespachoForToday(), []);
-  const todayLabel = useMemo(() => dayLabel(), []);
+  // dayLabel() captures `new Date()` at call time. If the app sits open past
+  // midnight, a useMemo([], ...) would leave "VIERNES 15 MAY" stale on
+  // Saturday morning. We re-derive on AppState `active` transitions so the
+  // masthead always reflects the current day after returning from background.
+  // Per diagnostic §E-1.
+  const [todayLabel, setTodayLabel] = useState<string>(() => dayLabel());
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (s) => {
+      if (s === "active") setTodayLabel(dayLabel());
+    });
+    return () => sub.remove();
+  }, []);
 
   return (
     <View style={[styles.root, { backgroundColor: Colors.background }]}>
