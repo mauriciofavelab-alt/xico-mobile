@@ -3,8 +3,7 @@ import * as Location from "expo-location";
 import { Platform } from "react-native";
 import { z } from "zod";
 
-import { API_BASE } from "@/constants/api";
-import { supabase } from "@/constants/supabase";
+import { API_BASE, getAuthHeaders } from "@/constants/api";
 
 /**
  * Zod schemas for the visit-token endpoint. Replaces the previous
@@ -71,11 +70,9 @@ const initial: VisitTokenState = {
   position: null,
 };
 
-async function authHeader(): Promise<Record<string, string>> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) return {};
-  return { Authorization: `Bearer ${session.access_token}` };
-}
+// Local `authHeader` was lifted to `getAuthHeaders` in `@/constants/api`
+// (2026-05-15 · Agent D · diagnostic-code.md §G-4 DRY pass). All callers
+// below now use the shared helper · 6 inline copies dropped to 1.
 
 export function useVisitToken(stopId: string | null | undefined) {
   const [state, setState] = useState<VisitTokenState>(initial);
@@ -97,7 +94,7 @@ export function useVisitToken(stopId: string | null | undefined) {
       if (!stopId || tokenRequestedRef.current) return;
       tokenRequestedRef.current = true;
       try {
-        const headers = await authHeader();
+        const headers = await getAuthHeaders();
         const res = await fetch(`${API_BASE}/api/ruta-stops/${stopId}/visit-token`, {
           method: "POST",
           headers: { ...headers, "Content-Type": "application/json" },

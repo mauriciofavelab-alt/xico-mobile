@@ -112,17 +112,24 @@ export default function OnboardingScreen() {
     if (!isReady) return;
     await AsyncStorage.setItem("xico_onboarding_done", "1");
     await AsyncStorage.setItem("xico_interests", JSON.stringify(selected));
-    // Sync interests to Supabase profile
+    // Sync interests to Supabase profile.
+    // DRY · 2026-05-15 (Agent D · diagnostic-code.md §G-4): the inline
+    // "fetch session, conditionally attach bearer" used to live here too ·
+    // now hits the shared `getAuthHeaders()` helper. When the user is
+    // anonymous, `getAuthHeaders()` returns `{}` and the fetch goes out
+    // without an Authorization header · the api-server's `/api/profile`
+    // PATCH 401s in that case, which the outer try/catch swallows (consistent
+    // with the previous behavior where the `if (session?.access_token)`
+    // guard simply skipped the call).
     try {
-      const { API_BASE } = await import("@/constants/api");
-      const { supabase } = await import("@/constants/supabase");
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
+      const { API_BASE, getAuthHeaders } = await import("@/constants/api");
+      const authHeaders = await getAuthHeaders();
+      if (authHeaders.Authorization) {
         await fetch(`${API_BASE}/api/profile`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+            ...authHeaders,
           },
           body: JSON.stringify({ interests: selected }),
         });

@@ -12,47 +12,29 @@
 import React from "react";
 import { useRouter, usePathname } from "expo-router";
 
-import { GlassTabBar, type TabItem } from "@/components/liquid-glass";
-import { Pillars } from "@/constants/colors";
+import { GlassTabBar } from "@/components/liquid-glass";
+import { useTabItems, type TabDescriptor } from "@/components/nav/tabItems";
+
+/**
+ * DRY · 2026-05-15 (Agent D · diagnostic-code.md §G-3): tab items used to be
+ * a 50-line inline array here AND another 33-line inline array in
+ * `app/(tabs)/_layout.tsx`. Both now consume `useTabItems()` from
+ * `components/nav/tabItems.ts`. Active-state strategy is the only thing
+ * each wrapper customizes · here, we use pathname-only (since this component
+ * renders on routes OUTSIDE the (tabs) group where the navigator state
+ * isn't available).
+ */
+function pathnameToActiveKey(pathname: string): TabDescriptor["key"] | null {
+  if (pathname.startsWith("/ruta")) return "ruta";
+  if (pathname === "/hoy" || pathname === "/") return "hoy";
+  if (pathname === "/tu-codice") return "tu-codice";
+  if (pathname === "/mapa") return "mapa";
+  return null;
+}
 
 export function ChromeTabBar() {
   const router = useRouter();
   const pathname = usePathname() ?? "";
-
-  const items: TabItem[] = [
-    {
-      key: "hoy",
-      label: "Hoy",
-      accentColor: Pillars.indice,
-      onPress: () => router.push("/hoy"),
-      isActive: pathname === "/hoy" || pathname === "/",
-      accessibilityLabel: "Hoy · El Despacho del día",
-    },
-    {
-      key: "ruta",
-      label: "La Ruta",
-      accentColor: Pillars.indice,
-      onPress: () => router.push("/ruta"),
-      isActive: pathname.startsWith("/ruta"),
-      accessibilityLabel: "La Ruta · paseo semanal",
-    },
-    {
-      key: "tu-codice",
-      label: "Tu Códice",
-      accentColor: Pillars.archivo,
-      onPress: () => router.push("/tu-codice"),
-      isActive: pathname === "/tu-codice",
-      accessibilityLabel: "Tu Códice · tu pasaporte personal",
-    },
-    {
-      key: "mapa",
-      label: "Mapa",
-      accentColor: Pillars.indice,
-      onPress: () => router.push("/mapa"),
-      isActive: pathname === "/mapa",
-      accessibilityLabel: "Mapa · paradas en Madrid",
-    },
-  ];
-
+  const items = useTabItems(router, pathnameToActiveKey(pathname));
   return <GlassTabBar items={items} />;
 }
