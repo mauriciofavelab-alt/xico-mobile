@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
+  withRepeat,
   withTiming,
   Easing,
   useReducedMotion,
@@ -14,6 +15,7 @@ import { Colors } from "@/constants/colors";
 import { Rumbos, RUMBO_ORDER, TIER_LABELS, type RumboSlug, type TierKey } from "@/constants/rumbos";
 import { Fonts, Hairline, Tracking, TypeSize } from "@/constants/editorial";
 import { GrainOverlay } from "./GrainOverlay";
+import { Shadow } from "@/constants/shadows";
 
 /**
  * Pasaporte de los Cuatro Rumbos · SVG rosetón.
@@ -215,6 +217,27 @@ export function Roseton(props: Props) {
       accessibilityLabel={summaryLabel}
     >
       <Animated.View style={[StyleSheet.absoluteFill, containerStyle]}>
+        {/* Petal glow layer · Apple-patterns §1.5 color-themed shadow.
+            One absolutely-positioned View per FILLED rumbo, casting an iOS
+            native colored shadow in that rumbo's hex. Sits UNDER the SVG so
+            the petal fill paints over the source View but the cast shadow
+            spreads outward, reading as a subtle color halo emerging from the
+            petal · the user's earned rumbo "glows quietly with its color."
+            iOS-only · Android's `elevation` doesn't tint, so the glow
+            disappears on Android (acceptable · XICO is iOS-first).
+            Reduced-motion respects: static peak glow, no pulse cycle. */}
+        {RUMBO_ORDER.filter((slug) => (distribution[slug] ?? 0) > 0).map((slug) => (
+          <PetalGlow
+            key={`glow-${slug}`}
+            slug={slug}
+            cx={cx}
+            cy={cy}
+            length={petalLength}
+            width={petalWidth}
+            rotation={PETAL_ROTATIONS[slug]}
+            reducedMotion={reducedMotion}
+          />
+        ))}
         <Svg
           width={size}
           height={size}
@@ -477,15 +500,124 @@ function Petal({
           transform="translate(0, 3)"
         />
       ) : null}
+      {/*
+       * Path opacity ⚠️ bug-fix · 2026-05-15 (Agent D · diagnostic-visual.md #2):
+       * the unfilled (ghost) case used to set the WHOLE path's opacity to 0,
+       * which multiplies through strokeOpacity → the hairline outline was
+       * invisible. Zero-state /tu-codice rendered the rosetón as a faint disc
+       * with "Iniciado 0" pasted on, the biggest single visual loss in the
+       * app per the visual diagnostic.
+       *
+       * Fix: keep path opacity at 1 for unfilled petals. The stroke now reads
+       * via its own strokeOpacity (0.4 for ghost rumbos that participate in
+       * the current view, 0.18 for "absent" rumbos that don't). The filled
+       * case still uses `filledOpacity` (0.55 + 0.31 × fillRatio) so a
+       * partially-earned petal stays visually distinct from a fully-earned one.
+       *
+       * Net effect: empty rosetón now reads as a four-petal cosmogram outline
+       * (~32% effective opacity from the stroke at hairline width) — quiet
+       * identity, present even before any sello. Brandbook §5 vibe restored.
+       */}
       <Path
         d={d}
         fill={hasFill ? color : "transparent"}
-        opacity={hasFill ? filledOpacity : 0}
+        opacity={hasFill ? filledOpacity : 1}
         stroke={hasFill ? color : Rumbos[slug].light}
         strokeWidth={hasFill ? 0 : Hairline.thin}
         strokeOpacity={hasFill ? 0 : (present ? 0.4 : 0.18)}
       />
     </G>
+  );
+}
+
+/**
+ * PetalGlow · color-themed halo emitted by a FILLED petal · Apple-patterns §1.5.
+ *
+ * One absolutely-positioned View per filled rumbo, sized roughly to the petal's
+ * almond shape and rotated to its cardinal direction. The View carries a native
+ * iOS `shadowColor: <rumbo hex>` with `Shadow.glow` opacity (55% at 16pt radius,
+ * zero offset = symmetric halo). The View itself is transparent; only its cast
+ * shadow is visible, painted in the rumbo's color. When the SVG petal Path
+ * paints over it, the user sees the rumbo's color radiating outward from the
+ * petal's footprint — the "your earned rumbo glows quietly" beat.
+ *
+ * Pulse: scale 0.94 → 1.06 over 4s, infinite reverse · subtle "alive" cadence
+ * that piggy-backs on the same 4s phrasing as HaloPulse. Under useReducedMotion
+ * the View renders at the peak scale (1.0) with no animation · same brightness,
+ * no movement.
+ *
+ * iOS-only · Android's `elevation` doesn't tint, so the glow is iOS-exclusive.
+ * That's acceptable since XICO is iOS-first and the rosetón is the emotional
+ * centerpiece of Tu Códice (iOS users get the full ceremony; Android users get
+ * an honest petal fill without the halo).
+ */
+function PetalGlow({
+  slug,
+  cx,
+  cy,
+  length,
+  width,
+  rotation,
+  reducedMotion,
+}: {
+  slug: RumboSlug;
+  cx: number;
+  cy: number;
+  length: number;
+  width: number;
+  rotation: number;
+  reducedMotion: boolean;
+}) {
+  const pulse = useSharedValue(1);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      pulse.value = 1;
+      return;
+    }
+    // 4s pulse · slow enough that it reads as breathing, not as flicker.
+    // Reverses smoothly via Reanimated's withRepeat(reverse=true).
+    pulse.value = withRepeat(
+      withTiming(1.06, { duration: 2000, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true,
+    );
+  }, [reducedMotion, pulse]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: pulse.value }],
+  }));
+
+  // The glow View sits at the petal's midpoint (radially out from center),
+  // sized smaller than the petal itself · the shadow does the chromatic
+  // spread, the View is just the source.
+  const midR = length * 0.55;
+  const angle = (rotation - 90) * (Math.PI / 180);
+  const px = cx + Math.cos(angle) * midR;
+  const py = cy + Math.sin(angle) * midR;
+  const glowSize = Math.max(width * 0.7, 12);
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: "absolute",
+          left: px - glowSize / 2,
+          top: py - glowSize / 2,
+          width: glowSize,
+          height: glowSize,
+          borderRadius: glowSize / 2,
+          // The View itself is invisible · only its cast shadow renders, in
+          // the rumbo's accent color.
+          backgroundColor: Rumbos[slug].hex,
+          opacity: 0.18,
+          ...Shadow.glow,
+          shadowColor: Rumbos[slug].hex,
+        },
+        style,
+      ]}
+    />
   );
 }
 
