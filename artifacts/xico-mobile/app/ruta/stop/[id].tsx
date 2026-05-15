@@ -43,7 +43,7 @@ import { GlifoMaya } from "@/components/GlifoMaya";
 import { ProgressRing } from "@/components/ruta/ProgressRing";
 import { StopVeil } from "@/components/ruta/StopVeil";
 import { XicoLoader } from "@/components/XicoLoader";
-import { fetchJson, API_BASE } from "@/constants/api";
+import { fetchJson, API_BASE, getAuthHeaders } from "@/constants/api";
 import { supabase } from "@/constants/supabase";
 import { useVisitToken } from "@/hooks/useVisitToken";
 import {
@@ -126,14 +126,18 @@ function useRumbos() {
 }
 
 async function postAnnotation(input: { ruta_stop_id: string; text: string }) {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw new Error(`Annotation failed: ${error.message}`);
-  const session = data.session;
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
+  // DRY · 2026-05-15 (Agent D · diagnostic-code.md §G-4): the previous
+  // implementation manually called supabase.auth.getSession() with a
+  // double-cast pattern · the diagnostic flagged it (§A-3) for hiding the
+  // error field on session expiry. The shared `getAuthHeaders()` helper
+  // returns `{}` when there's no session and the api-server cleanly 401s
+  // (or 403s if RLS denies) when no bearer is present · the outer mutation
+  // wrapper's onError handles surface · which is the same shape this used
+  // to throw with an opaque "Annotation failed" message.
+  const authHeaders = await getAuthHeaders();
   const res = await fetch(`${API_BASE}/api/ruta-stop-notes`, {
     method: "POST",
-    headers,
+    headers: { "Content-Type": "application/json", ...authHeaders },
     body: JSON.stringify(input),
   });
   if (!res.ok) throw new Error(`Annotation failed: ${res.status}`);
