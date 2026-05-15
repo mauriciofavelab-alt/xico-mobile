@@ -53,39 +53,36 @@ export default function HoyScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: Colors.background }]}>
-      {/* HERO PHOTO · 540pt full-bleed lugar photograph. When `lugar_image_url`
-          is set (Phase B sourced), the photo is the BASE layer; the gradient
-          tint + ColorBleed atmosphere stack on top for legibility. When the
-          field is undefined the gradient-only fallback reads on dark. */}
+      {/* HERO PHOTO · 460pt full-bleed lugar photograph. Rendered at low opacity
+          (Apple Music / Kinfolk pattern) so it functions as warm atmospheric
+          texture underneath the typography rather than a competing image. The
+          editorial composition reads first; the photograph supplies tonal
+          warmth and place-specificity. Photo also fades to transparent at its
+          bottom edge so the body text below sits on solid Colors.background. */}
       {despacho.lugar_image_url ? (
-        <Image
-          source={despacho.lugar_image_url}
-          style={styles.heroPhoto}
-          resizeMode="cover"
-          accessibilityIgnoresInvertColors
-          // No accessibilityLabel — the photo is decorative; the despacho
-          // text below carries the semantic content.
-          accessible={false}
-        />
-      ) : null}
-      {/* Dark tint over the photo (heavier when photo present so text reads). */}
-      <View
-        style={[
-          styles.heroGradientOverlay,
-          despacho.lugar_image_url ? styles.heroGradientOverlayWithPhoto : null,
-        ]}
-      />
-      {/* Bottom-to-top fade so the photo dissolves into the dark below the
-          hero text — keeps the body content reading on warm-dark, not photo. */}
-      {despacho.lugar_image_url ? (
-        <LinearGradient
-          colors={["transparent", "rgba(8,5,8,0.7)", Colors.background]}
-          start={{ x: 0.5, y: 0.55 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.heroPhotoFade}
-          pointerEvents="none"
-        />
-      ) : null}
+        <>
+          <Image
+            source={despacho.lugar_image_url}
+            style={[styles.heroPhoto, { opacity: 0.35 }]}
+            resizeMode="cover"
+            accessibilityIgnoresInvertColors
+            accessible={false}
+          />
+          {/* Bottom-edge fade · gradient from transparent through to the
+              background color so the photo dissolves into the dark canvas as
+              the user's eye reaches the body text region (Y ≈ 430-460pt). */}
+          <LinearGradient
+            colors={["transparent", "transparent", Colors.background]}
+            locations={[0, 0.75, 1]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.heroGradientOverlay}
+            pointerEvents="none"
+          />
+        </>
+      ) : (
+        <View style={styles.heroGradientOverlay} />
+      )}
       <ColorBleedBackdrop pillarColor={Pillars.indice} style={styles.bleedOverlay} />
 
       <ScrollView
@@ -294,21 +291,28 @@ function FeaturedArticlePlaceholder() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  // Hero photo region · confined to top 460pt (≈55% of 812pt iPhone viewport
+  // per spec §7.1 "50-60% of canvas"). Original 540pt extended into the body
+  // text region, leaving line 1-3 of the despacho paragraph unreadable over
+  // the photograph.
   heroPhoto: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 540,
+    height: 460,
     width: "100%",
     zIndex: 0,
   },
+  // Stronger photo fade · solid Colors.background at the bottom guarantees the
+  // body paragraph below the hero sits on a clean dark surface. Three-stop
+  // gradient: transparent at top, mid dark wash at 60%, full black at bottom.
   heroPhotoFade: {
     position: "absolute",
-    top: 280,
+    top: 200,
     left: 0,
     right: 0,
-    height: 260, // covers the lower portion of the 540pt hero
+    height: 260,
     zIndex: 1,
   },
   heroGradientOverlay: {
@@ -316,21 +320,21 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 540,
+    height: 460,
     backgroundColor: "rgba(8,5,8,0.4)",
     zIndex: 1,
   },
-  // When a photo is present we need a heavier veil for text legibility;
-  // editorial dark wash at 55% bleeds through warmly without flattening
-  // the photograph entirely. The 540pt height stays — same overlay region.
+  // When a photo is present the editorial wash sits at 60% (heavier than the
+  // 40% gradient-only baseline) to keep kicker + Nahuatlato + meaning all
+  // legible against any photograph in the corpus.
   heroGradientOverlayWithPhoto: {
-    backgroundColor: "rgba(8,5,8,0.55)",
+    backgroundColor: "rgba(8,5,8,0.6)",
   },
   bleedOverlay: {
     top: 0,
     left: 0,
     right: 0,
-    height: 540,
+    height: 460,
     zIndex: 1,
   },
   scrollContent: {
@@ -344,8 +348,10 @@ const styles = StyleSheet.create({
     letterSpacing: 2.5,
     textTransform: "uppercase",
     color: Colors.ochreLight, // gold-light · day's accent
-    textShadowColor: "rgba(0,0,0,0.6)",
-    textShadowRadius: 4,
+    // Stronger shadow on photo backdrops · 90% black + 8pt radius gives the
+    // tracked-caps a halo that survives any photograph in the lugar corpus.
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowRadius: 8,
     textShadowOffset: { width: 0, height: 1 },
     marginBottom: 16,
   },
@@ -375,13 +381,14 @@ const styles = StyleSheet.create({
     // Phase 9 (Task 9.2) · italic meaning is the line the user is reading,
     // not chrome. Scale it. The display name above it (Fraunces 42pt) and
     // the tracked lugarLabel below it stay fixed (design + chrome).
+    // Stronger shadow on photographic backdrops for legibility (90% black).
     fontFamily: "Newsreader_400Regular_Italic",
     fontSize: scaledFontSize(17),
     lineHeight: scaledFontSize(17) * 1.35,
     color: Colors.textSecondary,
     marginBottom: 22,
-    textShadowColor: "rgba(0,0,0,0.4)",
-    textShadowRadius: 3,
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowRadius: 6,
     textShadowOffset: { width: 0, height: 1 },
   },
   lugarRow: { marginBottom: 28 },
@@ -392,13 +399,19 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: Colors.textTertiary,
     marginBottom: 4,
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowRadius: 6,
+    textShadowOffset: { width: 0, height: 1 },
   },
   lugarName: {
     // Phase 9 (Task 9.2) · italic lugar name reads as continuation of the
-    // meaning line — same body-text treatment.
+    // meaning line — same body-text treatment + photo-legibility shadow.
     fontFamily: "Newsreader_400Regular_Italic",
     fontSize: scaledFontSize(14),
     color: Colors.textPrimary,
+    textShadowColor: "rgba(0,0,0,0.9)",
+    textShadowRadius: 6,
+    textShadowOffset: { width: 0, height: 1 },
   },
   ruleSpacing: {
     marginTop: 8,
