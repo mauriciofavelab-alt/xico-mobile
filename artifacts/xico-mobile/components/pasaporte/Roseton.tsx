@@ -155,6 +155,39 @@ export function Roseton(props: Props) {
 
   const isPresent = (slug: RumboSlug): boolean => (caps[slug] ?? 0) > 0;
 
+  // === Phase 9 (Task 9.3) · VoiceOver summary label ===
+  //
+  // Raw SVGs are invisible to assistive tech — by default VoiceOver users
+  // either skip the rosetón entirely or hear "Image" with no context. The
+  // petals and center disc already have their own labels (still useful for
+  // focused interaction), but the user also needs to hear an at-a-glance
+  // summary of the whole pasaporte when they first land on the component.
+  //
+  // The summary covers totals + rumbo coverage + state-aware framing:
+  //   lifetime → "Tu pasaporte: 2 de 13 sellos · 2 rumbos cubiertos · Iniciado"
+  //   week     → "Semana 19: 1 de 5 sellos · 1 rumbo cubierto" (or "Ruta
+  //              completa" when isComplete). Spanish copy per brand voice.
+  const summaryLabel = useMemo<string>(() => {
+    const rumbosCovered = RUMBO_ORDER.reduce(
+      (n, slug) => n + ((distribution[slug] ?? 0) > 0 ? 1 : 0),
+      0,
+    );
+    const rumboWord = rumbosCovered === 1 ? "rumbo cubierto" : "rumbos cubiertos";
+    if (isWeek) {
+      const wp = props as WeekProps;
+      const weekPrefix = wp.weekLabel ?? "Esta semana";
+      if (wp.isComplete) {
+        return `${weekPrefix}: ruta completa · ${wp.earnedStops} de ${wp.totalStops} sellos · ${rumbosCovered} ${rumboWord}`;
+      }
+      return `${weekPrefix}: ${wp.earnedStops} de ${wp.totalStops} sellos · ${rumbosCovered} ${rumboWord}`;
+    }
+    const lp = props as LifetimeProps;
+    const total = lp.totalSellos ?? 0;
+    const cap = RUMBO_ORDER.length * MAX_TICKS_PER_PETAL; // lifetime max ticks visible
+    const tier = TIER_LABELS[lp.tier ?? "iniciado"];
+    return `Tu pasaporte: ${total} de ${cap} sellos · ${rumbosCovered} ${rumboWord} · ${tier}`;
+  }, [props, isWeek, distribution]);
+
   // === Mount animation ===
   const mount = useSharedValue(0);
   const reducedMotion = useReducedMotion();
@@ -173,9 +206,25 @@ export function Roseton(props: Props) {
   }));
 
   return (
-    <View style={[styles.root, { width: size, height: size }]}>
+    <View
+      style={[styles.root, { width: size, height: size }]}
+      // Phase 9 (Task 9.3) · container label so VoiceOver users get a summary
+      // of the rosetón as a whole when they enter it. The petal + center
+      // Pressables below remain individually focusable for granular nav.
+      accessibilityRole="image"
+      accessibilityLabel={summaryLabel}
+    >
       <Animated.View style={[StyleSheet.absoluteFill, containerStyle]}>
-        <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <Svg
+          width={size}
+          height={size}
+          viewBox={`0 0 ${size} ${size}`}
+          // The SVG itself is decorative once the parent View carries the
+          // summary label — petal hit-areas + center disc handle interactive
+          // focus separately.
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
           {/* Petals · drawn first so ticks render above. Three visual states:
               absent (not in this view) · ghost (in view, not yet earned) ·
               filled (earned, opacity scales with earned-ratio in week mode). */}
