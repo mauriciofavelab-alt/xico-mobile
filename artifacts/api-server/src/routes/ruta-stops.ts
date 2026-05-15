@@ -46,6 +46,17 @@ router.post("/:id/visit-token", requireAuth, async (req, res) => {
     res.status(400).json({ error: "lat and lng (numbers) are required in body" });
     return;
   }
+  // Bound the coords to physical reality so haversine math + downstream checks
+  // never see garbage. NaN/Infinity also rejected (! Number.isFinite catches both).
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng) ||
+    lat < -90 || lat > 90 ||
+    lng < -180 || lng > 180
+  ) {
+    res.status(400).json({ error: "lat must be [-90,90], lng must be [-180,180]" });
+    return;
+  }
 
   // Fetch the stop with its lat/lng + apunte_in_situ (the geo-locked layer)
   const { data: stop, error: stopErr } = await supabase

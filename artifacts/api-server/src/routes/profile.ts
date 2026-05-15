@@ -2,6 +2,7 @@ import { Router, type Request } from "express";
 import { supabase } from "../supabase.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
 import { computeNarrationStyle } from "../utils/narrationStyle.js";
+import { validateInterests } from "../lib/interestsWhitelist.js";
 
 const router = Router();
 
@@ -58,7 +59,26 @@ router.get("/", requireAuth, async (req, res) => {
 
 router.patch("/", requireAuth, async (req, res) => {
   const userId = (req as Request & { userId: string }).userId;
-  const { name, interests } = req.body as { name?: string; interests?: string[] };
+  const { name, interests } = req.body as { name?: unknown; interests?: unknown };
+
+  // Validate name · length-cap to prevent abuse via huge display_name
+  if (name !== undefined) {
+    if (typeof name !== "string" || name.length > 80) {
+      res.status(400).json({ error: "name must be a string ≤ 80 chars" });
+      return;
+    }
+  }
+
+  // Validate interests against whitelist (legacy 8 + new 5 pillars)
+  let validatedInterests: string[] | undefined;
+  if (interests !== undefined) {
+    const result = validateInterests(interests);
+    if (result.ok === false) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+    validatedInterests = result.value;
+  }
 
   const { profile: existing } = await getOrCreateProfile(userId);
   if (!existing) {
@@ -68,9 +88,9 @@ router.patch("/", requireAuth, async (req, res) => {
 
   const updates: Record<string, unknown> = {};
   if (name !== undefined) updates.display_name = name;
-  if (interests !== undefined) {
-    updates.interests = interests;
-    updates.narration_style = computeNarrationStyle(interests);
+  if (validatedInterests !== undefined) {
+    updates.interests = validatedInterests;
+    updates.narration_style = computeNarrationStyle(validatedInterests);
   }
 
   const { data, error } = await supabase
