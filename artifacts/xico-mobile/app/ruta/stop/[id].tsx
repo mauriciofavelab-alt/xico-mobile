@@ -42,10 +42,15 @@ import { GlassMasthead, GlassChip } from "@/components/liquid-glass";
 import { GlifoMaya } from "@/components/GlifoMaya";
 import { ProgressRing } from "@/components/ruta/ProgressRing";
 import { StopVeil } from "@/components/ruta/StopVeil";
+import { XicoLoader } from "@/components/XicoLoader";
 import { fetchJson, API_BASE } from "@/constants/api";
 import { supabase } from "@/constants/supabase";
 import { useVisitToken } from "@/hooks/useVisitToken";
-import { useSelloMutation, type SelloEarnResult } from "@/hooks/useSelloMutation";
+import {
+  useSelloMutation,
+  SelloEarnError,
+  type SelloEarnResult,
+} from "@/hooks/useSelloMutation";
 import { useTypographyMode } from "@/hooks/useTypographyMode";
 import { useCurrentRuta } from "@/hooks/useCurrentRuta";
 import { findLugarImageByName } from "@/constants/despachos";
@@ -120,18 +125,19 @@ function useRumbos() {
   });
 }
 
-function postAnnotation(input: { ruta_stop_id: string; text: string }) {
-  return (supabase.auth.getSession() as Promise<{ data: { session: any } }>).then(async ({ data: { session } }: { data: { session: any } }) => {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
-    const res = await fetch(`${API_BASE}/api/ruta-stop-notes`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(input),
-    });
-    if (!res.ok) throw new Error(`Annotation failed: ${res.status}`);
-    return res.json();
+async function postAnnotation(input: { ruta_stop_id: string; text: string }) {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw new Error(`Annotation failed: ${error.message}`);
+  const session = data.session;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
+  const res = await fetch(`${API_BASE}/api/ruta-stop-notes`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(input),
   });
+  if (!res.ok) throw new Error(`Annotation failed: ${res.status}`);
+  return res.json();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -169,6 +175,31 @@ export default function StopScreen() {
   const [annotationDismissed, setAnnotationDismissed] = useState(false);
   const [tierUpInfo, setTierUpInfo] = useState<{ from: string; to: string } | null>(null);
   const haveFiredEarnRef = useRef(false);
+  // Soft notice copy shown to the user when sello-earn fails. Auto-dismisses
+  // after 4s. The state machine stays in `llegada` so the user can re-trigger
+  // by waiting through the next ring fill (or by stepping closer if the
+  // server reported `too_far`). Editorial register: Newsreader italic 14pt,
+  // no exclamation marks, no emoji.
+  const [selloErrorMessage, setSelloErrorMessage] = useState<string | null>(null);
+  // Captures every setTimeout handle we schedule so we can clear them on
+  // unmount / state-machine reset. Prevents stale-closure setState calls
+  // on a torn-down screen, and prevents haptics firing after navigation away.
+  // setTimeout returns `number` on RN (and `Timeout` on web) · ReturnType
+  // covers both without forcing an env-specific cast.
+  const pendingTimeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const pushTimeout = useCallback((handle: ReturnType<typeof setTimeout>) => {
+    pendingTimeoutsRef.current.push(handle);
+  }, []);
+
+  // Clear all pending timeouts on unmount so haptics + state writes never
+  // land on a torn-down component. Per diagnostic §C-1 these were
+  // un-cleaned-up before this fix.
+  useEffect(() => {
+    return () => {
+      for (const h of pendingTimeoutsRef.current) clearTimeout(h);
+      pendingTimeoutsRef.current = [];
+    };
+  }, []);
 
   // State 1 → 2: visit-token arrived means we're within 50m and server agreed
   useEffect(() => {
@@ -184,8 +215,8 @@ export default function StopScreen() {
 
     // Haptic ×3 spaced 80ms apart · ui-ux-pro-max touch rule + spec choreography
     Haptics.selectionAsync();
-    setTimeout(() => Haptics.selectionAsync(), 80);
-    setTimeout(() => Haptics.selectionAsync(), 160);
+    pushTimeout(setTimeout(() => Haptics.selectionAsync(), 80));
+    pushTimeout(setTimeout(() => Haptics.selectionAsync(), 160));
 
     selloMut.mutate(
       { visit_token: visit.visit_token, stop_id: stopId },
@@ -196,15 +227,47 @@ export default function StopScreen() {
             setTierUpInfo({ from: result.previous_tier, to: result.tier.tier });
           }
           // Advance to annotation after the sello-earn ceremony settles
-          setTimeout(() => setState("anotacion"), reducedMotion ? 0 : 1400);
+          pushTimeout(
+            setTimeout(() => setState("anotacion"), reducedMotion ? 0 : 1400),
+          );
         },
         onError: (e: unknown) => {
-          // Silent rollback per spec failure handling — soft notice in UI
-          console.warn("[stop] sello earn failed:", (e as Error).message);
+          // Silent rollback per spec failure handling · soft notice in UI.
+          // We stay in "llegada" so the user can retry (the ProgressRing's
+          // `active` is still true · once the next 30s fill completes,
+          // onRingComplete fires again because we reset haveFiredEarnRef
+          // below). Per diagnostic §B-2 the UI used to stick silently here.
+          console.warn(
+            "[stop] sello earn failed:",
+            e instanceof Error ? e.message : String(e),
+          );
+
+          // Reason-specific copy when the server told us why. `too_far` is
+          // the only reason where stepping closer fixes it · all other
+          // reasons (expired, invalid, too_soon replay, already_earned,
+          // network) get the neutral retry copy. Editorial register: no
+          // exclamation, no emoji, Newsreader italic.
+          let message = "No se pudo entregar el sello · vuelve a intentarlo en un momento.";
+          if (e instanceof SelloEarnError && e.reason === "too_far") {
+            message = "Acércate más al lugar para abrir el apunte.";
+          }
+          setSelloErrorMessage(message);
+
+          // Allow another attempt · the next ring-complete (or a manual
+          // retry path in a future iteration) will fire again. Without
+          // this reset the user would be permanently stuck after the
+          // first failure.
+          haveFiredEarnRef.current = false;
+
+          // Auto-dismiss after 4s so the user isn't trapped reading the
+          // notice. Tracked in `pendingTimeoutsRef` so unmount cleans it.
+          pushTimeout(
+            setTimeout(() => setSelloErrorMessage(null), 4000),
+          );
         },
       },
     );
-  }, [visit.visit_token, stopId, selloMut, reducedMotion]);
+  }, [visit.visit_token, stopId, selloMut, reducedMotion, pushTimeout]);
 
   // ─── Sello-earn animation: wax-seal medallion ──────────────────────────
   // The emotional peak of the app. Spring-physics stamp lands center-screen
@@ -317,9 +380,19 @@ export default function StopScreen() {
 
   // ─── Loading + error states ────────────────────────────────────────────
   if (!stopId || stop.isLoading) {
+    // Editorial loader · 2026-05-15 (Agent D · diagnostic-visual.md #4):
+    // Stop-screen loading used to flash the stock RN ActivityIndicator for
+    // ~5s before flipping to either content or error · jarring against the
+    // editorial register of every other surface. Swap to XicoLoader which is
+    // the same visual register as /article/[id]'s loading splash · users see
+    // a coherent loading-screen system across all three async routes.
+    // Note: ActivityIndicator is kept imported (line 3) because the inline
+    // "Guardando…" busy state on the annotation save button further down is
+    // a small in-button indicator, not a full-screen loader · XicoLoader's
+    // 36pt wordmark would not fit inside a button.
     return (
       <View style={[s.root, { paddingTop: insets.top, alignItems: "center", justifyContent: "center" }]}>
-        <ActivityIndicator color={Colors.textSecondary} />
+        <XicoLoader color={Colors.textSecondary} />
       </View>
     );
   }
@@ -504,6 +577,22 @@ export default function StopScreen() {
               {visit.apunte_in_situ}
             </Text>
           </Animated.View>
+        ) : null}
+
+        {/* Sello-earn soft notice · spec-aligned silent rollback. Renders
+            Newsreader italic 14pt secondary copy near the apunte/CTA region
+            when the mutation fails. State machine stays in `llegada` so the
+            user can retry · this notice tells them why (and auto-dismisses
+            after 4s, cleaned up on unmount). No exclamation, no emoji ·
+            editorial register, per diagnostic §B-2. */}
+        {selloErrorMessage ? (
+          <View
+            style={s.selloErrorNotice}
+            accessibilityLiveRegion="polite"
+            accessibilityRole="text"
+          >
+            <Text style={s.selloErrorNoticeText}>{selloErrorMessage}</Text>
+          </View>
         ) : null}
 
         <View style={s.body}>
@@ -749,23 +838,12 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  lockChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Space.xs,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderWidth: Hairline.thin,
-    borderColor: Colors.borderMedium,
-    backgroundColor: "rgba(8,5,8,0.5)",
-  },
-  lockChipText: {
-    fontFamily: Fonts.sansSemibold,
-    fontSize: TypeSize.micro,
-    color: Colors.textTertiary,
-    letterSpacing: Tracking.widest,
-    textTransform: "uppercase",
-  },
+  // Note · 2026-05-15 (Agent D · diagnostic-code.md §F-6):
+  // `lockChip` + `lockChipText` were the pre-spec-§7.3 inline lock-chip
+  // styles · replaced by `lockChipFloating` + `lockChipFloatingText` (below)
+  // which renders the chip as a floating glass element. Removed to keep the
+  // style sheet a contract with what renders.
+
   // Floating glass lock chip · spec §7.3 point 3.
   // Top offset = masthead top (81pt minimum) + masthead height (38pt) + 10pt gap.
   // Right-aligned with the same 16pt horizontal margin as GlassMasthead.
@@ -802,28 +880,11 @@ const s = StyleSheet.create({
     paddingTop: Space.lg,
     gap: Space.md,
   },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" },
-  orderNum: {
-    fontFamily: Fonts.serifLight,
-    fontSize: TypeSize.body,
-    color: Colors.textTertiary,
-    letterSpacing: Tracking.wider,
-  },
-  name: {
-    fontFamily: Fonts.serifMedium,
-    fontSize: TypeSize.display,
-    color: Colors.textPrimary,
-    letterSpacing: Tracking.tight,
-    lineHeight: TypeSize.display * 1.05,
-  },
-  address: {
-    fontFamily: Fonts.sansMedium,
-    fontSize: TypeSize.caption,
-    color: Colors.textTertiary,
-    letterSpacing: Tracking.wider,
-    textTransform: "uppercase",
-    marginTop: Space.xs,
-  },
+  // Note · 2026-05-15 (Agent D · diagnostic-code.md §F-6):
+  // `headerRow`, `orderNum`, `name`, `address` were the pre-spec-§7.3 stop
+  // header rendering · replaced by `stopNameBlock` + `stopFolio` + the
+  // monumental Fraunces 44pt name block below. The Phase 9 cleanup left them
+  // behind; removed now so the styles object reflects only what renders.
 
   // Phase 9 cleanup · `despachoBlock` / `despachoLabel` / `despachoText`
   // were the pre-Phase-4.2 plain-text despacho rendering. Phase 4.2 replaced
@@ -907,6 +968,24 @@ const s = StyleSheet.create({
     fontFamily: "Fraunces_600SemiBold",
     fontSize: 34,
     lineHeight: 34 * 0.85,
+  },
+
+  // Sello-earn soft notice · spec §"silent rollback per spec failure
+  // handling — soft notice in UI". Newsreader italic 14pt at textSecondary,
+  // no exclamation, no emoji. Sits near the apunte region so the user sees
+  // it in the same visual zone where the sello would have landed.
+  selloErrorNotice: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  selloErrorNoticeText: {
+    fontFamily: "Newsreader_400Regular_Italic",
+    fontStyle: "italic",
+    fontSize: 14,
+    lineHeight: 14 * 1.45,
+    color: Colors.textSecondary,
   },
 
   geoBlock: {
