@@ -10,8 +10,15 @@ web-build/
 expo-env.d.ts
 
 # Native
+# Note: `ios/` and `android/` ignore the Expo-prebuild output at the project
+# root. Local Expo Modules under `modules/<name>/ios/` are source-of-truth
+# and must be tracked. Same for `targets/*/` (handled by @bacons/apple-targets).
 ios/
+!/modules/*/ios/
+!/modules/*/ios/**
 android/
+!/modules/*/android/
+!/modules/*/android/**
 *.orig.*
 *.jks
 *.p8

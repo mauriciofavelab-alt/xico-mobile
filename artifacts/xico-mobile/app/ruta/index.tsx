@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors, Pillars } from "@/constants/colors";
@@ -15,7 +16,11 @@ import { useCurrentRuta, type RutaStopLite } from "@/hooks/useCurrentRuta";
 import { useTier } from "@/hooks/useTier";
 import { useSellos, type SelloRecord } from "@/hooks/useSellos";
 import { useTypographyMode } from "@/hooks/useTypographyMode";
+import { LiveActivity } from "@/modules/live-activity/src";
 import type { RumboSlug } from "@/constants/rumbos";
+
+/** AsyncStorage key for the active Ruta Live Activity id · Phase 7.2. */
+const ACTIVE_RUTA_ACTIVITY_KEY = "active_ruta_activity_id";
 
 /**
  * La Ruta de la semana · /ruta
@@ -103,6 +108,72 @@ export default function RutaIndex() {
   const stops = ruta.data?.stops ?? [];
   const totalStops = stops.length;
   const heroTitle = formatHeroTitle(totalStops);
+
+  // ── Live Activity (Phase 7.2) ──────────────────────────────────────────
+  // The Empezar button is the single saturated CTA on this screen (magenta
+  // pillar accent, same hue as the masthead live dot). It only renders when
+  // (a) we have an active Ruta with stops, (b) the user hasn't already
+  // started this week's Live Activity (we track the id in AsyncStorage),
+  // and (c) Live Activities are supported + enabled (checked at tap time
+  // rather than on mount, since the user can flip the Settings toggle).
+  const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
+  const [empezarBusy, setEmpezarBusy] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(ACTIVE_RUTA_ACTIVITY_KEY)
+      .then((v) => setActiveActivityId(v))
+      .catch(() => {
+        /* AsyncStorage failures shouldn't crash this surface · default to
+           "no active activity" so the Empezar button shows. */
+        setActiveActivityId(null);
+      });
+  }, []);
+
+  const handleEmpezarRuta = useCallback(async () => {
+    if (empezarBusy) return;
+    if (!ruta.data || stops.length === 0) return;
+    setEmpezarBusy(true);
+    try {
+      const enabled = await LiveActivity.areEnabled();
+      if (!enabled) {
+        Alert.alert(
+          "Live Activities desactivadas",
+          "Activa Live Activities en Ajustes para ver La Ruta en la Dynamic Island.",
+        );
+        return;
+      }
+      const first = stops[0];
+      const id = await LiveActivity.start({
+        attributes: {
+          weekKey: ruta.data.week_key ?? "",
+          editorName: ruta.data.editor_name ?? "",
+        },
+        contentState: {
+          stopsCompleted: 0,
+          stopsTotal: stops.length,
+          nextStopName: first.name,
+          nextStopDistanceM: 0,
+          nextStopRumboHex: first.rumbo?.color_hex ?? Pillars.indice,
+          rosetonState: [0, 0, 0, 0],
+        },
+      });
+      await AsyncStorage.setItem(ACTIVE_RUTA_ACTIVITY_KEY, id);
+      setActiveActivityId(id);
+    } catch (e) {
+      // Non-blocking · the user can keep using the app even if Live
+      // Activities fail. Surface the error so we get signal during
+      // TestFlight without a hard crash.
+      console.warn("[LiveActivity] start failed", e);
+      Alert.alert(
+        "No se pudo iniciar",
+        "La Dynamic Island no pudo arrancar esta vez. Puedes seguir caminando La Ruta normalmente.",
+      );
+    } finally {
+      setEmpezarBusy(false);
+    }
+  }, [empezarBusy, ruta.data, stops]);
+
+  const showEmpezar = !activeActivityId && !!ruta.data && stops.length > 0 && Platform.OS === "ios";
 
   // Tier byRumbo for the inline rosetón. useTier returns by_rumbo;
   // useSellos.data.by_rumbo is equivalent (both come from the same server
@@ -195,6 +266,33 @@ export default function RutaIndex() {
                 </View>
               </View>
             </RevealOnMount>
+
+            {/* Empezar La Ruta · Live Activity entry-point (Phase 7.2).
+                Single saturated CTA on the screen · pillar Indice magenta,
+                same hue as the masthead live dot · saturation discipline
+                anchor. Hidden once the Live Activity is running (AsyncStorage
+                check) so we don't double-start. iOS-only (no Live Activities
+                on web / Android). */}
+            {showEmpezar ? (
+              <RevealOnMount delay={420} duration={600}>
+                <Pressable
+                  onPress={handleEmpezarRuta}
+                  disabled={empezarBusy}
+                  style={({ pressed }) => [
+                    s.empezarBtn,
+                    pressed && s.empezarBtnPressed,
+                    empezarBusy && s.empezarBtnDisabled,
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel="Empezar La Ruta · activa la Dynamic Island"
+                  hitSlop={8}
+                >
+                  <Text style={s.empezarText}>
+                    {empezarBusy ? "INICIANDO…" : "EMPEZAR LA RUTA"}
+                  </Text>
+                </Pressable>
+              </RevealOnMount>
+            ) : null}
 
             {/* Stops · alternating featured / compact. mod-2 alternation
                 generalizes across any Ruta size (5 stops → F C F C F,
@@ -346,5 +444,41 @@ const s = StyleSheet.create({
   // by index parity in the map above. Each card owns its own rumbo accent.
   stopList: {
     marginTop: 4,
+  },
+
+  // Empezar La Ruta CTA · Phase 7.2. The one saturated button on the
+  // screen · pillar Indice magenta. Centered, generous tap target. Sits
+  // BELOW the rosetón inline state and ABOVE the stop list so the user
+  // reads through "this is the Ruta → here's your progress → start it now"
+  // top-to-bottom. Once tapped + activity is running, the button hides ·
+  // the Dynamic Island becomes the user's progress surface, the listing
+  // returns to read-only mode.
+  empezarBtn: {
+    backgroundColor: Pillars.indice,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 12,
+    alignSelf: "center",
+    marginTop: 8,
+    marginBottom: 28,
+    shadowColor: Pillars.indice,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  empezarBtnPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.985 }],
+  },
+  empezarBtnDisabled: {
+    opacity: 0.7,
+  },
+  empezarText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 11,
+    letterSpacing: 2,
+    color: "#FFFFFF",
+    textTransform: "uppercase",
   },
 });

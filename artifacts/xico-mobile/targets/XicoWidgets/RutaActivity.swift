@@ -20,6 +20,14 @@
 //
 //  Total state size well within the 4 KB Live Activity budget.
 //
+//  ⚠️ MUST STAY IN SYNC ⚠️
+//  This struct is duplicated in `modules/live-activity/ios/LiveActivityModule.swift`
+//  (the main-app side that calls Activity.request / update / end). The widget
+//  extension and the main-app target can't share a framework target without
+//  significantly more native scaffolding (deferred to v1.2). Codable encoding
+//  bridges the two by name + type; any drift here breaks the bridge silently
+//  at runtime. If you edit one, edit BOTH.
+//
 
 import ActivityKit
 import Foundation
