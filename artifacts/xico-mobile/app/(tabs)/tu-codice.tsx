@@ -3,19 +3,22 @@
 // family-name in current-rumbo color) + tier badge GlassChip.
 // Phase 3 Task 3.3 · hero rosetón (220pt, lifetime mode, withDropShadows)
 // wrapped in HaloPulse using the user's two dominant rumbo colors.
-// Carta del Equipo lands in Task 3.4.
+// Phase 3 Task 3.4 · stats row (sellos · guardados) in GlassCard +
+// Carta del Equipo glass-vibrant card with gold-accented drop cap.
 import React, { useMemo } from "react";
 import { ScrollView, View, Text, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { GlassMasthead, ColorBleedBackdrop, GlassChip, HaloPulse } from "@/components/liquid-glass";
+import { GlassMasthead, ColorBleedBackdrop, GlassChip, HaloPulse, GlassCard, GlassVibrant } from "@/components/liquid-glass";
 import { RevealOnMount } from "@/components/editorial/RevealOnMount";
 import { Roseton } from "@/components/pasaporte";
 import { Colors, Pillars } from "@/constants/colors";
 import { Rumbos, TIER_LABELS, type RumboSlug, type TierKey } from "@/constants/rumbos";
 import { useTier } from "@/hooks/useTier";
 import { useProfile } from "@/hooks/useProfile";
+import { useGuardados } from "@/hooks/useGuardados";
+import { useEditorLetter } from "@/hooks/useEditorLetter";
 
 /**
  * Derive `{ first, family }` from a display name or, failing that, an email.
@@ -87,10 +90,31 @@ function formatMemberSinceLabel(memberSinceYear: string | undefined): string {
   return formatter.format(now).toUpperCase();
 }
 
+/**
+ * Gold fallback accent for the Carta del Equipo card per spec §7.4 pt 10.
+ * The editor's own `accent_color` wins when it parses as a valid `#RRGGBB`;
+ * otherwise we render the brandbook gold (`#D4A030`) — Coyoacán kitchen ochre
+ * light variant — which is XICO's editorial gold across the system.
+ */
+const CARTA_FALLBACK_GOLD = "#D4A030";
+
+function isValidHex(c: string | undefined | null): c is string {
+  return !!c && /^#[0-9a-f]{6}$/i.test(c.trim());
+}
+
 export default function TuCodiceScreen() {
   const insets = useSafeAreaInsets();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: tier, isLoading: tierLoading } = useTier();
+  const { data: guardados } = useGuardados();
+
+  // The editor letter is interest-keyed on the server (NOT week-keyed, as the
+  // plan draft assumed). Use the user's first selected interest as the lookup
+  // key. If they have no interests, the hook short-circuits and returns
+  // undefined — the Carta block then hides per manifesto rule (no algorithmic
+  // placeholder copy).
+  const primaryInterest = profile?.interests?.[0];
+  const { data: editorLetter } = useEditorLetter(primaryInterest);
 
   const { first, family } = useMemo(
     () => deriveName(profile?.name, profile?.email),
@@ -130,6 +154,29 @@ export default function TuCodiceScreen() {
     () => formatMemberSinceLabel(profile?.memberSince),
     [profile?.memberSince],
   );
+
+  /**
+   * Carta del Equipo · letter body with seed-data `{interest}` placeholder
+   * substituted to the user's matched interest. Per seed.sql comment line 506,
+   * `{interest}` is the only placeholder used in v1.1 templates. We do a
+   * case-insensitive replace so future copy editors can write `{Interest}` or
+   * `{INTEREST}` without breaking rendering.
+   */
+  const letterText = useMemo(() => {
+    if (!editorLetter) return "";
+    return editorLetter.message_template.replace(/\{interest\}/gi, editorLetter.interest_match);
+  }, [editorLetter]);
+
+  /**
+   * Carta drop-cap + label accent. The editor's `accent_color` wins when
+   * present and parseable; brandbook gold `#D4A030` is the fallback per
+   * spec §7.4 pt 10. The accent appears on the kicker label AND the drop
+   * cap — saturation discipline is preserved because both chromatic moments
+   * sit inside the same vibrant card (counted as one editorial accent).
+   */
+  const cartaAccent = useMemo(() => {
+    return isValidHex(editorLetter?.accent_color) ? editorLetter!.accent_color : CARTA_FALLBACK_GOLD;
+  }, [editorLetter]);
 
   const showIdentity = !!profile && !profileLoading;
 
@@ -202,7 +249,55 @@ export default function TuCodiceScreen() {
           </View>
         </RevealOnMount>
 
-        {/* 3.4 · stats row + Carta del Equipo */}
+        {/* 7.4 pt 9 · Glass-deep stats row · sellos + guardados.
+            Spec calls for THREE stats (sellos · guardados · leídos) but
+            `articles_read` is not in the API or ProfileState yet — the
+            schema/API addition is deferred to v1.2 per Phase 3 scope.
+            Faking the count would violate the manifesto ("curated, not
+            algorithmic") so we ship two columns and add the third when
+            the backend lands. RevealOnMount index 4 · 1100ms beat. */}
+        <RevealOnMount index={4} delay={300} step={200} duration={700}>
+          <GlassCard style={styles.statsRow}>
+            <View style={styles.stat}>
+              <Text style={styles.statNum}>{tier?.total ?? 0}</Text>
+              <Text style={styles.statLabel}>sellos</Text>
+            </View>
+            <View style={styles.statSeparator} />
+            <View style={styles.stat}>
+              <Text style={styles.statNum}>{guardados?.length ?? 0}</Text>
+              <Text style={styles.statLabel}>guardados</Text>
+            </View>
+          </GlassCard>
+        </RevealOnMount>
+
+        {/* 7.4 pt 10-11 · Glass-vibrant Carta del Equipo. Only renders when
+            an editor letter is matched to the user's primary interest — the
+            manifesto's "curated not algorithmic" rule forbids a fallback
+            placeholder letter, so the screen reads as intentional (rosetón +
+            stats as a complete experience) when there is no curation.
+            v1.1 drop cap = oversized inline first character (React Native
+            constraint · no true hanging-initial typography). The cap reads
+            as a magazine pull-cap, which preserves the editorial feel.
+            RevealOnMount index 5 · 1300ms beat — last in the cascade so the
+            user reads the rosetón and stats first, then the editor's voice. */}
+        {editorLetter && letterText.length > 0 && (
+          <RevealOnMount index={5} delay={300} step={200} duration={700}>
+            <GlassVibrant style={styles.cartaCard}>
+              <Text style={[styles.cartaLabel, { color: cartaAccent }]}>
+                CARTA DEL EQUIPO
+              </Text>
+              <Text style={styles.cartaBody}>
+                <Text style={[styles.cartaDropCap, { color: cartaAccent }]}>
+                  {letterText.charAt(0)}
+                </Text>
+                {letterText.slice(1)}
+              </Text>
+              <Text style={styles.cartaByline}>
+                {`— ${editorLetter.editor_name} · ${editorLetter.editor_role.toLowerCase()}`}
+              </Text>
+            </GlassVibrant>
+          </RevealOnMount>
+        )}
       </ScrollView>
 
       <GlassMasthead
@@ -291,5 +386,79 @@ const styles = StyleSheet.create({
     letterSpacing: 1.8,
     textTransform: "uppercase",
     color: Colors.textPrimary,
+  },
+
+  // 7.4 pt 9 · Glass-deep stats row. Hairline vertical separator between
+  // columns (brandbook §2: hairline > shadow). Fraunces numerals with subtle
+  // text shadow so they stay readable over the backdrop + bleed.
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    marginBottom: 22,
+  },
+  stat: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statNum: {
+    fontFamily: "Fraunces_500Medium",
+    fontSize: 32,
+    lineHeight: 32,
+    letterSpacing: -0.015 * 32,
+    color: Colors.textPrimary,
+    textShadowColor: "rgba(0,0,0,0.4)",
+    textShadowRadius: 6,
+  },
+  statLabel: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 9,
+    letterSpacing: 1.8,
+    textTransform: "uppercase",
+    color: "rgba(245,239,227,0.55)",
+    marginTop: 6,
+  },
+  statSeparator: {
+    width: StyleSheet.hairlineWidth,
+    height: 32,
+    backgroundColor: "rgba(245,239,227,0.18)",
+  },
+
+  // 7.4 pt 10-11 · Glass-vibrant Carta del Equipo. The card's only chromatic
+  // moment is the gold (or editor accent) on the kicker + drop cap.
+  // Body text is Newsreader regular for editorial-letter intimacy. Byline is
+  // italic Newsreader, smaller, secondary text color.
+  cartaCard: {
+    marginBottom: 32,
+  },
+  cartaLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 9,
+    letterSpacing: 2.5,
+    textTransform: "uppercase",
+    // color set inline · editor accent or fallback gold #D4A030
+    textShadowColor: "rgba(0,0,0,0.4)",
+    textShadowRadius: 3,
+    marginBottom: 12,
+  },
+  cartaBody: {
+    fontFamily: "Newsreader_400Regular",
+    fontSize: 15,
+    lineHeight: 15 * 1.55,
+    color: Colors.textPrimary,
+  },
+  cartaDropCap: {
+    fontFamily: "Fraunces_500Medium",
+    fontSize: 48,
+    lineHeight: 48,
+    letterSpacing: -0.04 * 48,
+    // color set inline · matches kicker accent
+  },
+  cartaByline: {
+    fontFamily: "Newsreader_400Regular_Italic",
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 14,
   },
 });
