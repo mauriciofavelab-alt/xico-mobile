@@ -1,9 +1,31 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as Location from "expo-location";
 import { Platform } from "react-native";
+import { z } from "zod";
 
-import { fetchJson, API_BASE } from "@/constants/api";
+import { API_BASE } from "@/constants/api";
 import { supabase } from "@/constants/supabase";
+
+/**
+ * Zod schemas for the visit-token endpoint. Replaces the previous
+ * `(await res.json()) as any` cast. The success shape is strict; the
+ * error shape is permissive so unknown server reasons don't crash the
+ * parse — only documented branches (`too_far`) drive UI state.
+ */
+const VisitTokenSuccessSchema = z.object({
+  ok: z.literal(true),
+  visit_token: z.string(),
+  earliest_claim_ts: z.number().nullable().optional(),
+  apunte_in_situ: z.string().nullable().optional(),
+});
+
+const VisitTokenErrorSchema = z.object({
+  ok: z.literal(false).optional(),
+  reason: z.string().optional(),
+  error: z.string().optional(),
+  distance_m: z.number().optional(),
+  threshold_m: z.number().optional(),
+});
 
 /**
  * useVisitToken · subscribes to geo, requests POST /api/ruta-stops/:id/visit-token
@@ -81,26 +103,55 @@ export function useVisitToken(stopId: string | null | undefined) {
           headers: { ...headers, "Content-Type": "application/json" },
           body: JSON.stringify({ lat, lng }),
         });
-        const data = (await res.json()) as any;
-        if (res.ok && data?.ok && data?.visit_token) {
+
+        let rawBody: unknown;
+        try {
+          rawBody = await res.json();
+        } catch {
+          tokenRequestedRef.current = false;
+          setState((p) => ({ ...p, error: "Respuesta inválida del servidor" }));
+          return;
+        }
+
+        if (res.ok) {
+          const parsed = VisitTokenSuccessSchema.safeParse(rawBody);
+          if (parsed.success) {
+            setState((p) => ({
+              ...p,
+              apunte_in_situ: parsed.data.apunte_in_situ ?? null,
+              earliest_claim_ts: parsed.data.earliest_claim_ts ?? null,
+              visit_token: parsed.data.visit_token,
+              error: null,
+            }));
+            // Stop subscribing — we've crossed the threshold and have what we need.
+            if (watchSubRef.current) {
+              watchSubRef.current.remove();
+              watchSubRef.current = null;
+            }
+            return;
+          }
+          // 2xx with unexpected shape · don't strand the user silently.
+          tokenRequestedRef.current = false;
           setState((p) => ({
             ...p,
-            apunte_in_situ: data.apunte_in_situ ?? null,
-            earliest_claim_ts: data.earliest_claim_ts ?? null,
-            visit_token: data.visit_token,
-            error: null,
+            error: "Respuesta inesperada del servidor",
           }));
-          // Stop subscribing — we've crossed the threshold and have what we need.
-          if (watchSubRef.current) {
-            watchSubRef.current.remove();
-            watchSubRef.current = null;
-          }
-        } else if (res.status === 403 && data?.reason === "too_far") {
+          return;
+        }
+
+        // Non-2xx · parse the error shape permissively (unknown reasons are OK).
+        const errParsed = VisitTokenErrorSchema.safeParse(rawBody);
+        const errData = errParsed.success ? errParsed.data : null;
+
+        if (res.status === 403 && errData?.reason === "too_far") {
           tokenRequestedRef.current = false; // allow retry as user walks closer
-          setState((p) => ({ ...p, distance_m: data.distance_m ?? p.distance_m }));
+          setState((p) => ({ ...p, distance_m: errData.distance_m ?? p.distance_m }));
         } else {
           tokenRequestedRef.current = false;
-          setState((p) => ({ ...p, error: data?.error ?? "No se pudo emitir el visit-token" }));
+          setState((p) => ({
+            ...p,
+            error: errData?.error ?? "No se pudo emitir el visit-token",
+          }));
         }
       } catch (e: any) {
         tokenRequestedRef.current = false;
