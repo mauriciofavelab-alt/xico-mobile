@@ -22,6 +22,7 @@ import Animated, {
   Extrapolation,
   FadeIn,
   FadeInUp,
+  SlideInUp,
   interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -462,19 +463,28 @@ export default function StopScreen() {
           </Animated.View>
         ) : null}
 
-        <View style={s.body}>
-          {/* Apunte in situ · revealed when visit-token arrives */}
-          {state !== "en_camino" && visit.apunte_in_situ ? (
-            <Animated.View
-              entering={reducedMotion ? undefined : FadeInUp.duration(600).easing(Easing.bezier(0.22, 1, 0.36, 1))}
-              style={s.apunteBlock}
-            >
-              <View style={[s.apunteAccent, { backgroundColor: accent }]} />
-              <Text style={s.apunteLabel}>El apunte · in situ</Text>
-              <Text style={s.apunteText}>{visit.apunte_in_situ}</Text>
-            </Animated.View>
-          ) : null}
+        {/* Apunte card · spec §7.3 pt 9. The EMOTIONAL PEAK of the screen.
+            Reveals AFTER arrival (state !== "en_camino"), slide-up from below
+            with a longer 800ms editorial easing — María's voice arriving in
+            situ. SAME L1 surface + rumbo left-border + shadow.elevated as the
+            Despacho card (DRY · reuses `s.despachoCard`), but spaced 12pt
+            below and WITHOUT a drop cap — the Apunte is more intimate and
+            shorter, a drop cap would overstate it. Reduced-motion follows the
+            same `reducedMotion ? undefined : ...` pattern as every other
+            entering animation on this screen. */}
+        {state !== "en_camino" && visit.apunte_in_situ ? (
+          <Animated.View
+            entering={reducedMotion ? undefined : SlideInUp.duration(800).easing(Easing.bezier(0.22, 1, 0.36, 1))}
+            style={[s.despachoCard, { borderLeftColor: accent, marginTop: 12 }]}
+          >
+            <Text style={[s.cardLabel, { color: accent }]}>EL APUNTE · IN SITU</Text>
+            <Text style={[s.cardBody, { fontFamily: typo.bodyFontFamily, color: typo.bodyColor }]}>
+              {visit.apunte_in_situ}
+            </Text>
+          </Animated.View>
+        ) : null}
 
+        <View style={s.body}>
           {/* Permission / distance feedback for state=en_camino */}
           {state === "en_camino" ? (
             <View style={s.geoBlock}>
@@ -895,37 +905,6 @@ const s = StyleSheet.create({
     fontFamily: "Fraunces_600SemiBold",
     fontSize: 34,
     lineHeight: 34 * 0.85,
-  },
-
-  apunteBlock: {
-    marginTop: Space.xl,
-    paddingTop: Space.lg,
-    paddingHorizontal: Space.md,
-    paddingBottom: Space.lg,
-    backgroundColor: Colors.surface,
-    position: "relative",
-  },
-  apunteAccent: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    height: 2,
-    right: 0,
-  },
-  apunteLabel: {
-    fontFamily: Fonts.sansSemibold,
-    fontSize: TypeSize.micro,
-    color: Colors.textTertiary,
-    letterSpacing: Tracking.widest,
-    textTransform: "uppercase",
-    marginBottom: Space.sm,
-  },
-  apunteText: {
-    fontFamily: Fonts.serifItalic,
-    fontStyle: "italic",
-    fontSize: TypeSize.body + 1,
-    color: Colors.textPrimary,
-    lineHeight: (TypeSize.body + 1) * 1.7,
   },
 
   geoBlock: {
