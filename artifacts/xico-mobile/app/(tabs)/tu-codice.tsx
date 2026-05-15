@@ -353,6 +353,27 @@ export default function TuCodiceScreen() {
           </RevealOnMount>
         )}
 
+        {/* Ver introducción · re-runnable walkthrough entry point. 2026-05-15.
+            The walkthrough reads `?from=settings` and switches into re-run mode:
+            step 5 (interests · already saved) is skipped 4→6, and step 6
+            "Cerrar" closes via router.back() without clobbering the existing
+            onboarding flag or PATCHing Supabase. Italic Newsreader matches
+            the créditos footer treatment below · auxiliary navigation, not a
+            CTA. */}
+        <RevealOnMount index={6} delay={300} step={200} duration={700}>
+          <Pressable
+            onPress={() => router.push("/onboarding?from=settings" as any)}
+            accessibilityRole="link"
+            accessibilityLabel="Ver la introducción otra vez"
+            style={({ pressed }) => [styles.creditsLink, pressed && { opacity: 0.6 }]}
+            hitSlop={8}
+          >
+            <Text style={styles.creditsLinkText}>
+              Ver introducción otra vez →
+            </Text>
+          </Pressable>
+        </RevealOnMount>
+
         {/* Créditos link · CC BY-SA attribution surface required by ADR-003 +
             photo-sourcing-plan. Lives at the foot of Tu Códice as the natural
             "settings / pasaporte personal" location. Single italic line —
@@ -362,7 +383,7 @@ export default function TuCodiceScreen() {
             is intentionally NOT swapped to SpringPressable — the footer link
             reads as auxiliary navigation, and a spring/haptic would over-
             promote it. Plain opacity-fade is the editorial register here. */}
-        <RevealOnMount index={6} delay={300} step={200} duration={700}>
+        <RevealOnMount index={7} delay={300} step={200} duration={700}>
           <Pressable
             onPress={() => router.push("/credits" as any)}
             accessibilityRole="link"
