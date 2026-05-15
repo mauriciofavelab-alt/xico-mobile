@@ -16,6 +16,7 @@ import { TimeModeProvider } from "@/context/TimeModeContext";
 import { ReEntryWelcome } from "@/components/pasaporte";
 import { useLastOpen } from "@/hooks/useLastOpen";
 import { useSessionLifecycleEvents } from "@/hooks/useEmotionalEvent";
+import { useTierIcon } from "@/hooks/useTierIcon";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,6 +40,11 @@ function RootLayoutNav() {
 
   // Fire session_open / re_entry / late_night_open / quiet_return events.
   useSessionLifecycleEvents();
+
+  // Swap the iOS alternate app icon to match the user's current tier in
+  // the pasaporte ladder. iOS shows a one-time "Icon Changed" system alert;
+  // the hook dedupes by lastTier ref so we only swap on actual transitions.
+  useTierIcon();
 
   useEffect(() => {
     AsyncStorage.getItem("xico_onboarding_done").then(v => setOnboardingDone(!!v));
