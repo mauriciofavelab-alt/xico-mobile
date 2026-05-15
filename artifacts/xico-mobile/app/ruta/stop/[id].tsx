@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   Easing,
   Extrapolation,
+  FadeIn,
   FadeInUp,
   interpolate,
   useAnimatedScrollHandler,
@@ -36,6 +37,7 @@ import { Colors } from "@/constants/colors";
 import { Fonts, Hairline, Space, Tracking, TypeSize } from "@/constants/editorial";
 import { Rumbos, type RumboSlug } from "@/constants/rumbos";
 import { ByLine, Kicker, RevealOnMount } from "@/components/editorial";
+import { GlassMasthead, GlassChip } from "@/components/liquid-glass";
 import { GlifoMaya } from "@/components/GlifoMaya";
 import { ProgressRing } from "@/components/ruta/ProgressRing";
 import { StopVeil } from "@/components/ruta/StopVeil";
@@ -367,13 +369,11 @@ export default function StopScreen() {
             <Feather name="chevron-left" size={22} color={Colors.textPrimary} />
           </Pressable>
 
-          {/* Top-right: lock chip (state 1) → ring (state 2) → sello (state 3+) */}
-          {state === "en_camino" ? (
-            <View style={s.lockChip}>
-              <Feather name="lock" size={11} color={Colors.textTertiary} />
-              <Text style={s.lockChipText}>Apunte cerrado</Text>
-            </View>
-          ) : state === "llegada" ? (
+          {/* Top-right: ring (state 2) → sello (state 3+).
+              The "en_camino" lock chip is now rendered as a floating glass
+              chip OUTSIDE the ScrollView so it sits above the GlassMasthead
+              line · see end of file. */}
+          {state === "en_camino" ? null : state === "llegada" ? (
             <View style={s.ringWrap}>
               <ProgressRing
                 size={36}
@@ -529,6 +529,38 @@ export default function StopScreen() {
         ) : null}
       </Animated.ScrollView>
 
+      {/* Floating glass masthead · spec §7.3 point 2.
+          The live-dot uses the stop's rumbo color (this stop IS a rumbo
+          experience — not a generic accent). Total stops comes from
+          useCurrentRuta (already fetched · React Query dedupes); falls
+          back to "05" while the ruta data is in flight. */}
+      <GlassMasthead
+        label="XICO · LA RUTA · PARADA"
+        meta={`${String(stop.data?.order_num ?? 0).padStart(2, "0")} / ${String(totalStops ?? 5).padStart(2, "0")}`}
+        liveDotColor={accent}
+      />
+
+      {/* Floating glass lock chip · spec §7.3 point 3.
+          Only while user has not arrived (state === "en_camino"). Shows
+          live distance when geolocation has resolved one; otherwise the
+          neutral "Apunte cerrado" alone keeps the editorial register.
+          Reuses visit.distance_m · no new geolocation watch. */}
+      {state === "en_camino" ? (
+        <Animated.View
+          entering={reducedMotion ? undefined : FadeIn.duration(400).delay(200)}
+          style={[s.lockChipFloating, { top: Math.max(insets.top + 22, 81) + 38 + 10 }]}
+          pointerEvents="none"
+        >
+          <GlassChip minHeight={32}>
+            <Text style={s.lockChipFloatingText}>
+              {visit.distance_m != null
+                ? `Apunte cerrado · ${Math.round(visit.distance_m)}m`
+                : "Apunte cerrado"}
+            </Text>
+          </GlassChip>
+        </Animated.View>
+      ) : null}
+
       {/* Tier-up overlay · stacks on top once unlocked */}
       {tierUpInfo ? (
         <TierUpOverlay info={tierUpInfo} accent={accent} onDismiss={() => setTierUpInfo(null)} />
@@ -655,6 +687,21 @@ const s = StyleSheet.create({
     fontSize: TypeSize.micro,
     color: Colors.textTertiary,
     letterSpacing: Tracking.widest,
+    textTransform: "uppercase",
+  },
+  // Floating glass lock chip · spec §7.3 point 3.
+  // Top offset = masthead top (81pt minimum) + masthead height (38pt) + 10pt gap.
+  // Right-aligned with the same 16pt horizontal margin as GlassMasthead.
+  lockChipFloating: {
+    position: "absolute",
+    right: 16,
+    zIndex: 4,
+  },
+  lockChipFloatingText: {
+    fontFamily: Fonts.sansSemibold,
+    fontSize: TypeSize.micro,
+    color: Colors.textPrimary,
+    letterSpacing: Tracking.wider,
     textTransform: "uppercase",
   },
   ringWrap: {
