@@ -54,10 +54,13 @@ function RootLayoutNav() {
     if (loading || onboardingDone === null) return;
     // When the bundle was built without Supabase secrets (web brand preview /
     // unconfigured dev builds) the auth + onboarding flows are no-ops · skip
-    // straight into the editorial surfaces which fall back to local content.
-    // iOS production builds always have secrets, so this branch is dead there.
+    // them. iOS production builds always have secrets, so this branch is dead
+    // there. We don't redirect on every render — only when the user lands on
+    // a flow that is itself unreachable (/auth, /onboarding). Otherwise the
+    // user is free to navigate the editorial surfaces (/hoy, /ruta, etc.).
     if (!supabaseConfigured) {
-      router.replace("/(tabs)/hoy");
+      // No-op · let the user roam. The auth + onboarding screens still exist
+      // as routes (and gracefully render their UI), but nothing forces them.
       return;
     }
     if (!session) {

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "@/constants/api";
 import { useAuth } from "@/context/AuthContext";
+import { supabaseConfigured } from "@/constants/supabase";
 
 /**
  * Profile shape returned by GET /api/profile (see api-server/src/routes/profile.ts).
@@ -25,6 +26,29 @@ export type ProfileState = {
 };
 
 /**
+ * Synthetic "invitado" profile used when the bundle has no Supabase config
+ * (web brand preview, unconfigured dev builds). Keeps Tu Códice's identity
+ * block rendering so the editorial design demos correctly — falls through
+ * to the email-derivation pathway in `tu-codice.tsx` which produces "El
+ * códice de · Invitado". iOS production has Supabase so this branch never
+ * fires there.
+ */
+const PREVIEW_PROFILE: ProfileState = {
+  id: "preview",
+  auth_user_id: "preview",
+  name: "Invitado",
+  email: "invitado@xico.app",
+  interests: [],
+  narration_style: "neutral",
+  memberType: "invitado",
+  memberSince: String(new Date().getFullYear()),
+  city: "Madrid",
+  country: "ES",
+  points: 0,
+  streakDays: 0,
+};
+
+/**
  * Auth-gated React Query wrapper for the user profile.
  * Mirrors the pattern in useTier.ts (queryKey, enabled, staleTime).
  * Used by Tu Códice (§7.4 pt 5-6) for the editorial identity block.
@@ -32,9 +56,12 @@ export type ProfileState = {
 export function useProfile() {
   const { session } = useAuth();
   return useQuery<ProfileState>({
-    queryKey: ["profile"],
-    enabled: !!session,
+    queryKey: ["profile", supabaseConfigured ? "live" : "preview"],
+    enabled: supabaseConfigured ? !!session : true,
     staleTime: 60_000,
-    queryFn: () => fetchJson<ProfileState>("/api/profile"),
+    queryFn: async () => {
+      if (!supabaseConfigured) return PREVIEW_PROFILE;
+      return fetchJson<ProfileState>("/api/profile");
+    },
   });
 }

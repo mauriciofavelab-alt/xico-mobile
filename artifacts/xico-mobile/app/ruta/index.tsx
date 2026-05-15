@@ -9,6 +9,7 @@ import { Colors, Pillars } from "@/constants/colors";
 import { Fonts, Space, Tracking, TypeSize } from "@/constants/editorial";
 import { RevealOnMount } from "@/components/editorial";
 import { GlassMasthead } from "@/components/liquid-glass";
+import { ChromeTabBar } from "@/components/nav/ChromeTabBar";
 import { Roseton } from "@/components/pasaporte/Roseton";
 import { StopCardFeatured } from "@/components/ruta/StopCardFeatured";
 import { StopCardCompact } from "@/components/ruta/StopCardCompact";
@@ -349,6 +350,14 @@ export default function RutaIndex() {
         meta={ruta.data?.week_key === "2026-W19" ? "INAUGURAL" : undefined}
         liveDotColor={Pillars.indice}
       />
+
+      {/* Spec §7.2 pt 9 · floating glass tab bar with La Ruta active. /ruta
+          lives outside the (tabs) group so the navigator's tab bar doesn't
+          render here — we mount the standalone ChromeTabBar so the user
+          can switch tabs without backing out. /ruta/stop/[id] intentionally
+          does NOT include this (the Stop screen is the immersive showpiece
+          per spec §7.3). */}
+      <ChromeTabBar />
     </View>
   );
 }
