@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { StyleSheet, View, type ViewProps } from "react-native";
+import { Image, StyleSheet, View, type ImageSourcePropType, type ViewProps } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   Easing,
@@ -44,6 +44,11 @@ type Props = ViewProps & {
   /** Optional time-mode atmosphere wash (e.g. atardecer warm gold).
    *  Painted on top of the veil so it persists even after `lifted=true`. */
   atmosphereOverlay?: string | null;
+  /** Optional lugar photograph · sourced via despacho match. When present it
+   *  becomes the BASE layer below the rumbo wash + grain; a bottom-to-top
+   *  black gradient (60% at the foot, transparent at the top) ensures the
+   *  body composition below the hero still reads on warm-dark. */
+  photoSource?: ImageSourcePropType;
 };
 
 export function StopVeil({
@@ -51,6 +56,7 @@ export function StopVeil({
   lifted,
   height = 340,
   atmosphereOverlay,
+  photoSource,
   children,
   style,
   ...rest
@@ -75,17 +81,48 @@ export function StopVeil({
 
   return (
     <View style={[{ height, position: "relative", overflow: "hidden", backgroundColor: Colors.surface }, style]} {...rest}>
+      {/* Layer 1 · lugar photograph (optional) — sourced via Build #11 photo
+          program. Becomes the BASE; rumbo wash + grain + bottom black fade
+          stack on top so the rumbo identity reads through the image and the
+          body text below the hero stays legible. */}
+      {photoSource ? (
+        <Image
+          source={photoSource}
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+          accessible={false}
+          accessibilityIgnoresInvertColors
+        />
+      ) : null}
       {/* Layer 2 · rumbo accent wash — sets the place's color identity even
           before the veil lifts. Top 14% alpha fading to 4% at bottom gives a
-          subtle vertical light source feel without using shadow. */}
+          subtle vertical light source feel without using shadow. Stack
+          opacity drops by half when a photo is present so the picture reads,
+          not a flat color block. */}
       <LinearGradient
-        colors={[`${accent}24`, `${accent}14`, `${accent}0A`]}
+        colors={
+          photoSource
+            ? [`${accent}14`, `${accent}0A`, "transparent"]
+            : [`${accent}24`, `${accent}14`, `${accent}0A`]
+        }
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
       {/* Layer 3 · grain texture · brandbook §7.6 tactile print feel */}
       <GrainOverlay opacity={0.04} />
+      {/* Bottom-to-top black gradient — only when a photo is present.
+          Ensures the body text below the hero reads on warm-dark instead of
+          on top of an image edge. 60% at the foot per brief. */}
+      {photoSource ? (
+        <LinearGradient
+          colors={["transparent", "rgba(8,5,8,0.6)"]}
+          start={{ x: 0.5, y: 0.4 }}
+          end={{ x: 0.5, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+      ) : null}
 
       {/* Layer 4 · hero content (passed in by Stop screen) */}
       {children}

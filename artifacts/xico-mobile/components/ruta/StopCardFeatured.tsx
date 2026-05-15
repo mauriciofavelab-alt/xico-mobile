@@ -1,10 +1,11 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Colors } from "@/constants/colors";
 import { Rumbos, type RumboSlug } from "@/constants/rumbos";
 import { GlassChip } from "@/components/liquid-glass";
+import { findLugarImageByName } from "@/constants/despachos";
 
 /**
  * StopCardFeatured · Phase 4 Task 4.4 · spec §7.2 pt 7 (featured variant).
@@ -71,6 +72,7 @@ export function StopCardFeatured({
   const accentDim = rumbo?.dim ?? Colors.surfaceHigh;
   const { body: nameBody, punct: namePunct } = splitName(name);
   const folio = `${String(index).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+  const photoSource = findLugarImageByName(name);
 
   return (
     <Pressable
@@ -79,17 +81,31 @@ export function StopCardFeatured({
       accessibilityRole="button"
       accessibilityLabel={`Parada ${index} de ${total}: ${name}`}
     >
-      {/* PHOTO SLOT · rumbo-tinted gradient placeholder until per-stop
-          photos are sourced per ADR-003. Goes from rumbo `dim` (deep) →
-          L1 surface → rumbo hex hint at the corner — gives the surface
-          a directional sense of saturation without faking photography. */}
-      <LinearGradient
-        colors={[accentDim, Colors.surfaceHigh, `${accent}22`]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={s.heroPhoto}
-      >
-        {/* Kicker chip top-left · rumbo Nahuatl in rumbo color */}
+      {/* PHOTO SLOT · 200pt full-bleed lugar photograph when sourced (Build #11
+          photo program · see assets/lugares/). Falls back to a rumbo-tinted
+          gradient (dim → surface → accent hint) when no photo is matched —
+          the card still reads as a Ruta spread headline either way. */}
+      <View style={s.heroPhotoWrap}>
+        {photoSource ? (
+          <Image
+            source={photoSource}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+            accessible={false}
+            accessibilityIgnoresInvertColors
+          />
+        ) : null}
+        <LinearGradient
+          colors={
+            photoSource
+              ? ["rgba(8,5,8,0.0)", "rgba(8,5,8,0.45)", `${accent}22`]
+              : [accentDim, Colors.surfaceHigh, `${accent}22`]
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={s.heroPhotoOverlay}
+        >
+          {/* Kicker chip top-left · rumbo Nahuatl in rumbo color */}
         {rumbo && rumboNahuatl ? (
           <View style={s.kickerWrap}>
             <GlassChip tintColor={`${accent}30`} minHeight={26}>
@@ -101,11 +117,12 @@ export function StopCardFeatured({
           </View>
         ) : null}
 
-        {/* Folio top-right · tracked caps Inter (neutral) */}
-        <View style={s.folioWrap}>
-          <Text style={s.folioText}>{folio}</Text>
-        </View>
-      </LinearGradient>
+          {/* Folio top-right · tracked caps Inter (neutral) */}
+          <View style={s.folioWrap}>
+            <Text style={s.folioText}>{folio}</Text>
+          </View>
+        </LinearGradient>
+      </View>
 
       <View style={s.body}>
         <Text style={s.address}>{address.toUpperCase()}</Text>
@@ -149,12 +166,22 @@ const s = StyleSheet.create({
     elevation: 10,
   },
 
-  // PHOTO SLOT · 200pt full-bleed region. Once real per-stop photography
-  // is sourced, swap the LinearGradient for an <Image> with the same height
-  // + overflow:hidden parent. Kicker + folio overlay survive unchanged.
-  heroPhoto: {
+  // PHOTO SLOT · 200pt full-bleed region. Wrap holds the optional <Image>
+  // base layer (sized via absoluteFill below it) plus the gradient overlay
+  // that carries the kicker chip + folio. Overflow:hidden keeps the image
+  // bound to the card's rounded top corners.
+  heroPhotoWrap: {
     height: 200,
     width: "100%",
+    position: "relative",
+    overflow: "hidden",
+  },
+  heroPhotoOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     paddingHorizontal: 14,
     paddingVertical: 14,
     flexDirection: "row",

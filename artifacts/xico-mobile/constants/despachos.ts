@@ -1,3 +1,11 @@
+// `lugar_image_url` is the result of `require("@/assets/lugares/<file>.jpg")` ·
+// Metro statically resolves that into an opaque numeric handle. The runtime
+// type is `number` on native and `{ uri: string; width: number; height: number }`
+// on web · Image's `source` prop accepts both shapes. We avoid pulling in the
+// RN `ImageSourcePropType` import to keep this constants file
+// platform-agnostic (it's imported by widget code that runs outside RN too).
+export type LugarImageSource = number | { uri: string; width?: number; height?: number };
+
 export type Despacho = {
   numero: string;
   subtitulo: string;
@@ -8,6 +16,14 @@ export type Despacho = {
   hecho: string;
   pregunta: string;
   teaser: string;
+  /**
+   * Per-day full-bleed hero photograph · Phase B (Build #11).
+   * `undefined` means no photo authored yet — every consumer must render a
+   * gracefully degraded gradient fallback so the screen still reads on a
+   * Despacho without a sourced photo. Sources + attribution recorded in
+   * `assets/lugares/_credits.json` (see ADR-003).
+   */
+  lugar_image_url?: LugarImageSource;
 };
 
 export const DESPACHOS: Despacho[] = [
@@ -352,4 +368,32 @@ function getDayOfYear(date: Date): number {
 export function getDespachoForToday(): Despacho {
   const idx = getDayOfYear(new Date()) % DESPACHOS.length;
   return DESPACHOS[idx];
+}
+
+/**
+ * Best-effort lookup of a Despacho photo by lugar name. Used by Stop screen
+ * + StopCardFeatured to render lugar photography when the API doesn't carry
+ * a structured `photo_url` yet. Matching strategy: case-insensitive,
+ * accent-insensitive substring match on `lugar.nombre`. Returns the FIRST
+ * Despacho whose `lugar.nombre` matches — multiple despachos share venues
+ * (e.g. Casa de México appears 3×) but the same photo applies, so the first
+ * match is correct. Returns `undefined` when no match is found.
+ */
+const stripDiacritics = (s: string): string =>
+  s.normalize("NFD").replace(/\p{Diacritic}+/gu, "").toLowerCase();
+
+export function findLugarImageByName(name: string | null | undefined): LugarImageSource | undefined {
+  if (!name) return undefined;
+  const needle = stripDiacritics(name).trim();
+  if (!needle) return undefined;
+  for (const d of DESPACHOS) {
+    if (!d.lugar_image_url) continue;
+    const hay = stripDiacritics(d.lugar.nombre);
+    // Try exact, then either-direction substring (handles "Reina Sofía" ⇄
+    // "Museo Reina Sofía" + "Librería La Central del Reina Sofía").
+    if (hay === needle || hay.includes(needle) || needle.includes(hay)) {
+      return d.lugar_image_url;
+    }
+  }
+  return undefined;
 }

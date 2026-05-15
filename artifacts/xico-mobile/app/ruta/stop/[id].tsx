@@ -48,6 +48,7 @@ import { useVisitToken } from "@/hooks/useVisitToken";
 import { useSelloMutation, type SelloEarnResult } from "@/hooks/useSelloMutation";
 import { useTypographyMode } from "@/hooks/useTypographyMode";
 import { useCurrentRuta } from "@/hooks/useCurrentRuta";
+import { findLugarImageByName } from "@/constants/despachos";
 
 /**
  * Stop screen · /ruta/stop/[id]
@@ -370,7 +371,13 @@ export default function StopScreen() {
             live BELOW the hero in the body composition (spec §7.3 pts 4-8).
             Masthead floats above, lock chip floats top-right. */}
         <Animated.View style={heroParallaxStyle}>
-          <StopVeil accent={accent} lifted={veilLifted} height={340} atmosphereOverlay={typo.atmosphereOverlay} />
+          <StopVeil
+            accent={accent}
+            lifted={veilLifted}
+            height={340}
+            atmosphereOverlay={typo.atmosphereOverlay}
+            photoSource={findLugarImageByName(data.name)}
+          />
         </Animated.View>
 
         {/* Pinned controls · close (top-left) + state indicator (top-right).

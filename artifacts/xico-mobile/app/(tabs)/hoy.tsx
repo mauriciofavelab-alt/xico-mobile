@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { ScrollView, View, StyleSheet, Text } from "react-native";
+import { Image, ScrollView, View, StyleSheet, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { GlassMasthead, ColorBleedBackdrop } from "@/components/liquid-glass";
@@ -53,8 +53,39 @@ export default function HoyScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: Colors.background }]}>
-      {/* HERO PHOTO SLOT · per-day photos not yet authored — backdrop reads on dark. */}
-      <View style={styles.heroGradientOverlay} />
+      {/* HERO PHOTO · 540pt full-bleed lugar photograph. When `lugar_image_url`
+          is set (Phase B sourced), the photo is the BASE layer; the gradient
+          tint + ColorBleed atmosphere stack on top for legibility. When the
+          field is undefined the gradient-only fallback reads on dark. */}
+      {despacho.lugar_image_url ? (
+        <Image
+          source={despacho.lugar_image_url}
+          style={styles.heroPhoto}
+          resizeMode="cover"
+          accessibilityIgnoresInvertColors
+          // No accessibilityLabel — the photo is decorative; the despacho
+          // text below carries the semantic content.
+          accessible={false}
+        />
+      ) : null}
+      {/* Dark tint over the photo (heavier when photo present so text reads). */}
+      <View
+        style={[
+          styles.heroGradientOverlay,
+          despacho.lugar_image_url ? styles.heroGradientOverlayWithPhoto : null,
+        ]}
+      />
+      {/* Bottom-to-top fade so the photo dissolves into the dark below the
+          hero text — keeps the body content reading on warm-dark, not photo. */}
+      {despacho.lugar_image_url ? (
+        <LinearGradient
+          colors={["transparent", "rgba(8,5,8,0.7)", Colors.background]}
+          start={{ x: 0.5, y: 0.55 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.heroPhotoFade}
+          pointerEvents="none"
+        />
+      ) : null}
       <ColorBleedBackdrop pillarColor={Pillars.indice} style={styles.bleedOverlay} />
 
       <ScrollView
@@ -263,6 +294,23 @@ function FeaturedArticlePlaceholder() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  heroPhoto: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 540,
+    width: "100%",
+    zIndex: 0,
+  },
+  heroPhotoFade: {
+    position: "absolute",
+    top: 280,
+    left: 0,
+    right: 0,
+    height: 260, // covers the lower portion of the 540pt hero
+    zIndex: 1,
+  },
   heroGradientOverlay: {
     position: "absolute",
     top: 0,
@@ -271,6 +319,12 @@ const styles = StyleSheet.create({
     height: 540,
     backgroundColor: "rgba(8,5,8,0.4)",
     zIndex: 1,
+  },
+  // When a photo is present we need a heavier veil for text legibility;
+  // editorial dark wash at 55% bleeds through warmly without flattening
+  // the photograph entirely. The 540pt height stays — same overlay region.
+  heroGradientOverlayWithPhoto: {
+    backgroundColor: "rgba(8,5,8,0.55)",
   },
   bleedOverlay: {
     top: 0,

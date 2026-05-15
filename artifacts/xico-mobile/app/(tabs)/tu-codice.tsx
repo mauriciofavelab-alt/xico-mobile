@@ -6,9 +6,10 @@
 // Phase 3 Task 3.4 · stats row (sellos · guardados) in GlassCard +
 // Carta del Equipo glass-vibrant card with gold-accented drop cap.
 import React, { useMemo } from "react";
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import { Pressable, ScrollView, View, Text, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 
 import { GlassMasthead, ColorBleedBackdrop, GlassChip, HaloPulse, GlassCard, GlassVibrant } from "@/components/liquid-glass";
 import { RevealOnMount } from "@/components/editorial/RevealOnMount";
@@ -299,6 +300,26 @@ export default function TuCodiceScreen() {
             </GlassVibrant>
           </RevealOnMount>
         )}
+
+        {/* Créditos link · CC BY-SA attribution surface required by ADR-003 +
+            photo-sourcing-plan. Lives at the foot of Tu Códice as the natural
+            "settings / pasaporte personal" location. Single italic line —
+            no chrome button — keeps the editorial register and matches the
+            footer treatment of magazines that credit their photographers in
+            small italics at the back. */}
+        <RevealOnMount index={6} delay={300} step={200} duration={700}>
+          <Pressable
+            onPress={() => router.push("/credits" as any)}
+            accessibilityRole="link"
+            accessibilityLabel="Ver créditos · fotografía y licencias"
+            style={({ pressed }) => [styles.creditsLink, pressed && { opacity: 0.6 }]}
+            hitSlop={8}
+          >
+            <Text style={styles.creditsLinkText}>
+              Créditos · fotografía y licencias →
+            </Text>
+          </Pressable>
+        </RevealOnMount>
       </ScrollView>
 
       <GlassMasthead
@@ -464,5 +485,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textSecondary,
     marginTop: 14,
+  },
+
+  // Créditos footer link · italic Newsreader at body-meta scale. Single line,
+  // tinted secondary so it reads as auxiliary navigation, not a CTA.
+  creditsLink: {
+    marginTop: 8,
+    paddingVertical: 12,
+    minHeight: 44, // touch target
+    justifyContent: "center",
+  },
+  creditsLinkText: {
+    fontFamily: "Newsreader_400Regular_Italic",
+    fontStyle: "italic",
+    fontSize: 13,
+    color: "rgba(245,239,227,0.55)",
+    letterSpacing: 0.2,
   },
 });
