@@ -1,5 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { AppState, Image, ScrollView, View, StyleSheet, Text } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { AppState, Image, RefreshControl, View, StyleSheet, Text } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { GlassMasthead, ColorBleedBackdrop } from "@/components/liquid-glass";
@@ -62,6 +66,39 @@ export default function HoyScreen() {
     return () => sub.remove();
   }, []);
 
+  // Scroll-driven masthead blur (Apple-patterns §4.7) — the chrome thickens
+  // as the user scrolls content underneath. scrollY is captured by the
+  // worklet on the UI thread and shared with the GlassMasthead, which
+  // interpolates blur intensity + bg tint over the first 120pt of scroll.
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      scrollY.value = e.contentOffset.y;
+    },
+  });
+
+  // Pull-to-refresh (Apple-patterns §4.5) — Hoy currently reads the
+  // local-only despacho corpus per ADR-001, so onRefresh re-derives the
+  // day label + lightly bumps the today getter to surface any AppState-
+  // missed midnight crossing. Cheap, table-stakes affordance — the spinner
+  // tint is pillar magenta (Indice) so it matches the surface chromatic
+  // anchor on Hoy.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Refresh day label · the despacho is a memo by-day, but rendering
+      // the new label is a visible signal that the pull worked.
+      setTodayLabel(dayLabel());
+      // 600ms theatre · long enough that the user sees the spinner do its
+      // work, short enough that it never feels broken. Real backend
+      // refetches land here when the editor-admin path ships per ADR-001.
+      await new Promise((r) => setTimeout(r, 600));
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
   return (
     <View style={[styles.root, { backgroundColor: Colors.background }]}>
       {/* HERO PHOTO · 460pt full-bleed lugar photograph. Rendered at low opacity
@@ -96,12 +133,22 @@ export default function HoyScreen() {
       )}
       <ColorBleedBackdrop pillarColor={Pillars.indice} style={styles.bleedOverlay} />
 
-      <ScrollView
+      <Animated.ScrollView
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + 100 },
         ]}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Pillars.indice}
+            colors={[Pillars.indice]}
+          />
+        }
       >
         <HeroBlock despacho={despacho} />
 
@@ -118,12 +165,29 @@ export default function HoyScreen() {
           <RutaHeroCardInline />
         </RevealOnMount>
 
-        {/* Section opener — "EL EQUIPO TE PROPONE" */}
+        {/*
+         * Section opener — "EL EQUIPO TE PROPONE"
+         *
+         * Saturation-discipline fix · 2026-05-15 (Agent D · diagnostic-visual.md #5):
+         * the surface used to stack THREE saturated accents on a single 1000px
+         * scroll — magenta (despacho kicker + Ruta L-border) → magenta SectionOpener
+         * → cobalt (FeaturedArticle L-border + kicker chip), with the ochre
+         * day-color hit on `Nahuatlato.` at the top. Brandbook §6 says one
+         * saturated hit per surface section.
+         *
+         * Resolution: the SectionOpener is editorial chrome BETWEEN two accented
+         * cards · it should be a neutral connector, not a third magenta hit.
+         * Demoting `accent` to Colors.textTertiary keeps the serial number `01`,
+         * the rule, and the label legible while letting the Ruta card (magenta)
+         * and the Featured article (cobalt) own their respective saturated hits.
+         * The scroll now reads: magenta (Ruta) → neutral (section opener) →
+         * cobalt (Featured) — clean handoff.
+         */}
         <RevealOnMount delay={1150} duration={600}>
           <SectionOpener
             serial={1}
             label="El equipo te propone"
-            accent={Pillars.indice}
+            accent={Colors.textTertiary}
             style={styles.sectionOpenerSpacing}
           />
         </RevealOnMount>
@@ -132,12 +196,13 @@ export default function HoyScreen() {
         <RevealOnMount delay={1300} duration={700}>
           <FeaturedArticlePlaceholder />
         </RevealOnMount>
-      </ScrollView>
+      </Animated.ScrollView>
 
       <GlassMasthead
         label="XICO · HOY"
         meta={todayLabel}
         liveDotColor={despacho.color.hex}
+        scrollY={scrollY}
       />
     </View>
   );
@@ -315,17 +380,6 @@ const styles = StyleSheet.create({
     width: "100%",
     zIndex: 0,
   },
-  // Stronger photo fade · solid Colors.background at the bottom guarantees the
-  // body paragraph below the hero sits on a clean dark surface. Three-stop
-  // gradient: transparent at top, mid dark wash at 60%, full black at bottom.
-  heroPhotoFade: {
-    position: "absolute",
-    top: 200,
-    left: 0,
-    right: 0,
-    height: 260,
-    zIndex: 1,
-  },
   heroGradientOverlay: {
     position: "absolute",
     top: 0,
@@ -335,12 +389,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(8,5,8,0.4)",
     zIndex: 1,
   },
-  // When a photo is present the editorial wash sits at 60% (heavier than the
-  // 40% gradient-only baseline) to keep kicker + Nahuatlato + meaning all
-  // legible against any photograph in the corpus.
-  heroGradientOverlayWithPhoto: {
-    backgroundColor: "rgba(8,5,8,0.6)",
-  },
+  // Note · 2026-05-15 (Agent D · diagnostic-code.md §F-6):
+  // `heroPhotoFade` and `heroGradientOverlayWithPhoto` style entries used to
+  // live here but had no consumers · the photo fade is now handled inline
+  // via the LinearGradient at the top of the screen (locations stops do the
+  // work). Removed to keep the styles object as a contract with what renders.
   bleedOverlay: {
     top: 0,
     left: 0,

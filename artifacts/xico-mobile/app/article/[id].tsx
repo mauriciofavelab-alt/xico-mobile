@@ -41,6 +41,8 @@ import {
   Rule,
   Standfirst,
 } from "@/components/editorial";
+import { SpringPressable } from "@/components/primitives";
+import { haptic } from "@/constants/haptics";
 
 type ApiArticle = {
   id: string; slug?: string; title?: string; subtitle?: string;
@@ -263,6 +265,9 @@ export default function ArticleScreen() {
   const toggleSave = async () => {
     if (!article) return;
     const wasSaved = saved;
+    // Light impact haptic on toggle · per manifesto "lo importante es lo que
+    // guardas." Save is a ritual moment · the haptic gives it weight.
+    haptic.impactLight();
     setSaved(!wasSaved);
     try {
       await fetchJson(`/api/saved/${article.id}`, { method: wasSaved ? "DELETE" : "POST" });
@@ -366,6 +371,14 @@ export default function ArticleScreen() {
               // below the DI cutout on iPhone 14/15/16 Pro, while the 81pt floor
               // protects older safe-area-only devices.
               style={[s.backBtn, { top: Math.max(topPad + 22, 81) }]}
+              // A11y · 2026-05-15 (Agent D · diagnostic-code.md §D-3):
+              // icon-only Pressable with no label. VoiceOver users heard
+              // nothing on focus · article had no escape affordance from the
+              // back arrow surface. Apple HIG mandates a label on every
+              // standalone navigation arrow, even when the system swipe-back
+              // covers the affordance for sighted users.
+              accessibilityRole="button"
+              accessibilityLabel="Volver"
             >
               <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} />
               <Feather name="arrow-left" size={18} color="rgba(255,255,255,0.9)" />
@@ -421,14 +434,28 @@ export default function ArticleScreen() {
 
           <RevealOnMount index={6}>
             <View style={s.actionsRow}>
-              <Pressable onPress={toggleSave} style={({ pressed }) => [s.actionBtn, pressed && { opacity: 0.6 }]}>
+              <SpringPressable
+                onPress={toggleSave}
+                style={s.actionBtn}
+                accessibilityRole="button"
+                accessibilityLabel={saved ? "Guardado · toca para quitar de tus guardados" : "Guardar artículo"}
+                // The light-impact haptic fires in toggleSave (state-aware
+                // weight) · SpringPressable's default selection would step on
+                // it. null here keeps only the toggleSave haptic.
+                haptic={null}
+              >
                 <Feather name="bookmark" size={16} color={saved ? accent : "rgba(255,255,255,0.3)"} />
                 <Text style={[s.actionLabel, saved && { color: accent }]}>{saved ? "Guardado" : "Guardar"}</Text>
-              </Pressable>
-              <Pressable onPress={handleShare} style={({ pressed }) => [s.actionBtn, pressed && { opacity: 0.6 }]}>
+              </SpringPressable>
+              <SpringPressable
+                onPress={handleShare}
+                style={s.actionBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Compartir artículo"
+              >
                 <Feather name="share" size={16} color="rgba(255,255,255,0.3)" />
                 <Text style={s.actionLabel}>Compartir</Text>
-              </Pressable>
+              </SpringPressable>
             </View>
           </RevealOnMount>
 
@@ -452,9 +479,11 @@ export default function ArticleScreen() {
           </View>
 
           {nextArticle && (
-            <Pressable
+            <SpringPressable
               onPress={() => router.push(`/article/${nextArticle.id}` as any)}
-              style={({ pressed }) => [s.nextCard, pressed && { opacity: 0.85 }]}
+              style={s.nextCard}
+              accessibilityRole="button"
+              accessibilityLabel={`Continúa leyendo · ${nextArticle.title}`}
             >
               <Text style={s.nextEye}>CONTINÚA LEYENDO</Text>
               <View style={s.nextInner}>
@@ -470,7 +499,7 @@ export default function ArticleScreen() {
                   )}
                 </View>
               </View>
-            </Pressable>
+            </SpringPressable>
           )}
 
           <Pressable

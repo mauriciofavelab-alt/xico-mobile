@@ -5,8 +5,12 @@
 // wrapped in HaloPulse using the user's two dominant rumbo colors.
 // Phase 3 Task 3.4 · stats row (sellos · guardados) in GlassCard +
 // Carta del Equipo glass-vibrant card with gold-accented drop cap.
-import React, { useMemo } from "react";
-import { Image, Pressable, ScrollView, View, Text, StyleSheet } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { Image, Pressable, RefreshControl, View, Text, StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
@@ -111,9 +115,12 @@ function isValidHex(c: string | undefined | null): c is string {
 
 export default function TuCodiceScreen() {
   const insets = useSafeAreaInsets();
-  const { data: profile, isLoading: profileLoading } = useProfile();
-  const { data: tier, isLoading: tierLoading } = useTier();
-  const { data: guardados } = useGuardados();
+  const profileQ = useProfile();
+  const tierQ = useTier();
+  const guardadosQ = useGuardados();
+  const { data: profile, isLoading: profileLoading } = profileQ;
+  const { data: tier, isLoading: tierLoading } = tierQ;
+  const { data: guardados } = guardadosQ;
 
   // The editor letter is interest-keyed on the server (NOT week-keyed, as the
   // plan draft assumed). Use the user's first selected interest as the lookup
@@ -121,7 +128,35 @@ export default function TuCodiceScreen() {
   // undefined — the Carta block then hides per manifesto rule (no algorithmic
   // placeholder copy).
   const primaryInterest = profile?.interests?.[0];
-  const { data: editorLetter } = useEditorLetter(primaryInterest);
+  const editorLetterQ = useEditorLetter(primaryInterest);
+  const { data: editorLetter } = editorLetterQ;
+
+  // Scroll-driven masthead blur (Apple-patterns §4.7) · chrome thickens
+  // as content scrolls underneath. UI-thread worklet via Reanimated.
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      scrollY.value = e.contentOffset.y;
+    },
+  });
+
+  // Pull-to-refresh (Apple-patterns §4.5) · refetches the four hooks that
+  // back this screen. Tint = archivo-verde (Tu Códice's pillar accent), the
+  // canonical chromatic moment for this surface.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        profileQ.refetch(),
+        tierQ.refetch(),
+        guardadosQ.refetch(),
+        editorLetterQ.refetch(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [profileQ, tierQ, guardadosQ, editorLetterQ]);
 
   const { first, family } = useMemo(
     () => deriveName(profile?.name, profile?.email),
@@ -204,9 +239,19 @@ export default function TuCodiceScreen() {
       {/* Three-radial color bleed · tier-driven via useColorBleed; pillar accent = Archivo verde */}
       <ColorBleedBackdrop pillarColor={Pillars.archivo} style={styles.bleedOverlay} />
 
-      <ScrollView
+      <Animated.ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Pillars.archivo}
+            colors={[Pillars.archivo]}
+          />
+        }
       >
         {/* 7.4 pt 5-7 · Identity block + tier badge */}
         {showIdentity && (
@@ -313,7 +358,10 @@ export default function TuCodiceScreen() {
             "settings / pasaporte personal" location. Single italic line —
             no chrome button — keeps the editorial register and matches the
             footer treatment of magazines that credit their photographers in
-            small italics at the back. */}
+            small italics at the back. Per the spec scope note this Pressable
+            is intentionally NOT swapped to SpringPressable — the footer link
+            reads as auxiliary navigation, and a spring/haptic would over-
+            promote it. Plain opacity-fade is the editorial register here. */}
         <RevealOnMount index={6} delay={300} step={200} duration={700}>
           <Pressable
             onPress={() => router.push("/credits" as any)}
@@ -327,12 +375,13 @@ export default function TuCodiceScreen() {
             </Text>
           </Pressable>
         </RevealOnMount>
-      </ScrollView>
+      </Animated.ScrollView>
 
       <GlassMasthead
         label="XICO · TU CÓDICE"
         meta="FOLIO #1"
         liveDotColor={Rumbos.center.hex}
+        scrollY={scrollY}
       />
     </View>
   );

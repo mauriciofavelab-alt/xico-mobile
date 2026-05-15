@@ -1,9 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Platform, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
+import { XicoLoader } from "@/components/XicoLoader";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { SpringPressable } from "@/components/primitives";
+import { haptic } from "@/constants/haptics";
 
 import { Colors, Pillars } from "@/constants/colors";
 import { Fonts, Space, Tracking, TypeSize } from "@/constants/editorial";
@@ -96,6 +104,27 @@ export default function RutaIndex() {
   const tier = useTier();
   const sellos = useSellos();
   const typo = useTypographyMode();
+
+  // Scroll-driven masthead blur (Apple-patterns §4.7) · UI-thread worklet.
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      scrollY.value = e.contentOffset.y;
+    },
+  });
+
+  // Pull-to-refresh (Apple-patterns §4.5) · refetches Ruta + sellos. Tint =
+  // magenta (Pillars.indice) — La Ruta lives under the Indice pillar surface,
+  // matches the masthead live dot.
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([ruta.refetch(), sellos.refetch(), tier.refetch()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [ruta, sellos, tier]);
 
   // Stop-precise earned set. useSellos hits GET /api/sellos-rumbo which
   // returns the user's full sello list with ruta_stop_id per row.
@@ -205,7 +234,7 @@ export default function RutaIndex() {
         <Feather name="chevron-left" size={22} color={Colors.textSecondary} />
       </Pressable>
 
-      <ScrollView
+      <Animated.ScrollView
         contentContainerStyle={{
           // GlassMasthead floats absolutely at top: 81pt (or insets.top+22)
           // with height 38 + 10pt breathing room before content; the hero
@@ -215,10 +244,27 @@ export default function RutaIndex() {
           paddingBottom: bottomPad,
         }}
         showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Pillars.indice}
+            colors={[Pillars.indice]}
+          />
+        }
       >
         {ruta.isLoading ? (
+          // Editorial loader · brandbook §6 violation fix (Agent D · 2026-05-15):
+          // the generic RN ActivityIndicator was a manifesto break · users see
+          // a stock spinner in the most-trafficked loading state and the
+          // editorial register collapses for ~3s on every cold open. The
+          // XicoLoader is a quiet pulsing wordmark + hairline rule · same
+          // visual register as the rest of the app · honors useReducedMotion
+          // internally (no spin on reduced motion).
           <View style={s.loading}>
-            <ActivityIndicator color={Colors.textSecondary} />
+            <XicoLoader color={Colors.textSecondary} inline />
             <Text style={s.loadingText}>Cargando la Ruta…</Text>
           </View>
         ) : ruta.isError || !ruta.data ? (
@@ -276,22 +322,28 @@ export default function RutaIndex() {
                 on web / Android). */}
             {showEmpezar ? (
               <RevealOnMount delay={420} duration={600}>
-                <Pressable
-                  onPress={handleEmpezarRuta}
+                <SpringPressable
+                  onPress={() => {
+                    haptic.impactMedium();
+                    handleEmpezarRuta();
+                  }}
                   disabled={empezarBusy}
-                  style={({ pressed }) => [
+                  style={[
                     s.empezarBtn,
-                    pressed && s.empezarBtnPressed,
                     empezarBusy && s.empezarBtnDisabled,
                   ]}
                   accessibilityRole="button"
                   accessibilityLabel="Empezar La Ruta · activa la Dynamic Island"
                   hitSlop={8}
+                  // SpringPressable already fires `selection` by default · the
+                  // medium impact haptic above is the ceremonial weight for
+                  // the primary CTA. Set haptic={null} so we don't double-fire.
+                  haptic={null}
                 >
                   <Text style={s.empezarText}>
                     {empezarBusy ? "INICIANDO…" : "EMPEZAR LA RUTA"}
                   </Text>
-                </Pressable>
+                </SpringPressable>
               </RevealOnMount>
             ) : null}
 
@@ -338,17 +390,20 @@ export default function RutaIndex() {
             </View>
           </>
         )}
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Floating glass masthead · spec §7.2 pt 1. Live dot = Pillars.indice
           (magenta) because La Ruta lives under the Indice ritual surface —
           this is the screen-level pillar anchor that unifies the spread.
           Per-card rumbo accents (different colors for each card) are the
-          second saturation layer; they live inside the cards, not on chrome. */}
+          second saturation layer; they live inside the cards, not on chrome.
+          scrollY drives the masthead blur/tint thickening as the user scrolls
+          stop cards underneath. */}
       <GlassMasthead
         label={formatWeekLabel(ruta.data?.week_key ?? null)}
         meta={ruta.data?.week_key === "2026-W19" ? "INAUGURAL" : undefined}
         liveDotColor={Pillars.indice}
+        scrollY={scrollY}
       />
 
       {/* Spec §7.2 pt 9 · floating glass tab bar with La Ruta active. /ruta

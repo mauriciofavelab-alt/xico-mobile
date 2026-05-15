@@ -1,10 +1,12 @@
 import React from "react";
-import { View, Pressable, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LiquidGlass } from "@/constants/liquidGlass";
 import { Colors } from "@/constants/colors";
 import { Fonts, TypeSize } from "@/constants/editorial";
+import { Shadow, InsetRim } from "@/constants/shadows";
+import { SpringPressable } from "@/components/primitives";
 
 export interface TabItem {
   key: string;
@@ -38,7 +40,7 @@ export function GlassTabBar({ items }: GlassTabBarProps) {
         style={[StyleSheet.absoluteFill, styles.blur]}
       />
       {items.map((item) => (
-        <Pressable
+        <SpringPressable
           key={item.key}
           onPress={item.onPress}
           style={styles.tab}
@@ -46,6 +48,10 @@ export function GlassTabBar({ items }: GlassTabBarProps) {
           accessibilityLabel={item.accessibilityLabel}
           accessibilityState={{ selected: item.isActive }}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          // Tab tap = Apple's canonical selection haptic (already the default
+          // on SpringPressable). Scale-down kept light (0.94) because tab pills
+          // are small targets — overly aggressive shrink reads cartoony.
+          scaleDown={0.94}
         >
           <View
             style={[
@@ -60,7 +66,7 @@ export function GlassTabBar({ items }: GlassTabBarProps) {
           <Text style={[styles.label, item.isActive && styles.labelActive]}>
             {item.label}
           </Text>
-        </Pressable>
+        </SpringPressable>
       ))}
     </View>
   );
@@ -83,11 +89,13 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     paddingHorizontal: 6,
     zIndex: 5,
-    // shadow per LiquidGlass.regular.dropShadow
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    shadowColor: "#000",
+    // Apple-grade chrome float shadow · per Apple-patterns diagnostic §1.2 +
+    // brandbook §2 sanction. 8pt y-lift, 24pt halo, 32% opacity reads as
+    // "floating above" without the previous 0.5 opacity going chunky.
+    ...Shadow.chromeFloat,
+    // Inset top hairline · the iOS "this is real glass with an edge" trick.
+    // 0.5pt white at 18% opacity catches ambient light on the top edge.
+    ...InsetRim,
   },
   blur: {
     borderRadius: 25,

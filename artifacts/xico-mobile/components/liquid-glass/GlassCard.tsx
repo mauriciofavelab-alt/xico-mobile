@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import { View, StyleSheet, ViewStyle } from "react-native";
 import { BlurView } from "expo-blur";
 import { LiquidGlass } from "@/constants/liquidGlass";
+import { Shadow } from "@/constants/shadows";
 
 interface GlassCardProps {
   children: ReactNode;
@@ -35,10 +36,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: "hidden",
     borderWidth: StyleSheet.hairlineWidth,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.55,
-    shadowRadius: 16,
-    shadowColor: "#000",
+    // Apple-grade in-flow card lift · per Apple-patterns diagnostic §1.1.
+    // 6pt y-offset, 18pt halo, 18% opacity. Reads as the Apple News "Today"
+    // card suspension — quiet lift, never chunky drop. Token sourced from
+    // constants/shadows.ts so future surfaces stay consistent.
+    ...Shadow.cardLift,
   },
   blur: {
     borderRadius: 14,
