@@ -675,7 +675,7 @@ export default function OnboardingScreen() {
       stage = (
         <WalkthroughStage
           backdrop={BACKDROP_MANIFESTO}
-          scrim={0.58}
+          scrim={0.72}
           eyebrow="XICO"
           showSkip={showSkip}
           onSkip={handleSkip}
