@@ -6,10 +6,15 @@
 // Phase 3 Task 3.4 · stats row (sellos · guardados) in GlassCard +
 // Carta del Equipo glass-vibrant card with gold-accented drop cap.
 import React, { useMemo } from "react";
-import { Pressable, ScrollView, View, Text, StyleSheet } from "react-native";
+import { Image, Pressable, ScrollView, View, Text, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+
+// Tu Códice golden-hour Madrid backdrop · Build #11 photo program.
+// Lives at `assets/lugares/_backdrop-tu-codice.jpg`. Metro statically
+// resolves this require() at bundle time; the file ships once with the
+// app, no network fetch on render.
+const TU_CODICE_BACKDROP = require("@/assets/lugares/_backdrop-tu-codice.jpg");
 
 import { GlassMasthead, ColorBleedBackdrop, GlassChip, HaloPulse, GlassCard, GlassVibrant } from "@/components/liquid-glass";
 import { RevealOnMount } from "@/components/editorial/RevealOnMount";
@@ -184,13 +189,15 @@ export default function TuCodiceScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: Colors.background }]}>
-      {/* PHOTO SLOT · golden-hour Madrid · drops in via assets/images/tu-codice-backdrop.jpg */}
-      {/* Until the photo lands, a vertical gradient fallback so the screen reads intentional, not broken */}
-      <LinearGradient
-        colors={[Colors.background, Pillars.archivo + "33"]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
+      {/* Golden-hour Madrid backdrop · spec §7.4 photo slot. The image is
+          the BASE layer; the dark overlay below + ColorBleed stack on top so
+          the warm-dark editorial register reads through the photograph. */}
+      <Image
+        source={TU_CODICE_BACKDROP}
         style={styles.backdrop}
+        resizeMode="cover"
+        accessible={false}
+        accessibilityIgnoresInvertColors
       />
       <View style={styles.backdropOverlay} />
 

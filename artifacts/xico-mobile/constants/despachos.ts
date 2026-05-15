@@ -37,6 +37,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "31 estados de México tienen representación activa en Madrid en 2026. No es diáspora: es presencia calculada.",
     pregunta: "¿Qué parte de ti vive en Nepantla hoy?",
     teaser: "Mañana: el color que México le regaló a España sin que España lo sepa.",
+    lugar_image_url: require("@/assets/lugares/001-mercado-san-fernando.jpg"),
   },
   {
     numero: "002",
@@ -48,6 +49,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El 40% de los tintes rojos usados en Europa entre los siglos XVI y XVIII provenían de grana cochinilla mexicana. Un insecto de tres milímetros cambió la paleta de un continente.",
     pregunta: "¿Cuántos colores que ves hoy tienen un origen que no conoces?",
     teaser: "Mañana: lo que el cacao era antes de que llegara el azúcar.",
+    lugar_image_url: require("@/assets/lugares/002-iglesia-san-gines.jpg"),
   },
   {
     numero: "003",
@@ -59,6 +61,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Los aztecas usaban granos de cacao como moneda. Un esclavo valía 100 granos. Una canoa, 50. El chocolate era literalmente dinero.",
     pregunta: "¿Cuántas cosas consumes hoy que son radicalmente distintas de lo que fueron en origen?",
     teaser: "Mañana: el árbol que lleva dos mil años en el mismo sitio.",
+    lugar_image_url: require("@/assets/lugares/003-chocolateria-san-gines.jpg"),
   },
   {
     numero: "004",
@@ -70,6 +73,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El árbol del Tule en Oaxaca tiene aproximadamente 2,000 años y es el árbol con mayor circunferencia del mundo: 58 metros. Ha visto más historia que cualquier monumento de Madrid.",
     pregunta: "¿Cuánto tiempo tiene la cosa más antigua que has tocado hoy?",
     teaser: "Mañana: la ciudad que se construyó sobre el agua y sigue hundiéndose.",
+    lugar_image_url: require("@/assets/lugares/004-jardin-botanico-retiro.jpg"),
   },
   {
     numero: "005",
@@ -81,6 +85,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El Centro Histórico de Ciudad de México se hunde hasta 30 cm por año en algunas zonas. Es uno de los hundimientos urbanos más acelerados del planeta. La ciudad construida sobre el agua paga su deuda.",
     pregunta: "¿Qué está debajo del suelo donde vives?",
     teaser: "Mañana: el primer alimento sagrado que alimenta a dos mil millones de personas.",
+    lugar_image_url: require("@/assets/lugares/005-museo-antropologia.jpg"),
   },
   {
     numero: "006",
@@ -92,6 +97,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "México es el centro de diversidad genética del maíz con más de 59 razas nativas. Ningún país en el mundo tiene más variedades de un cultivo tan fundamental. Es un banco genético vivo.",
     pregunta: "¿Qué parte de tu dieta diaria vino de México sin que lo supieras?",
     teaser: "Mañana: la institución más antigua de América que Madrid no ha podido replicar.",
+    lugar_image_url: require("@/assets/lugares/006-la-lucerna.jpg"),
   },
   {
     numero: "007",
@@ -103,6 +109,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "En México se celebran más de 50,000 tianguis semanales. El Mercado de La Merced en CDMX ocupa 63,000 m² y mueve más productos en un día que algunos aeropuertos en una semana.",
     pregunta: "¿Cuándo fue la última vez que compraste algo mirando a los ojos de quien lo hizo?",
     teaser: "Mañana: lo que la muerte no cancela.",
+    lugar_image_url: require("@/assets/lugares/007-mercado-la-paz.jpg"),
   },
   {
     numero: "008",
@@ -114,6 +121,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El Día de Muertos de 2024 en Madrid reunió a más de 40,000 personas en el Cementerio Civil. Es la celebración mexicana más grande fuera de México. La flor de cempasúchil tardó un mes en llegar desde Puebla.",
     pregunta: "¿A quién llamarías si creyeras que pudiera escucharte?",
     teaser: "Mañana: la música que nació en un puerto y llegó a dos continentes.",
+    lugar_image_url: require("@/assets/lugares/008-casa-de-mexico.jpg"),
   },
   {
     numero: "009",
@@ -125,6 +133,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "'La Bamba' de Ritchie Valens (1958) es una versión del son jarocho La Bamba Jarocha. El original lleva 200 años. La versión de 1958 llegó al número 1 en Estados Unidos. El original nunca salió de Veracruz.",
     pregunta: "¿Qué tienes que fue creado por nadie y pertenece a todos?",
     teaser: "Mañana: la escritura que el cuerpo lleva puesta.",
+    lugar_image_url: require("@/assets/lugares/009-la-corrala.jpg"),
   },
   {
     numero: "010",
@@ -136,6 +145,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Teotitlán del Valle, Oaxaca, produce alfombras de lana con tintes naturales desde hace 2,500 años. El proceso no ha cambiado sustancialmente. Cada pieza requiere entre una semana y tres meses.",
     pregunta: "¿Qué lleva tu ropa de hoy que no pusiste tú?",
     teaser: "Mañana: el destilado que no pide permiso.",
+    lugar_image_url: require("@/assets/lugares/010-tienda-casa-mexico.jpg"),
   },
   {
     numero: "011",
@@ -147,6 +157,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El agave tepeztate tarda entre 25 y 35 años en madurar antes de poder destilarse. Se cosecha una sola vez en toda su vida. Un mezcal de tepeztate es el resultado de tres décadas de espera.",
     pregunta: "¿Qué en tu vida requiere espera y no se puede acelerar?",
     teaser: "Mañana: el arquitecto que construyó con luz.",
+    lugar_image_url: require("@/assets/lugares/011-bar-brutal.jpg"),
   },
   {
     numero: "012",
@@ -158,6 +169,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "La Casa Barragán fue declarada Patrimonio de la Humanidad por la UNESCO en 2004. Es la única casa del siglo XX en México con esa distinción. Tiene 250 m². El tamaño no importaba.",
     pregunta: "¿Qué espacio has habitado que te cambió sin que lo notaras en el momento?",
     teaser: "Mañana: la fotógrafa que convirtió la dignidad en técnica.",
+    lugar_image_url: require("@/assets/lugares/012-fundacion-juan-march.jpg"),
   },
   {
     numero: "013",
@@ -169,6 +181,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Graciela Iturbide ganó el Premio Princesa de Asturias de las Artes 2025. Tiene 82 años y sigue fotografiando. Su archivo contiene más de 40,000 negativos. Ha publicado 12 libros.",
     pregunta: "¿A quién has querido fotografiar sin atreverte a hacerlo?",
     teaser: "Mañana: el arte que salió a la calle antes de que la calle lo pidiera.",
+    lugar_image_url: require("@/assets/lugares/013-photoespana.jpg"),
   },
   {
     numero: "014",
@@ -180,6 +193,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El mural 'Sueño de una tarde dominical en la Alameda Central' de Rivera mide 15 metros de largo. Tardó cuatro años. Fue trasladado a un nuevo museo sin moverlo: construyeron el edificio a su alrededor.",
     pregunta: "¿Qué quieres decir en voz alta que solo te has atrevido a decir en privado?",
     teaser: "Mañana: el idioma que hablas sin saber que lo hablas.",
+    lugar_image_url: require("@/assets/lugares/014-reina-sofia.jpg"),
   },
   {
     numero: "015",
@@ -191,6 +205,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El náhuatl es hablado por aproximadamente 1.7 millones de personas en México hoy. Es la lengua indígena más hablada del país. Tiene escritura moderna, gramática formalizada y literatura contemporánea.",
     pregunta: "¿Qué parte de ti viene de donde no crees?",
     teaser: "Mañana: el límite que se movió sin que nadie votara.",
+    lugar_image_url: require("@/assets/lugares/015-real-academia-espanola.jpg"),
   },
   {
     numero: "016",
@@ -202,6 +217,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El Tratado de Guadalupe Hidalgo fue firmado en 1848 en el pueblo de Guadalupe Hidalgo, hoy parte de Ciudad de México. México perdió más de 1.3 millones de km² en un solo documento.",
     pregunta: "¿Qué límite tuyo es real y cuál es una historia que te contaron?",
     teaser: "Mañana: la megalópolis que no pide disculpas por su tamaño.",
+    lugar_image_url: require("@/assets/lugares/016-museo-de-america.jpg"),
   },
   {
     numero: "017",
@@ -213,6 +229,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Ciudad de México tiene más de 150 museos, más museos per cápita que cualquier otra ciudad del mundo. La ciudad construida sobre un lago acumula más cultura por m² que cualquier capital europea.",
     pregunta: "¿Qué ciudad te ha cambiado más y por qué no hablas de ello?",
     teaser: "Mañana: el escritor que escribió dos libros y cambió una literatura entera.",
+    lugar_image_url: require("@/assets/lugares/017-galeria-elvira-gonzalez.jpg"),
   },
   {
     numero: "018",
@@ -224,6 +241,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Pedro Páramo fue rechazado por varios editores antes de publicarse en 1955. Hoy está traducido a más de 40 idiomas y es considerado uno de los diez mejores libros en español del siglo XX. Tiene 128 páginas.",
     pregunta: "¿Qué has dejado incompleto que en realidad ya está terminado?",
     teaser: "Mañana: la pintora que hizo del cuerpo un territorio.",
+    lugar_image_url: require("@/assets/lugares/018-libreria-reina-sofia.jpg"),
   },
   {
     numero: "019",
@@ -235,6 +253,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "'Dos Fridas' (1939) se pintó el año del divorcio de Rivera. Mide 173 × 173 cm. Es el más grande que pintó. Un año de dolor convertido en el lienzo más ambicioso de su carrera.",
     pregunta: "¿Qué dolor tuyo todavía no has convertido en algo?",
     teaser: "Mañana: el ingrediente que cambió la cocina de un continente sin que ese continente lo sepa.",
+    lugar_image_url: require("@/assets/lugares/019-circulo-bellas-artes.jpg"),
   },
   {
     numero: "020",
@@ -246,6 +265,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El pimiento se cultiva hoy en más de 70 países y es la especia fresca más consumida del mundo. Antes de 1492, Europa no conocía el picante. Todo el sabor picante de la cocina global viene de México y Centroamérica.",
     pregunta: "¿Qué cosa tuya, que ya no reconoces como tuya, empezó siendo de otro?",
     teaser: "Mañana: vivir en dos tiempos al mismo tiempo.",
+    lugar_image_url: require("@/assets/lugares/020-taberna-carmencita.jpg"),
   },
   {
     numero: "021",
@@ -257,6 +277,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El desfase horario entre Madrid y Ciudad de México varía entre 6 y 7 horas según la época del año. Los mexicanos en Madrid son, según estudios de adaptación, el grupo que más tarda en regularizar su ciclo de sueño.",
     pregunta: "¿En qué momento del día piensas en alguien que está en otro huso horario?",
     teaser: "Mañana: el material que viene del volcán y corta más que el bisturí.",
+    lugar_image_url: require("@/assets/lugares/021-bar-matos.jpg"),
   },
   {
     numero: "022",
@@ -268,6 +289,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "La obsidiana tiene un filo 10 veces más delgado que la hoja de bisturí más afilada. Algunos cirujanos modernos usan escalpelos de obsidiana para incisiones de precisión máxima. La tecnología prehistórica supera a la moderna.",
     pregunta: "¿Qué ves cuando te miras en un espejo que no quieres ver?",
     teaser: "Mañana: el estado que tiene 16 idiomas distintos y una sola cocina sin igual.",
+    lugar_image_url: require("@/assets/lugares/022-museo-ciencias-naturales.jpg"),
   },
   {
     numero: "023",
@@ -279,6 +301,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Oaxaca tiene más de 35 razas nativas de maíz, la mayor biodiversidad de maíz del mundo. También tiene el mayor número de lenguas indígenas activas de México: 16 familias lingüísticas con más de 150 variantes.",
     pregunta: "¿Qué lugar conoces que nadie necesita saber que existe para que exista?",
     teaser: "Mañana: el incienso que abre el espacio antes de que llegues.",
+    lugar_image_url: require("@/assets/lugares/023-mercado-anton-martin.jpg"),
   },
   {
     numero: "024",
@@ -290,6 +313,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "El copal fue uno de los primeros productos americanos en llegar a Europa tras la conquista. Los farmacéuticos españoles del siglo XVI lo documentaron como antiséptico y como regulador del estado de ánimo.",
     pregunta: "¿Qué olor te transforma sin que lo decidas?",
     teaser: "Mañana: los artistas que hacen arte de México sin hacer 'arte mexicano'.",
+    lugar_image_url: require("@/assets/lugares/024-tienda-copal.jpg"),
   },
   {
     numero: "025",
@@ -301,6 +325,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Gabriel Orozco estudió en Madrid, en la Escuela de Bellas Artes de San Fernando, antes de convertirse en el artista mexicano más cotizado del mercado secundario global, con obras vendidas por más de 4 millones de dólares.",
     pregunta: "¿Dónde termina el origen de alguien y dónde empieza lo que eligió ser?",
     teaser: "Mañana: el libro de piedra que casi no sobrevivió.",
+    lugar_image_url: require("@/assets/lugares/025-reina-sofia-coleccion.jpg"),
   },
   {
     numero: "026",
@@ -312,6 +337,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "De los aproximadamente 500 códices prehispánicos que existían en el momento de la conquista, solo 16 sobrevivieron completos. El resto fue quemado por órdenes eclesiásticas. Perdimos más del 96% del conocimiento.",
     pregunta: "¿Qué has destruido sin saber que no tenías derecho a hacerlo?",
     teaser: "Mañana: la música contemporánea que México hace sin pedir permiso.",
+    lugar_image_url: require("@/assets/lugares/026-biblioteca-nacional.jpg"),
   },
   {
     numero: "027",
@@ -323,6 +349,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Natalia Lafourcade ha ganado 12 Grammy Latinos, más que cualquier artista femenina latinoamericana en la historia del premio. Ha rechazado tres contratos con discográficas estadounidenses.",
     pregunta: "¿Qué música escuchas cuando necesitas volver a ser tú?",
     teaser: "Mañana: la memoria que casi nadie en España conoce.",
+    lugar_image_url: require("@/assets/lugares/027-sala-caracol.jpg"),
   },
   {
     numero: "028",
@@ -334,6 +361,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Elena Poniatowska documentó la masacre en 'La noche de Tlatelolco' (1971), con testimonios directos. Es considerado uno de los libros de periodismo más importantes en lengua española del siglo XX. Tardó tres años en recopilar los testimonios.",
     pregunta: "¿Qué verdad de tu país prefieres no saber?",
     teaser: "Mañana: lo que el mezcal no dijo pero el agave sí sabe.",
+    lugar_image_url: require("@/assets/lugares/028-tlatelolco.jpg"),
   },
   {
     numero: "029",
@@ -345,6 +373,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Un agave tobalá silvestre tarda entre 12 y 15 años en madurar. Solo se encuentra en las sierras de Oaxaca por encima de los 1,500 metros de altitud. No se cultiva: se cosecha en el lugar donde creció solo.",
     pregunta: "¿Qué en tu vida creció sin que nadie lo plantara?",
     teaser: "Mañana: lo que siempre queda pendiente.",
+    lugar_image_url: require("@/assets/lugares/029-barra-tobala.jpg"),
   },
   {
     numero: "030",
@@ -356,6 +385,7 @@ export const DESPACHOS: Despacho[] = [
     hecho: "Se estima que 50,000 mexicanos viven en España, de los cuales aproximadamente 18,000 están en Madrid. Es la comunidad latinoamericana de mayor crecimiento en la capital en los últimos cinco años.",
     pregunta: "¿Dónde está tu lugar en el mundo?",
     teaser: "Mañana empieza de nuevo. El Despacho te espera.",
+    lugar_image_url: require("@/assets/lugares/030-casa-de-mexico-cierre.jpg"),
   },
 ];
 
