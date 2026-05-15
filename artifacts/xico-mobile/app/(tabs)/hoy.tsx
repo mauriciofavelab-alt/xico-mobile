@@ -5,7 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { GlassMasthead, ColorBleedBackdrop } from "@/components/liquid-glass";
 import { Colors, Pillars } from "@/constants/colors";
 import { getDespachoForToday, type Despacho } from "@/constants/despachos";
-import { Rule, SectionOpener } from "@/components/editorial";
+import { Rule, RevealOnMount, SectionOpener } from "@/components/editorial";
 import { Roseton } from "@/components/pasaporte/Roseton";
 import { useCurrentRuta } from "@/hooks/useCurrentRuta";
 import { useCurrentRutaProgress } from "@/hooks/useCurrentRutaProgress";
@@ -74,18 +74,24 @@ export default function HoyScreen() {
         <Rule variant="accent" color={Pillars.indice} style={styles.ruleSpacing} />
 
         {/* La Ruta hero card — L1 + magenta L-border + inline rosetón. */}
-        <RutaHeroCardInline />
+        <RevealOnMount delay={1000} duration={700}>
+          <RutaHeroCardInline />
+        </RevealOnMount>
 
         {/* Section opener — "EL EQUIPO TE PROPONE" */}
-        <SectionOpener
-          serial={1}
-          label="El equipo te propone"
-          accent={Pillars.indice}
-          style={styles.sectionOpenerSpacing}
-        />
+        <RevealOnMount delay={1150} duration={600}>
+          <SectionOpener
+            serial={1}
+            label="El equipo te propone"
+            accent={Pillars.indice}
+            style={styles.sectionOpenerSpacing}
+          />
+        </RevealOnMount>
 
         {/* Featured article placeholder — cultura-cobalt kicker chip on L1. */}
-        <FeaturedArticlePlaceholder />
+        <RevealOnMount delay={1300} duration={700}>
+          <FeaturedArticlePlaceholder />
+        </RevealOnMount>
       </ScrollView>
 
       <GlassMasthead
@@ -103,21 +109,35 @@ interface HeroBlockProps {
 
 function HeroBlock({ despacho }: HeroBlockProps) {
   const kicker = `EL DESPACHO DEL DÍA · ${despacho.color.nombre.toUpperCase()}`;
+  // Task 2.4 · staggered entrance per spec §7.1. RevealOnMount handles
+  // useReducedMotion() internally (rendering children inline if Reduce
+  // Motion is on), so each block fades up with cubic-out easing on
+  // first mount. Masthead at 100ms is excluded — see top-level note.
   return (
     <View>
-      <Text style={[styles.kicker, { color: despacho.color.hex }]}>{kicker}</Text>
-      <Text style={styles.heroTitle}>
-        {despacho.palabra.nahuatl}
-        <Text style={[styles.italicAccent, { color: despacho.color.hex }]}>.</Text>
-      </Text>
-      <View style={[styles.colorBand, { backgroundColor: despacho.color.hex, shadowColor: despacho.color.hex }]} />
-      <Text style={styles.meaning}>{`— ${despacho.palabra.español}`}</Text>
-      <View style={styles.lugarRow}>
-        <Text style={styles.lugarLabel}>Hoy · lugar</Text>
-        <Text style={styles.lugarName}>
-          {`${despacho.lugar.nombre} · ${despacho.lugar.barrio}`}
+      <RevealOnMount delay={300} duration={700}>
+        <Text style={[styles.kicker, { color: despacho.color.hex }]}>{kicker}</Text>
+      </RevealOnMount>
+      <RevealOnMount delay={450} duration={800}>
+        <Text style={styles.heroTitle}>
+          {despacho.palabra.nahuatl}
+          <Text style={[styles.italicAccent, { color: despacho.color.hex }]}>.</Text>
         </Text>
-      </View>
+      </RevealOnMount>
+      <RevealOnMount delay={600} duration={600}>
+        <View style={[styles.colorBand, { backgroundColor: despacho.color.hex, shadowColor: despacho.color.hex }]} />
+      </RevealOnMount>
+      <RevealOnMount delay={700} duration={800}>
+        <Text style={styles.meaning}>{`— ${despacho.palabra.español}`}</Text>
+      </RevealOnMount>
+      <RevealOnMount delay={850} duration={700}>
+        <View style={styles.lugarRow}>
+          <Text style={styles.lugarLabel}>Hoy · lugar</Text>
+          <Text style={styles.lugarName}>
+            {`${despacho.lugar.nombre} · ${despacho.lugar.barrio}`}
+          </Text>
+        </View>
+      </RevealOnMount>
     </View>
   );
 }
