@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 
 import { Colors } from "@/constants/colors";
 import { Rumbos, type RumboSlug } from "@/constants/rumbos";
@@ -68,6 +69,20 @@ const SCENARIOS: Scenario[] = [
 ];
 
 export default function PasaporteShowcase() {
+  // Prod gate · 2026-05-15 (Agent D · diagnostic-code.md §F-9):
+  // /dev/pasaporte was shipping in the production bundle as a navigable route
+  // because expo-router picks up every file under app/. The screen is a dev
+  // sandbox (5-scenario Roseton showcase) · not part of the public surface.
+  // We early-return-back when __DEV__ is false so a malicious deep-link or
+  // accidental router.push cannot land a user on the dev preview in prod.
+  // A clean follow-up is to MOVE this file outside app/ entirely; gating
+  // here is the fast safe answer for Build #11.
+  useEffect(() => {
+    if (!__DEV__) {
+      router.back();
+    }
+  }, []);
+
   const insets = useSafeAreaInsets();
   const top = Platform.OS === "web" ? 24 : insets.top + 12;
   const [scenarioIdx, setScenarioIdx] = useState(1);
