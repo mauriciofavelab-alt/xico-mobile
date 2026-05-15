@@ -68,12 +68,12 @@ function HeroBlock({ despacho }: HeroBlockProps) {
   const kicker = `EL DESPACHO DEL DÍA · ${despacho.color.nombre.toUpperCase()}`;
   return (
     <View>
-      <Text style={styles.kicker}>{kicker}</Text>
+      <Text style={[styles.kicker, { color: despacho.color.hex }]}>{kicker}</Text>
       <Text style={styles.heroTitle}>
         {despacho.palabra.nahuatl}
-        <Text style={styles.italicAccent}>.</Text>
+        <Text style={[styles.italicAccent, { color: despacho.color.hex }]}>.</Text>
       </Text>
-      <View style={[styles.colorBand, { backgroundColor: despacho.color.hex }]} />
+      <View style={[styles.colorBand, { backgroundColor: despacho.color.hex, shadowColor: despacho.color.hex }]} />
       <Text style={styles.meaning}>{`— ${despacho.palabra.español}`}</Text>
       <View style={styles.lugarRow}>
         <Text style={styles.lugarLabel}>Hoy · lugar</Text>
@@ -137,7 +137,6 @@ const styles = StyleSheet.create({
     height: 4,
     width: 72,
     marginVertical: 14,
-    shadowColor: Colors.ochre,
     shadowOpacity: 0.4,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 0 },
@@ -146,7 +145,7 @@ const styles = StyleSheet.create({
     fontFamily: "Newsreader_400Regular_Italic",
     fontSize: 17,
     lineHeight: 17 * 1.35,
-    color: "rgba(245,239,227,0.88)",
+    color: Colors.textSecondary,
     marginBottom: 22,
     textShadowColor: "rgba(0,0,0,0.4)",
     textShadowRadius: 3,
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1.5,
     textTransform: "uppercase",
-    color: "rgba(245,239,227,0.6)",
+    color: Colors.textTertiary,
     marginBottom: 4,
   },
   lugarName: {
