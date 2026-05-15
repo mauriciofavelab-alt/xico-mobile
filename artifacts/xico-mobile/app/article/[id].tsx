@@ -319,12 +319,13 @@ export default function ArticleScreen() {
   const readTime = article.read_time_minutes || 4;
   const body = article.body || article.excerpt || "";
 
-  const sectionRoute = article.pillar === "cultura" ? "/(tabs)/cultura"
-    : article.pillar === "mexico-ahora" ? "/(tabs)/mexico-ahora"
-    : "/(tabs)";
-  const sectionName = article.pillar === "cultura" ? "Cultura"
-    : article.pillar === "mexico-ahora" ? "México Ahora"
-    : "Índice";
+  // Phase 2 deleted the per-pillar tab routes; everything lives under /hoy now.
+  // Phase 9: link "Seguir en …" back to /hoy uniformly. Section label still
+  // reads from the pillar so the copy remains editorial.
+  const sectionRoute = "/(tabs)/hoy";
+  const sectionName = article.pillar === "cultura" ? "Hoy"
+    : article.pillar === "mexico-ahora" ? "Hoy"
+    : "Hoy";
 
   const articleIndex = articles.findIndex((a: ApiArticle) => a.id === article.id);
   const folioNumber = articleIndex >= 0 ? articleIndex + 1 : undefined;

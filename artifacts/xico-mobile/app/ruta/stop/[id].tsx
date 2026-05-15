@@ -690,37 +690,10 @@ const s = StyleSheet.create({
     color: Colors.textSecondary,
   },
 
-  // Hero content inside the StopVeil · display chrome that replaces the old
-  // gray surface. The whole hero region is 340pt; this content occupies the
-  // top ~70% of that with monumental type. parallaxes via heroParallaxStyle
-  // and individually fades+shrinks via heroTitleStyle when user scrolls.
-  heroContent: {
-    flex: 1,
-    paddingHorizontal: Space.lg,
-    paddingBottom: Space.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: Space.sm,
-  },
-  heroFolio: {
-    fontFamily: Fonts.sansSemibold,
-    fontSize: TypeSize.micro + 1,
-    color: Colors.textTertiary,
-    letterSpacing: Tracking.widest,
-    textTransform: "uppercase",
-  },
-  heroName: {
-    fontFamily: Fonts.serifMedium,
-    fontSize: TypeSize.monumental,
-    color: Colors.textPrimary,
-    letterSpacing: Tracking.tight,
-    lineHeight: TypeSize.monumental * 1.05,
-    textAlign: "center",
-  },
-  heroKicker: {
-    marginTop: Space.sm,
-    alignItems: "center",
-  },
+  // Phase 9 cleanup · `heroContent` / `heroFolio` / `heroName` / `heroKicker`
+  // were the old hero text styles for a chrome-on-photo composition that
+  // Phase 3/4 replaced with the `stopNameBlock` + `stopName` system below.
+  // Removed in Phase 9.
 
   // Pinned controls overlay · absolute to the screen, top of stack.
   // Stays put while the hero parallaxes underneath.
@@ -816,20 +789,10 @@ const s = StyleSheet.create({
     marginTop: Space.xs,
   },
 
-  despachoBlock: { marginTop: Space.lg, gap: Space.sm },
-  despachoLabel: {
-    fontFamily: Fonts.sansSemibold,
-    fontSize: TypeSize.micro,
-    color: Colors.textTertiary,
-    letterSpacing: Tracking.widest,
-    textTransform: "uppercase",
-  },
-  despachoText: {
-    fontFamily: Fonts.serifRegular,
-    fontSize: TypeSize.body,
-    color: Colors.textPrimary,
-    lineHeight: TypeSize.body * 1.65,
-  },
+  // Phase 9 cleanup · `despachoBlock` / `despachoLabel` / `despachoText`
+  // were the pre-Phase-4.2 plain-text despacho rendering. Phase 4.2 replaced
+  // them with the `despachoCard` + `cardLabel` + `cardBody` + `cardDropCap`
+  // system below. Removed in Phase 9.
 
   // Spec §7.3 pts 4-7 · body composition that sits below the hero veil.
   // Folio (tracked-caps) → rumbo tag pill → monumental Fraunces 44pt name
