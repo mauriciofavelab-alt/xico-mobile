@@ -5,3 +5,4 @@ export { GlassChip } from "./GlassChip";
 export { GlassCard } from "./GlassCard";
 export { GlassVibrant } from "./GlassVibrant";
 export { ColorBleedBackdrop } from "./ColorBleedBackdrop";
+export { HaloPulse } from "./HaloPulse";
