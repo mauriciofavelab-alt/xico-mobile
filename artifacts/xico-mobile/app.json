@@ -17,6 +17,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.xico.app",
       "appleTeamId": "B76TK6N9VU",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "XICO necesita saber que estás en cada parada de La Ruta para abrir el apunte in situ. Tu ubicación nunca se guarda.",
@@ -37,6 +38,13 @@
       "expo-router",
       "expo-font",
       "expo-web-browser",
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.YOUR_REVERSED_CLIENT_ID"
+        }
+      ],
       [
         "expo-build-properties",
         {
