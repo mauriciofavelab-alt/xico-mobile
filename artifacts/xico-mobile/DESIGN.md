@@ -231,6 +231,23 @@ npx @google/design.md lint DESIGN.md
 
 Run before any UI commit. (Note Windows quirk: alias as `designmd` in package.json if needed — the `.md` suffix confuses Windows command resolution.)
 
+## v2 update (2026-05-15) · Liquid Glass + iOS 26 spatial
+
+Brandbook §2 historical rule "no glassmorphism as default" is **overridden by user decision 2026-05-15**. iOS 26 ships Liquid Glass as the system-wide material; not adopting it now reads as a dated tell. Application discipline:
+
+- **Glass material ONLY on chrome that floats over content** — masthead, tab bar, chip, modal sheet, lock chip on Stop screen.
+- **In-flow cards STILL use luminance elevation L1/L2/L3 + hairline borders** — no glass on article previews, despacho body cards, anything below the visible scroll baseline.
+- Material variants live in `constants/liquidGlass.ts` with documented use cases.
+- Primitives in `components/liquid-glass/` (GlassMasthead, GlassTabBar, GlassChip, GlassCard, GlassVibrant, ColorBleedBackdrop, HaloPulse).
+
+Typography addition: **Fraunces** (variable, opsz-aware) joins the font system as the display face. Newsreader stays for body warmth. Inter for caps labels. Three families, locked.
+
+Navigation shift (manifesto-aligned): legacy tabs (Índice / Cultura / Ahora / Archivo) replaced by ritual-cadence tabs (Hoy / La Ruta / Tu Códice / Mapa). Each tab has its own pillar color anchoring active states.
+
+Photography rule: every primary screen has a full-bleed hero photograph behind every glass surface. Color bleed (triple-radial overlay) tints based on user tier state. Photography fills 50-60% of the visible canvas.
+
+Spec authority: [docs/superpowers/specs/2026-05-15-liquid-glass-redesign.md](../../docs/superpowers/specs/2026-05-15-liquid-glass-redesign.md). Every dimension in §18 of that spec is binding on this DESIGN.md.
+
 ## Source
 
 This file was generated 2026-05-14 by synthesizing:
