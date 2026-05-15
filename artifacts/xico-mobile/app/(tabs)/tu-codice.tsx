@@ -19,6 +19,7 @@ import { useTier } from "@/hooks/useTier";
 import { useProfile } from "@/hooks/useProfile";
 import { useGuardados } from "@/hooks/useGuardados";
 import { useEditorLetter } from "@/hooks/useEditorLetter";
+import { scaledFontSize } from "@/constants/editorial";
 
 /**
  * Derive `{ first, family }` from a display name or, failing that, an email.
@@ -443,9 +444,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cartaBody: {
+    // Phase 9 (Task 9.2) · Carta del Equipo is body the reader reads. Scale
+    // it to the user's Dynamic Type setting; keep the drop-cap and byline
+    // fixed (design + chrome respectively).
     fontFamily: "Newsreader_400Regular",
-    fontSize: 15,
-    lineHeight: 15 * 1.55,
+    fontSize: scaledFontSize(15),
+    lineHeight: scaledFontSize(15) * 1.55,
     color: Colors.textPrimary,
   },
   cartaDropCap: {

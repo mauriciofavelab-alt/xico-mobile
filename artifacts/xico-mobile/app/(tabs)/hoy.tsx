@@ -10,6 +10,7 @@ import { Roseton } from "@/components/pasaporte/Roseton";
 import { useCurrentRuta } from "@/hooks/useCurrentRuta";
 import { useCurrentRutaProgress } from "@/hooks/useCurrentRutaProgress";
 import { useTier } from "@/hooks/useTier";
+import { scaledFontSize } from "@/constants/editorial";
 
 // Task 2.2 · Hoy hero takeover (spec §7.1)
 // Task 2.3 · Body content below the hero — drop cap, Ruta card, featured article.
@@ -317,9 +318,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   meaning: {
+    // Phase 9 (Task 9.2) · italic meaning is the line the user is reading,
+    // not chrome. Scale it. The display name above it (Fraunces 42pt) and
+    // the tracked lugarLabel below it stay fixed (design + chrome).
     fontFamily: "Newsreader_400Regular_Italic",
-    fontSize: 17,
-    lineHeight: 17 * 1.35,
+    fontSize: scaledFontSize(17),
+    lineHeight: scaledFontSize(17) * 1.35,
     color: Colors.textSecondary,
     marginBottom: 22,
     textShadowColor: "rgba(0,0,0,0.4)",
@@ -336,8 +340,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   lugarName: {
+    // Phase 9 (Task 9.2) · italic lugar name reads as continuation of the
+    // meaning line — same body-text treatment.
     fontFamily: "Newsreader_400Regular_Italic",
-    fontSize: 14,
+    fontSize: scaledFontSize(14),
     color: Colors.textPrimary,
   },
   ruleSpacing: {
@@ -374,9 +380,11 @@ const dropCap = StyleSheet.create({
   },
   textBlock: { flex: 1 },
   body: {
+    // Phase 9 (Task 9.2) · the despacho hero body paragraph, the most-read
+    // chunk on Hoy. Drop-cap above stays at 48pt (design).
     fontFamily: "Newsreader_400Regular",
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: scaledFontSize(16),
+    lineHeight: scaledFontSize(24),
     color: Colors.textPrimary,
     letterSpacing: 0.05,
   },

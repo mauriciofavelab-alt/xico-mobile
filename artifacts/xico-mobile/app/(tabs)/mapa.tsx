@@ -8,7 +8,7 @@ import Animated, { SlideInUp, useReducedMotion, Easing } from "react-native-rean
 import { GlassMasthead, GlassCard } from "@/components/liquid-glass";
 import { useCurrentRuta, type RutaStopLite } from "@/hooks/useCurrentRuta";
 import { Colors, Pillars } from "@/constants/colors";
-import { Fonts } from "@/constants/editorial";
+import { Fonts, scaledFontSize } from "@/constants/editorial";
 
 /**
  * Mapa de la Ruta · /mapa
@@ -281,9 +281,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   previewSubline: {
+    // Phase 9 (Task 9.2) · the italic subline of the Mapa preview card is
+    // the body the user actually reads to decide whether to open the stop.
+    // The Fraunces previewName above + uppercase previewKicker stay fixed.
     fontFamily: Fonts.serifItalic,
     fontStyle: "italic",
-    fontSize: 13,
+    fontSize: scaledFontSize(13),
     color: Colors.textSecondary,
     letterSpacing: 0.1,
     marginBottom: 14,

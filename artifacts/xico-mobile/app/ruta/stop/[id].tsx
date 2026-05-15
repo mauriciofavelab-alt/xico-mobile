@@ -35,7 +35,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { Colors } from "@/constants/colors";
-import { Fonts, Hairline, Space, Tracking, TypeSize } from "@/constants/editorial";
+import { Fonts, Hairline, scaledFontSize, Space, Tracking, TypeSize } from "@/constants/editorial";
 import { Rumbos, type RumboSlug } from "@/constants/rumbos";
 import { ByLine, Kicker, RevealOnMount } from "@/components/editorial";
 import { GlassMasthead, GlassChip } from "@/components/liquid-glass";
@@ -896,9 +896,12 @@ const s = StyleSheet.create({
     marginBottom: 8,
   },
   cardBody: {
+    // Phase 9 (Task 9.2) · scaledFontSize on body so Dynamic Type users can
+    // actually read the despacho/apunte content. lineHeight derives from the
+    // scaled size so the rhythm stays proportional at any setting.
     fontFamily: "Newsreader_400Regular",
-    fontSize: 14,
-    lineHeight: 14 * 1.55,
+    fontSize: scaledFontSize(14),
+    lineHeight: scaledFontSize(14) * 1.55,
     color: Colors.textSecondary,
   },
   cardDropCap: {

@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { PixelRatio, StyleSheet } from "react-native";
 
 export const Space = {
   hairline: StyleSheet.hairlineWidth,
@@ -74,4 +74,27 @@ export const Radius = {
 
 export function lh(size: number, ratio: number = LineHeight.normal): number {
   return Math.round(size * ratio);
+}
+
+/**
+ * Dynamic Type scaling helper (Phase 9 · Task 9.2).
+ *
+ * Multiplies a base font size by the OS-level font-scale setting. Apply this
+ * ONLY to body text the reader is meant to actually *read* (despacho body,
+ * apunte body, Carta del Equipo, article paragraphs, Hoy hero italic meaning,
+ * Mapa preview subline).
+ *
+ * Do NOT apply to display headlines (Fraunces 42/44/56pt name + despacho hero,
+ * stats numerals), kicker / eyebrow caps, or chrome labels — those sizes are
+ * editorial design decisions and must remain pixel-stable across Dynamic Type
+ * settings. The body content scales; the publication's typographic identity
+ * stays fixed. Manifesto: "premium, not pretentious" — accessibility is
+ * editorial respect for the reader, not a uniform multiplier.
+ *
+ * Clamped on the low end so a user with shrunk font-scale doesn't crush body
+ * copy below the brand's minimum readable size.
+ */
+export function scaledFontSize(size: number): number {
+  const scale = PixelRatio.getFontScale();
+  return Math.round(size * Math.max(scale, 0.85));
 }

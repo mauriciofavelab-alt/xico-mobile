@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
 import { Colors, getAccentColor } from "@/constants/colors";
-import { Fonts, Hairline, lh, Space, Tracking, TypeSize } from "@/constants/editorial";
+import { Fonts, Hairline, lh, scaledFontSize, Space, Tracking, TypeSize } from "@/constants/editorial";
 import { fetchJson, API_BASE } from "@/constants/api";
 import { getImage } from "@/constants/imageMap";
 import { usePassport, trackArticleRead, trackSaved } from "@/hooks/usePassport";
@@ -189,9 +189,13 @@ function ArticleBody({ body, accent, subcategory }: { body: string; accent: stri
 
 const body_s = StyleSheet.create({
   para: {
+    // Phase 9 (Task 9.2) · Article body is the canonical "user is reading"
+    // surface. Wrap fontSize + lineHeight in scaledFontSize so Dynamic Type
+    // settings actually take effect for the paragraph copy. Display headline,
+    // kicker, byline + drop-cap remain pixel-fixed (editorial identity).
     fontFamily: Fonts.serifRegular,
-    fontSize: TypeSize.lede,
-    lineHeight: lh(TypeSize.lede, 1.65),
+    fontSize: scaledFontSize(TypeSize.lede),
+    lineHeight: scaledFontSize(lh(TypeSize.lede, 1.65)),
     color: Colors.textPrimary,
     opacity: 0.88,
     letterSpacing: Tracking.body,
