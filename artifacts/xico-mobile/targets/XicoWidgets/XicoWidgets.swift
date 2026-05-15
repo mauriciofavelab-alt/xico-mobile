@@ -12,10 +12,16 @@ import SwiftUI
 @main
 struct XicoWidgetsBundle: WidgetBundle {
     var body: some Widget {
+        // Home Screen · cream surface · editorial moments (DespachoSmallProvider)
         DespachoSmallWidget()
-        // Tasks 6.3 widgets: DespachoMediumWidget(), DespachoLargeWidget(),
-        //   LockInlineWidget(), LockCircularWidget(), LockRectangularWidget(),
-        //   StandByWidget()
-        // Phase 7: RutaActivityWidget() (Live Activity)
+        DespachoMediumWidget()
+        DespachoLargeWidget()
+        // Lock Screen · system tint · accessory families
+        LockInlineWidget()            // DespachoSmallProvider · the day's word
+        LockCircularWidget()          // RutaProgressProvider · sellos gauge
+        LockRectangularWidget()       // RutaProgressProvider · sellos + next stop
+        // StandBy · landscape full Despacho · day + night variants
+        StandByWidget()
+        // Phase 7: RutaActivityWidget() (Live Activity · same target per ADR-007)
     }
 }
