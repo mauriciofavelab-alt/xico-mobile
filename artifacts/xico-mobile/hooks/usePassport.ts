@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/constants/supabase";
 
 export type StampId =
@@ -162,6 +162,10 @@ export async function resetPassport() {
 export function usePassport() {
   const [stamps, setStamps] = useState<Stamp[]>([]);
   const [newStamp, setNewStamp] = useState<Stamp | null>(null);
+  // Captures the stamp-fade-out timer so we can clear it on unmount, preventing
+  // a stale setState on a torn-down screen during the 3.5s notification fade.
+  // Per diagnostic §C-2.
+  const newStampTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     const local = await loadEarned();
@@ -174,6 +178,16 @@ export function usePassport() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Cleanup the stamp fade-out timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (newStampTimerRef.current) {
+        clearTimeout(newStampTimerRef.current);
+        newStampTimerRef.current = null;
+      }
+    };
+  }, []);
+
   const earn = useCallback(async (id: StampId) => {
     const earned = await loadEarned();
     if (earned.has(id)) return;
@@ -183,7 +197,14 @@ export function usePassport() {
     const s: Stamp = { ...def, earned: true };
     setStamps(DEFINITIONS.map(d => ({ ...d, earned: earned.has(d.id) })));
     setNewStamp(s);
-    setTimeout(() => setNewStamp(null), 3500);
+    // Replace any in-flight fade-out timer so consecutive earns don't leak
+    // a handle. The cleanup useEffect above guarantees unmount clears the
+    // current pending timer.
+    if (newStampTimerRef.current) clearTimeout(newStampTimerRef.current);
+    newStampTimerRef.current = setTimeout(() => {
+      setNewStamp(null);
+      newStampTimerRef.current = null;
+    }, 3500);
     syncEarnedToCloud(id, earned); // fire and forget
   }, []);
 
