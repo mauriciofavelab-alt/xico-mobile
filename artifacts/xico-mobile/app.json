@@ -19,7 +19,8 @@
       "appleTeamId": "B76TK6N9VU",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "XICO necesita saber que estás en cada parada de La Ruta para abrir el apunte in situ. Tu ubicación nunca se guarda."
+        "NSLocationWhenInUseUsageDescription": "XICO necesita saber que estás en cada parada de La Ruta para abrir el apunte in situ. Tu ubicación nunca se guarda.",
+        "NSSupportsLiveActivities": true
       }
     },
     "android": {

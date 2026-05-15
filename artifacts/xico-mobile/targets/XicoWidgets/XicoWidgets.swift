@@ -22,6 +22,8 @@ struct XicoWidgetsBundle: WidgetBundle {
         LockRectangularWidget()       // RutaProgressProvider · sellos + next stop
         // StandBy · landscape full Despacho · day + night variants
         StandByWidget()
-        // Phase 7: RutaActivityWidget() (Live Activity · same target per ADR-007)
+        // Phase 7 · Live Activity for the active Ruta (Dynamic Island + Lock Screen)
+        // Lives in this same bundle per ADR-007.
+        RutaActivityView()
     }
 }
