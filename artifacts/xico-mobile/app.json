@@ -42,7 +42,16 @@
           }
         }
       ],
-      "@bacons/apple-targets"
+      "@bacons/apple-targets",
+      [
+        "expo-alternate-app-icons",
+        [
+          { "name": "AppIcon-Iniciado",  "ios": "./assets/alternate-icons/icon-iniciado.png" },
+          { "name": "AppIcon-Conocedor", "ios": "./assets/alternate-icons/icon-conocedor.png" },
+          { "name": "AppIcon-Curador",   "ios": "./assets/alternate-icons/icon-curador.png" },
+          { "name": "AppIcon-Cronista",  "ios": "./assets/alternate-icons/icon-cronista.png" }
+        ]
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
