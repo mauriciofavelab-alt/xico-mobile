@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Platform } from "react-native";
+import Animated, { FadeInDown, Easing } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LiquidGlass } from "@/constants/liquidGlass";
@@ -21,7 +22,8 @@ export function GlassMasthead({ label, meta, liveDotColor }: GlassMastheadProps)
   const topOffset = Math.max(insets.top + 22, 81);
 
   return (
-    <View
+    <Animated.View
+      entering={FadeInDown.duration(600).delay(100).easing(Easing.bezier(0.22, 1, 0.36, 1))}
       style={[
         styles.container,
         { top: topOffset, marginHorizontal: 16 },
@@ -43,7 +45,7 @@ export function GlassMasthead({ label, meta, liveDotColor }: GlassMastheadProps)
         </View>
         {meta && <Text style={styles.metaText}>{meta}</Text>}
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
