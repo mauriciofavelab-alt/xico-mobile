@@ -76,6 +76,17 @@ export const Colors = {
   transparent: "transparent",
 };
 
+// Aggregate pillar palette — shorter keys for ergonomic downstream imports.
+// Mirrors Colors.pillar* properties; additive, does not replace them.
+export const Pillars = {
+  indice: Colors.pillarIndice,
+  cultura: Colors.pillarCultura,
+  mexicoAhora: Colors.pillarMexicoAhora,
+  tradicion: Colors.pillarTradicion,
+  archivo: Colors.pillarArchivo,
+} as const;
+export type PillarKey = keyof typeof Pillars;
+
 const colors = {
   light: {
     text: Colors.textPrimary,
