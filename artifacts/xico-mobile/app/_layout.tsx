@@ -1,21 +1,3 @@
-import {
-  Inter_300Light,
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts as useInterFonts,
-} from "@expo-google-fonts/inter";
-import {
-  Newsreader_300Light,
-  Newsreader_300Light_Italic,
-  Newsreader_400Regular,
-  Newsreader_400Regular_Italic,
-  Newsreader_500Medium,
-  Newsreader_600SemiBold,
-  Newsreader_600SemiBold_Italic,
-  useFonts as useNewsreaderFonts,
-} from "@expo-google-fonts/newsreader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
@@ -26,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { supabase } from "@/constants/supabase";
+import { useXicoFonts } from "@/constants/fonts";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
@@ -111,25 +94,7 @@ async function handleAuthUrl(url: string) {
 }
 
 export default function RootLayout() {
-  const [interLoaded, interError] = useInterFonts({
-    Inter_300Light,
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-  });
-  const [newsreaderLoaded, newsreaderError] = useNewsreaderFonts({
-    Newsreader_300Light,
-    Newsreader_300Light_Italic,
-    Newsreader_400Regular,
-    Newsreader_400Regular_Italic,
-    Newsreader_500Medium,
-    Newsreader_600SemiBold,
-    Newsreader_600SemiBold_Italic,
-  });
-
-  const fontsLoaded = interLoaded && newsreaderLoaded;
-  const fontError = interError || newsreaderError;
+  const [fontsLoaded, fontError] = useXicoFonts();
   // 8-second hard timeout · if Google Fonts hasn't resolved (slow connection,
   // CDN issue, hung web client) we proceed with system fallback fonts instead
   // of leaving the user staring at a blank screen forever.

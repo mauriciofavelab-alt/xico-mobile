@@ -203,6 +203,9 @@ importers:
 
   artifacts/xico-mobile:
     dependencies:
+      '@expo-google-fonts/fraunces':
+        specifier: ~0.4.0
+        version: 0.4.1
       '@expo-google-fonts/newsreader':
         specifier: ^0.4.1
         version: 0.4.1
@@ -990,6 +993,9 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@expo-google-fonts/fraunces@0.4.1':
+    resolution: {integrity: sha512-gYc9P92ObyWvz1rWPOeWSvVKyBFIuA8hgOdhvo4DSiPBaWLbFA6v8uLIEIBwW+0oWTlXbBzjeBReHQI2H7UNjQ==}
 
   '@expo-google-fonts/inter@0.4.2':
     resolution: {integrity: sha512-syfiImMaDmq7cFi0of+waE2M4uSCyd16zgyWxdPOY7fN2VBmSLKEzkfbZgeOjJq61kSqPBNNtXjggiQiSD6gMQ==}
@@ -5773,6 +5779,8 @@ snapshots:
     optional: true
 
   '@esbuild/win32-x64@0.27.3': {}
+
+  '@expo-google-fonts/fraunces@0.4.1': {}
 
   '@expo-google-fonts/inter@0.4.2': {}
 
