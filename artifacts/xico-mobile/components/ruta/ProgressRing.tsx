@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import Animated, {
+  cancelAnimation,
+  runOnJS,
   useAnimatedProps,
   useSharedValue,
   withTiming,
@@ -49,25 +51,51 @@ export function ProgressRing({
   const progress = useSharedValue(0);
   const reducedMotion = useReducedMotion();
 
+  // Stabilize the JS-thread callback so the worklet captures one reference
+  // for the lifetime of this effect. If the parent re-renders and passes a
+  // new `onComplete`, the effect re-runs and `cancelAnimation` clears any
+  // in-flight timing so a stale callback can never fire. The sello-earn
+  // pipeline depends on this callback firing exactly once per 30s ring
+  // completion — fragile-by-default before this refactor.
+  const handleComplete = useCallback(() => {
+    onComplete?.();
+  }, [onComplete]);
+
   useEffect(() => {
-    if (!active) return;
-    if (reducedMotion) {
-      progress.value = 1;
-      onComplete?.();
+    if (!active) {
+      // Cancel any in-flight timing if the ring is disabled mid-animation
+      // so a pending completion callback never lands on a torn-down state.
+      cancelAnimation(progress);
       return;
     }
+    if (reducedMotion) {
+      progress.value = 1;
+      handleComplete();
+      return;
+    }
+    // Cancel any previous timing before kicking off a new one. Without this,
+    // a re-mount or onComplete reference change could leave two timings
+    // racing on the same shared value — the older one would fire its (now
+    // stale) callback after the new one already completed.
+    cancelAnimation(progress);
+    progress.value = 0;
     progress.value = withTiming(
       1,
       { duration: durationMs, easing: Easing.linear },
       (finished) => {
-        if (finished && onComplete) {
-          // Worklet → JS thread
-          // @ts-ignore — runOnJS is available in Reanimated worklets
-          (require("react-native-reanimated") as any).runOnJS(onComplete)();
+        "worklet";
+        if (finished) {
+          runOnJS(handleComplete)();
         }
       },
     );
-  }, [active, durationMs, onComplete, progress, reducedMotion]);
+    return () => {
+      // Cleanup on unmount or before the next effect run: cancel the timing
+      // so any pending completion callback never fires on an unmounted
+      // component.
+      cancelAnimation(progress);
+    };
+  }, [active, durationMs, handleComplete, progress, reducedMotion]);
 
   const animatedProps = useAnimatedProps(() => {
     const offset = circumference * (1 - progress.value);
