@@ -56,10 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen name="ruta" options={{ title: "La Ruta", href: "/ruta" }} />
       <Tabs.Screen name="tu-codice" options={{ title: "Tu Códice" }} />
       <Tabs.Screen name="mapa" options={{ title: "Mapa" }} />
-      {/* Hide legacy routes from tab bar but keep them functional until deleted in Task 2.5 */}
-      <Tabs.Screen name="index" options={{ href: null }} />
-      <Tabs.Screen name="cultura" options={{ href: null }} />
-      <Tabs.Screen name="mexico-ahora" options={{ href: null }} />
+      {/* mi-xico stays hidden until Phase 3 Task 3.1 renames it to tu-codice. */}
       <Tabs.Screen name="mi-xico" options={{ href: null }} />
     </Tabs>
   );
