@@ -19,6 +19,7 @@ import sellosRumboRouter from "./sellos-rumbo.js";
 import rutaStopNotesRouter from "./ruta-stop-notes.js";
 import madridPulseRouter from "./madrid-pulse.js";
 import emotionalEventsRouter from "./emotional-events.js";
+import widgetRouter from "./widget.js";
 
 const router: IRouter = Router();
 
@@ -42,5 +43,6 @@ router.use("/sellos-rumbo", sellosRumboRouter);
 router.use("/ruta-stop-notes", rutaStopNotesRouter);
 router.use("/madrid-pulse", madridPulseRouter);
 router.use("/emotional-events", emotionalEventsRouter);
+router.use("/widget", widgetRouter);
 
 export default router;
