@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -635,7 +636,7 @@ export default function StopScreen() {
                   <TextInput
                     value={note}
                     onChangeText={setNote}
-                    placeholder="Lo que viste, lo que se te quedó, lo que descartes el equipo lo guarda."
+                    placeholder="Lo que viste, lo que se te quedó. El equipo lo guarda."
                     placeholderTextColor={Colors.textTertiary}
                     multiline
                     maxLength={280}
@@ -1057,6 +1058,8 @@ const s = StyleSheet.create({
     flex: 1,
     paddingVertical: Space.md,
     borderWidth: 1.5,
+    // Unified primary CTA radius (auth + walkthrough + ruta empezar all at 12).
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     minHeight: 44, // touch-target-size · ui-ux-pro-max CRITICAL
@@ -1086,9 +1089,13 @@ const s = StyleSheet.create({
     color: Colors.textSecondary,
   },
 
+  // Wax-seal overlay centers on screen height instead of a hardcoded top.
+  // 108pt seal + ~96pt visual offset above center keeps the seal in the
+  // top third of the content area (above the despacho text on iPhone 14
+  // Pro Max, still readable above the CTA bar on iPhone SE). 2026-05-15.
   glyphOverlay: {
     position: "absolute",
-    top: 120,
+    top: Math.max(120, (Dimensions.get("window").height - 108) / 2 - 96),
     left: 0,
     right: 0,
     alignItems: "center",

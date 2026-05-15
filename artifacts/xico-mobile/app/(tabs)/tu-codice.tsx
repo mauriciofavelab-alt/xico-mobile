@@ -424,7 +424,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(8,5,8,0.7)",
+    // 0.55 (was 0.7) · the golden-hour Madrid photograph should READ as
+    // golden hour, not be dimmed to texture. Hero typography sits in the
+    // upper third where the ColorBleedBackdrop adds additional verde tint
+    // for contrast (sufficient at 0.55).
+    backgroundColor: "rgba(8,5,8,0.55)",
     zIndex: 0,
   },
   bleedOverlay: {
@@ -515,13 +519,13 @@ const styles = StyleSheet.create({
     fontSize: 9,
     letterSpacing: 1.8,
     textTransform: "uppercase",
-    color: "rgba(245,239,227,0.55)",
+    color: Colors.textTertiary,
     marginTop: 6,
   },
   statSeparator: {
     width: StyleSheet.hairlineWidth,
     height: 32,
-    backgroundColor: "rgba(245,239,227,0.18)",
+    backgroundColor: Colors.textQuaternary,
   },
 
   // 7.4 pt 10-11 · Glass-vibrant Carta del Equipo. The card's only chromatic
@@ -576,7 +580,7 @@ const styles = StyleSheet.create({
     fontFamily: "Newsreader_400Regular_Italic",
     fontStyle: "italic",
     fontSize: 13,
-    color: "rgba(245,239,227,0.55)",
+    color: Colors.textTertiary,
     letterSpacing: 0.2,
   },
 });

@@ -302,11 +302,11 @@ function DespachoSampleCard({ reducedMotion }: { reducedMotion: boolean }) {
 // ============================================================================
 
 const RUTA_DOT_COLORS: string[] = [
-  Rumbos.norte.hex,                  // Mictlampa #0E1018
+  Rumbos.norte.hex,                  // Mictlampa  #0E1018
   Rumbos.este.hex,                   // Tlapallan  #D9357B
   Rumbos.sur.hex,                    // Huitzlampa #234698
-  Colors.textSecondary,              // Cihuatlampa proxy (cream-ish)
-  Rumbos.center.light,               // Tlalxicco gold/green-warm proxy
+  Rumbos.oeste.hex,                  // Cihuatlampa #EDE6D8 (Barragán bone)
+  Rumbos.center.light,               // Tlalxicco  warm-green
 ];
 
 function RutaDotsAnimation({ reducedMotion }: { reducedMotion: boolean }) {
@@ -447,7 +447,7 @@ function PillarChipButton({
         >
           {id}
         </Text>
-        {selected && <Text style={styles.pillarChipCheck}>✓</Text>}
+        {selected && <View style={styles.pillarChipDot} />}
       </BlurView>
     </SpringPressable>
   );
@@ -1044,13 +1044,18 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     textAlign: "center",
   },
-  pillarChipCheck: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    color: Colors.primaryLight,
+  // Selected-state indicator on pillar chips. A magenta dot is more
+  // brand-coherent than an ASCII check glyph (brandbook §5 reserves
+  // typography for words; iconography uses Mexica glyphs or geometric
+  // primitives — never an Inter checkmark character).
+  pillarChipDot: {
     position: "absolute",
-    top: 6,
-    right: 8,
+    top: 8,
+    right: 10,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.primaryLight,
   },
 
   // ---- Footer chrome ----------------------------------------------------
@@ -1078,7 +1083,9 @@ const styles = StyleSheet.create({
     height: 52,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 2,
+    // Unified primary CTA radius across auth + walkthrough + ruta empezar
+    // (auth and ruta already at 12pt; walkthrough was 2pt; see visual audit).
+    borderRadius: 12,
     paddingHorizontal: 28,
     ...Shadow.cardLift,
   },

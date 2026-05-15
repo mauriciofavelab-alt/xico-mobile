@@ -1,19 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { AppState, Image, RefreshControl, View, StyleSheet, Text } from "react-native";
+import { AppState, Image, Pressable, RefreshControl, View, StyleSheet, Text } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { GlassMasthead, ColorBleedBackdrop } from "@/components/liquid-glass";
-import { Colors, Pillars } from "@/constants/colors";
+import { Colors, Pillars, getAccentColor } from "@/constants/colors";
 import { getDespachoForToday, type Despacho } from "@/constants/despachos";
 import { Rule, RevealOnMount, SectionOpener } from "@/components/editorial";
 import { Roseton } from "@/components/pasaporte/Roseton";
 import { useCurrentRuta } from "@/hooks/useCurrentRuta";
 import { useCurrentRutaProgress } from "@/hooks/useCurrentRutaProgress";
 import { useTier } from "@/hooks/useTier";
+import { useFeaturedArticle, type FeaturedArticle } from "@/hooks/useFeaturedArticle";
+import { isInauguralWeek } from "@/constants/editorial-calendar";
 import { scaledFontSize } from "@/constants/editorial";
 
 // Task 2.2 · Hoy hero takeover (spec §7.1)
@@ -183,19 +186,11 @@ export default function HoyScreen() {
          * The scroll now reads: magenta (Ruta) → neutral (section opener) →
          * cobalt (Featured) — clean handoff.
          */}
-        <RevealOnMount delay={1150} duration={600}>
-          <SectionOpener
-            serial={1}
-            label="El equipo te propone"
-            accent={Colors.textTertiary}
-            style={styles.sectionOpenerSpacing}
-          />
-        </RevealOnMount>
-
-        {/* Featured article placeholder — cultura-cobalt kicker chip on L1. */}
-        <RevealOnMount delay={1300} duration={700}>
-          <FeaturedArticlePlaceholder />
-        </RevealOnMount>
+        {/* Featured editorial section — only renders when there's a real
+         * published+featured article (manifesto: curated, not algorithmic).
+         * The SectionOpener and card live together so we hide both when
+         * the editorial pipeline has no Featured slot scheduled. */}
+        <FeaturedEditorialSection />
       </Animated.ScrollView>
 
       <GlassMasthead
@@ -295,8 +290,7 @@ function RutaHeroCardInline() {
   // won't falsely claim to be inaugural.
   const week = progress.weekLabel ?? "Semana 19";
   const editor = progress.editorName ?? ruta.data?.editor_name ?? "María Vázquez";
-  const weekKey = ruta.data?.week_key;
-  const isInaugural = weekKey === "2026-W19";
+  const isInaugural = isInauguralWeek(ruta.data?.week_key);
 
   return (
     <View style={ruta_s.card}>
@@ -331,37 +325,94 @@ function RutaHeroCardInline() {
 }
 
 /**
- * FeaturedArticlePlaceholder — L1 surface card with magenta-bordered hero
- * gradient placeholder + cultura-cobalt kicker chip + Fraunces headline +
- * italic standfirst. Real article photography lands later.
+ * FeaturedEditorialSection — reads today's curated Featured article from
+ * `useFeaturedArticle` (which fetches `GET /api/articles/featured/today`).
+ * Renders the SectionOpener + L1 card together; returns null when no
+ * featured article is published (the editorial "no Featured slot today"
+ * state is silent — manifesto rule "curated, not algorithmic").
+ *
+ * Replaced the static FeaturedArticlePlaceholder on 2026-05-15 so the
+ * Hoy surface is no longer paste-shipping a static placeholder that
+ * repeated every day. The editorial CMS is the existing `articles`
+ * table — when `featured=true AND is_published=true` exists, this card
+ * renders that article verbatim with a tap-to-open Pressable.
  */
-function FeaturedArticlePlaceholder() {
+function FeaturedEditorialSection() {
+  const { data: article, isPending } = useFeaturedArticle();
+
+  // Render nothing while pending or when no featured article exists.
+  // Manifesto: better silence than a fake card.
+  if (isPending || !article) return null;
+
   return (
-    <View style={article_s.card}>
-      {/* PHOTO SLOT · article hero — real photo lands when sourced. */}
+    <>
+      <RevealOnMount delay={1150} duration={600}>
+        <SectionOpener
+          serial={1}
+          label="El equipo te propone"
+          accent={Colors.textTertiary}
+          style={styles.sectionOpenerSpacing}
+        />
+      </RevealOnMount>
+
+      <RevealOnMount delay={1300} duration={700}>
+        <FeaturedArticleCard article={article} />
+      </RevealOnMount>
+    </>
+  );
+}
+
+/**
+ * FeaturedArticleCard — L1 surface card with kicker chip + headline +
+ * standfirst + byline. Tappable → /article/[id]. Kicker color derives
+ * from the article's subcategory or pillar via getAccentColor() so the
+ * one-accent-per-card discipline holds even as editorial categories
+ * shift week-to-week.
+ */
+function FeaturedArticleCard({ article }: { article: FeaturedArticle }) {
+  const kickerLabel = (article.subcategory || article.category || article.pillar || "CULTURA").toUpperCase();
+  // Pillar/subcategory → hex accent. Fallback to cultura cobalt for the
+  // legacy "portada" pillar (cover-story styling).
+  const accentSource = article.subcategory || article.pillar || "cultura";
+  const accent = getAccentColor(accentSource) ?? Pillars.cultura;
+
+  return (
+    <Pressable
+      onPress={() => router.push(`/article/${article.id}` as never)}
+      accessibilityRole="link"
+      accessibilityLabel={`Abrir artículo · ${article.title}`}
+      style={({ pressed }) => [article_s.card, pressed && { opacity: 0.85 }]}
+    >
+      {/* PHOTO SLOT · article hero. Real photo lands when image_key is wired
+          to a CDN URL; for now the gradient placeholder reads as editorial
+          rather than as a broken state. */}
       <LinearGradient
         colors={[Colors.surfaceHigh, Colors.surfaceHigher, Colors.surface]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={article_s.heroPlaceholder}
       >
-        <View style={[article_s.heroBorderLeft, { backgroundColor: Pillars.cultura }]} />
+        <View style={[article_s.heroBorderLeft, { backgroundColor: accent }]} />
       </LinearGradient>
 
       <View style={article_s.body}>
-        <View style={[article_s.kickerChip, { borderColor: Pillars.cultura }]}>
-          <Text style={[article_s.kickerChipText, { color: Pillars.cultura }]}>CULTURA</Text>
+        <View style={[article_s.kickerChip, { borderColor: accent }]}>
+          <Text style={[article_s.kickerChipText, { color: accent }]}>{kickerLabel}</Text>
         </View>
-        <Text style={article_s.headline}>
-          {"El mole que llegó "}
-          <Text style={article_s.italicAccent}>antes que el papeleo</Text>
+        <Text style={article_s.headline} numberOfLines={3}>
+          {article.title}
         </Text>
-        <Text style={article_s.standfirst}>
-          Tres puestos del Mercado de San Fernando ya servían recetas oaxaqueñas en 2018, dos años antes de que la palabra "fusión" entrara en la conversación madrileña.
+        {article.subtitle ? (
+          <Text style={article_s.standfirst} numberOfLines={3}>
+            {article.subtitle}
+          </Text>
+        ) : null}
+        <Text style={article_s.byline}>
+          {article.author_name ? `— de ${article.author_name}` : "— Editorial"}
+          {article.institution ? ` · ${article.institution}` : ""}
         </Text>
-        <Text style={article_s.byline}>— de Sofía Mendoza · editora gastronomía</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

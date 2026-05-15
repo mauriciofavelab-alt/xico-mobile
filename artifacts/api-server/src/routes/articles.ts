@@ -31,6 +31,32 @@ router.get("/", async (_req, res) => {
   res.json((data ?? []).map(normalize));
 });
 
+// GET /api/articles/featured/today · public
+// Returns the most recent published article with featured=true. Powers the
+// Hoy screen's "Featured" card. Anonymous · same curated content for everyone.
+// When no featured article exists, returns 404 so the client renders the
+// "no featured today" state (manifesto-honest · never invent content).
+router.get("/featured/today", async (_req, res) => {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("id, slug, pillar, subcategory, category, tag, title, subtitle, author_name, institution, image_key, read_time_minutes, accent_color, published_at")
+    .eq("is_published", true)
+    .eq("featured", true)
+    .order("published_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+    return;
+  }
+  if (!data) {
+    res.status(404).json({ error: "No featured article available" });
+    return;
+  }
+  res.json(normalize(data));
+});
+
 router.get("/:id", async (req, res) => {
   const { data, error } = await supabase
     .from("articles")

@@ -15,6 +15,7 @@ import { haptic } from "@/constants/haptics";
 
 import { Colors, Pillars } from "@/constants/colors";
 import { Fonts, Space, Tracking, TypeSize } from "@/constants/editorial";
+import { isInauguralWeek } from "@/constants/editorial-calendar";
 import { RevealOnMount } from "@/components/editorial";
 import { GlassMasthead } from "@/components/liquid-glass";
 import { ChromeTabBar } from "@/components/nav/ChromeTabBar";
@@ -401,7 +402,7 @@ export default function RutaIndex() {
           stop cards underneath. */}
       <GlassMasthead
         label={formatWeekLabel(ruta.data?.week_key ?? null)}
-        meta={ruta.data?.week_key === "2026-W19" ? "INAUGURAL" : undefined}
+        meta={isInauguralWeek(ruta.data?.week_key) ? "INAUGURAL" : undefined}
         liveDotColor={Pillars.indice}
         scrollY={scrollY}
       />
