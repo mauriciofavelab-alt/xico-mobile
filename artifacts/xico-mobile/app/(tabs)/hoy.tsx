@@ -17,6 +17,7 @@ import { useCurrentRutaProgress } from "@/hooks/useCurrentRutaProgress";
 import { useTier } from "@/hooks/useTier";
 import { useFeaturedArticle, type FeaturedArticle } from "@/hooks/useFeaturedArticle";
 import { isInauguralWeek } from "@/constants/editorial-calendar";
+import { getImage } from "@/constants/imageMap";
 import { scaledFontSize } from "@/constants/editorial";
 
 // Task 2.2 · Hoy hero takeover (spec §7.1)
@@ -375,6 +376,10 @@ function FeaturedArticleCard({ article }: { article: FeaturedArticle }) {
   // legacy "portada" pillar (cover-story styling).
   const accentSource = article.subcategory || article.pillar || "cultura";
   const accent = getAccentColor(accentSource) ?? Pillars.cultura;
+  // Photo resolution chain (mirrors article/[id].tsx getImageForArticle):
+  // 1. image_key from the editorial CMS → imageMap thematic asset
+  // 2. else, gradient placeholder (still hairline-stripe accented)
+  const heroImage = article.image_key ? getImage(article.image_key) : null;
 
   return (
     <Pressable
@@ -383,17 +388,36 @@ function FeaturedArticleCard({ article }: { article: FeaturedArticle }) {
       accessibilityLabel={`Abrir artículo · ${article.title}`}
       style={({ pressed }) => [article_s.card, pressed && { opacity: 0.85 }]}
     >
-      {/* PHOTO SLOT · article hero. Real photo lands when image_key is wired
-          to a CDN URL; for now the gradient placeholder reads as editorial
-          rather than as a broken state. */}
-      <LinearGradient
-        colors={[Colors.surfaceHigh, Colors.surfaceHigher, Colors.surface]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={article_s.heroPlaceholder}
-      >
-        <View style={[article_s.heroBorderLeft, { backgroundColor: accent }]} />
-      </LinearGradient>
+      {/* PHOTO SLOT · article hero. Renders a real thematic image when the
+          article carries an image_key (28 of 28 production articles do as
+          of 2026-05-15). Falls back to the gradient when image_key is
+          missing — still editorial, never broken. */}
+      {heroImage ? (
+        <View style={article_s.heroPlaceholder}>
+          <Image
+            source={heroImage}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+          />
+          {/* Bottom-to-top dark fade so the kicker/headline below still
+              reads regardless of photo brightness. */}
+          <LinearGradient
+            colors={["transparent", "rgba(8,5,8,0.55)"]}
+            locations={[0.55, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={[article_s.heroBorderLeft, { backgroundColor: accent }]} />
+        </View>
+      ) : (
+        <LinearGradient
+          colors={[Colors.surfaceHigh, Colors.surfaceHigher, Colors.surface]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={article_s.heroPlaceholder}
+        >
+          <View style={[article_s.heroBorderLeft, { backgroundColor: accent }]} />
+        </LinearGradient>
+      )}
 
       <View style={article_s.body}>
         <View style={[article_s.kickerChip, { borderColor: accent }]}>

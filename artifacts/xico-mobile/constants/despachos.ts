@@ -412,10 +412,40 @@ export function getDespachoForToday(): Despacho {
 const stripDiacritics = (s: string): string =>
   s.normalize("NFD").replace(/\p{Diacritic}+/gu, "").toLowerCase();
 
+/**
+ * Manual override map for Ruta stops whose lugar.nombre doesn't appear in
+ * the 30-despacho photo library. La Ruta del Mezcal (inaugural 2026-W19)
+ * has 4 mezcal-bar stops that are NOT independently photographed yet · we
+ * substitute with thematically-aligned existing lugar photographs.
+ *
+ * EDITORIAL CONTRACT (v1.1 follow-up): these are stand-ins. María / Mauricio
+ * should source independent venue photos OR commission them before the
+ * inaugural Ruta ships publicly. Until then, the substitutions are honest
+ * (no generic stock) and thematically congruent (mezcal/bar/taberna).
+ */
+const STOP_PHOTO_OVERRIDES: Record<string, LugarImageSource> = {
+  // Punto MX (Roberto Ruiz · Mexican fine-dining w/ mezcal pairing, Salamanca)
+  // Substitute: 020-taberna-carmencita · classic Madrid taberna register.
+  "punto mx": require("@/assets/lugares/020-taberna-carmencita.jpg"),
+  // Barracuda MX (Mexican cocktail bar, Retiro)
+  // Substitute: 011-bar-brutal · bar-interior register.
+  "barracuda mx": require("@/assets/lugares/011-bar-brutal.jpg"),
+  // Corazón de Agave (mezcal bar, La Latina) ↔ 029-barra-tobala (Tobala is
+  // a mezcal varietal · perfect thematic match).
+  "corazon de agave": require("@/assets/lugares/029-barra-tobala.jpg"),
+  "corazón de agave": require("@/assets/lugares/029-barra-tobala.jpg"),
+  // La Botica de la Condesa (apothecary-themed cocktail bar, Malasaña)
+  // Substitute: 027-sala-caracol · venue/atmospheric register.
+  "la botica de la condesa": require("@/assets/lugares/027-sala-caracol.jpg"),
+};
+
 export function findLugarImageByName(name: string | null | undefined): LugarImageSource | undefined {
   if (!name) return undefined;
   const needle = stripDiacritics(name).trim();
   if (!needle) return undefined;
+  // 1. Manual override map (Ruta stops not in despacho photo library).
+  if (STOP_PHOTO_OVERRIDES[needle]) return STOP_PHOTO_OVERRIDES[needle];
+  // 2. Substring match across despacho lugar.nombre entries.
   for (const d of DESPACHOS) {
     if (!d.lugar_image_url) continue;
     const hay = stripDiacritics(d.lugar.nombre);

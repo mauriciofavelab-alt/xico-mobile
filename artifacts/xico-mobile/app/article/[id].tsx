@@ -50,10 +50,19 @@ type ApiArticle = {
   author_name?: string; read_time_minutes?: number; is_featured?: boolean;
   created_at?: string | null; published_at?: string | null; hero_image_url?: string;
   hero_caption?: string; photographer_credit?: string; translator_name?: string;
+  image_key?: string;
 };
 
+// Photo resolution chain · 2026-05-15
+// 1. hero_image_url (a real per-article CDN URL · authored by editor)
+// 2. image_key (per-article thematic key into imageMap · 28 articles have
+//    this populated in production with strings like "dia-de-muertos",
+//    "iturbide-iguanas", "mezcal-destilados", etc. so each article now
+//    gets a matched thematic image instead of three pillar-wide fallbacks)
+// 3. pillar fallback (last-resort thematic default)
 function getImageForArticle(a: ApiArticle) {
   if (a.hero_image_url) return { uri: a.hero_image_url };
+  if (a.image_key) return getImage(a.image_key);
   if (a.pillar === "mexico-ahora") return getImage("arte-mesoamerica");
   if (a.pillar === "cultura") return getImage("arte-contemporaneo");
   return getImage("artesania-mexicana");
