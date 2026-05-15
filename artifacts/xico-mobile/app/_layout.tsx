@@ -47,7 +47,13 @@ function RootLayoutNav() {
   useTierIcon();
 
   useEffect(() => {
-    AsyncStorage.getItem("xico_onboarding_done").then(v => setOnboardingDone(!!v));
+    // .catch routes AsyncStorage failures (rare but documented on iOS reinstall
+    // edge cases) to "not yet onboarded" so the user sees /onboarding instead
+    // of unhandled-rejecting into the ErrorBoundary on second launch. Per
+    // diagnostic §B-4.
+    AsyncStorage.getItem("xico_onboarding_done")
+      .then((v) => setOnboardingDone(!!v))
+      .catch(() => setOnboardingDone(false));
   }, [session]);
 
   useEffect(() => {
