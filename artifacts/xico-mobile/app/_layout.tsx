@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { supabase } from "@/constants/supabase";
+import { supabase, supabaseConfigured } from "@/constants/supabase";
 import { useXicoFonts } from "@/constants/fonts";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -52,6 +52,14 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (loading || onboardingDone === null) return;
+    // When the bundle was built without Supabase secrets (web brand preview /
+    // unconfigured dev builds) the auth + onboarding flows are no-ops · skip
+    // straight into the editorial surfaces which fall back to local content.
+    // iOS production builds always have secrets, so this branch is dead there.
+    if (!supabaseConfigured) {
+      router.replace("/(tabs)/hoy");
+      return;
+    }
     if (!session) {
       router.replace("/auth");
     } else if (!onboardingDone) {
