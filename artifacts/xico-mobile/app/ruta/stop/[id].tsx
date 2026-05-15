@@ -81,7 +81,24 @@ type StopPublic = {
 
 type StopState = "en_camino" | "llegada" | "sello_entregado" | "anotacion" | "tier_up";
 
-type RumboLite = { id: string; slug: RumboSlug; nahuatl_name: string; color_hex: string };
+type RumboLite = {
+  id: string;
+  slug: RumboSlug;
+  nahuatl_name: string;
+  meaning: string;
+  color_hex: string;
+};
+
+// Trailing-punctuation parser for the monumental stop name. Some stops end with
+// "?" or "!" (e.g. "¿Café o té?"), most end with no punctuation. We render the
+// trailing punctuation italic + rumbo-colored as an editorial signature; if the
+// name has none, we add a single italic period. The period is THE finality cue.
+const NAME_PUNCT_RE = /[.!?…]+$/;
+function splitStopName(name: string): { body: string; punct: string } {
+  const match = name.match(NAME_PUNCT_RE);
+  if (match) return { body: name.slice(0, -match[0].length), punct: match[0] };
+  return { body: name, punct: "." };
+}
 
 // ─── Local data hooks ─────────────────────────────────────────────────────
 function useStop(stopId: string | undefined) {
@@ -332,28 +349,12 @@ export default function StopScreen() {
             display name fades + shrinks slightly to "rise into the nav" as
             the user scrolls. State indicator (lock/ring/sello) is pinned
             absolutely OUTSIDE this region so it survives any scroll position. */}
+        {/* Hero · 340pt veiled region. Photo + rumbo wash + grain. The
+            monumental stop name, folio, rumbo tag, and italic address now
+            live BELOW the hero in the body composition (spec §7.3 pts 4-8).
+            Masthead floats above, lock chip floats top-right. */}
         <Animated.View style={heroParallaxStyle}>
-          <StopVeil accent={accent} lifted={veilLifted} height={340} atmosphereOverlay={typo.atmosphereOverlay}>
-            <Animated.View style={[s.heroContent, { paddingTop: insets.top + 56 }, heroTitleStyle]}>
-              <Text style={s.heroFolio}>
-                {String(data.order_num ?? 0).padStart(2, "0")}
-                {totalStops ? ` / ${String(totalStops).padStart(2, "0")}` : ""}
-              </Text>
-              <Text
-                style={s.heroName}
-                numberOfLines={3}
-                adjustsFontSizeToFit
-                minimumFontScale={0.7}
-              >
-                {data.name}
-              </Text>
-              {rumbo ? (
-                <View style={s.heroKicker}>
-                  <Kicker color={accent}>{rumbo.nahuatl_name}</Kicker>
-                </View>
-              ) : null}
-            </Animated.View>
-          </StopVeil>
+          <StopVeil accent={accent} lifted={veilLifted} height={340} atmosphereOverlay={typo.atmosphereOverlay} />
         </Animated.View>
 
         {/* Pinned controls · close (top-left) + state indicator (top-right).
@@ -390,21 +391,78 @@ export default function StopScreen() {
           )}
         </View>
 
-        <View style={s.body}>
-          {/* Despacho · always rendered. Modo hora: madrugada uses Newsreader 300
-              Light and drops body to secondary contrast; atardecer + dia use default.
-              The order/name/rumbo header that used to live here now lives in the
-              hero region above — this body starts directly with the despacho. */}
-          <Text style={s.address}>{data.address}</Text>
-          {data.despacho_text ? (
-            <View style={s.despachoBlock}>
-              <Text style={s.despachoLabel}>El despacho</Text>
-              <Text style={[s.despachoText, { fontFamily: typo.bodyFontFamily, color: typo.bodyColor }]}>
-                {data.despacho_text}
-              </Text>
+        {/* Body composition · spec §7.3 pts 4-8. Staggered reveal cascades in
+            below the hero photo: folio (tracked caps) → rumbo tag pill →
+            monumental Fraunces 44pt name with italic-accent punctuation →
+            italic Newsreader address line → Despacho L1 card with rumbo
+            kicker + drop cap. ONE rumbo accent across all of them — that's
+            the saturation discipline. */}
+        {(() => {
+          const { body: nameBody, punct: namePunct } = splitStopName(data.name);
+          const rumboSlug = rumbo?.slug;
+          const rumboMeaning = rumbo?.meaning ?? "";
+          const cardinalLabel = rumboSlug
+            ? rumboSlug.charAt(0).toUpperCase() + rumboSlug.slice(1)
+            : "";
+          const rumboTagParts = rumbo
+            ? [rumbo.nahuatl_name, cardinalLabel, rumboMeaning].filter(Boolean)
+            : [];
+          const rumboTagText = rumboTagParts.join(" · ");
+          return (
+            <View style={s.stopNameBlock}>
+              <Animated.View
+                entering={reducedMotion ? undefined : FadeInUp.duration(420).delay(200).easing(Easing.bezier(0.22, 1, 0.36, 1))}
+              >
+                <Text style={s.stopFolio}>{data.address.toUpperCase()}</Text>
+              </Animated.View>
+              {rumbo && rumboTagText ? (
+                <Animated.View
+                  entering={reducedMotion ? undefined : FadeInUp.duration(420).delay(300).easing(Easing.bezier(0.22, 1, 0.36, 1))}
+                  style={s.rumboTag}
+                >
+                  <GlassChip tintColor={`${accent}30`} minHeight={28}>
+                    <View style={[s.rumboSwatch, { backgroundColor: accent }]} />
+                    <Text style={[s.rumboText, { color: accent }]}>{rumboTagText}</Text>
+                  </GlassChip>
+                </Animated.View>
+              ) : null}
+              <Animated.View
+                entering={reducedMotion ? undefined : FadeInUp.duration(540).delay(400).easing(Easing.bezier(0.22, 1, 0.36, 1))}
+              >
+                <Text style={s.stopName}>
+                  {nameBody}
+                  <Text style={[s.stopNameAccent, { color: accent }]}>{namePunct}</Text>
+                </Text>
+              </Animated.View>
+              {data.description ? (
+                <Animated.View
+                  entering={reducedMotion ? undefined : FadeInUp.duration(540).delay(500).easing(Easing.bezier(0.22, 1, 0.36, 1))}
+                >
+                  <Text style={s.stopAddressItalic}>{data.description}</Text>
+                </Animated.View>
+              ) : null}
             </View>
-          ) : null}
+          );
+        })()}
 
+        {/* Despacho card · spec §7.3 pt 8. L1 surface with rumbo-colored 3pt
+            left border + sanctioned `shadow.elevated`. Rumbo kicker + rumbo
+            drop cap on the first letter. Only renders if despacho_text exists
+            — no algorithmic placeholder per manifesto. */}
+        {data.despacho_text ? (
+          <Animated.View
+            entering={reducedMotion ? undefined : FadeInUp.duration(540).delay(600).easing(Easing.bezier(0.22, 1, 0.36, 1))}
+            style={[s.despachoCard, { borderLeftColor: accent }]}
+          >
+            <Text style={[s.cardLabel, { color: accent }]}>EL DESPACHO</Text>
+            <Text style={[s.cardBody, { fontFamily: typo.bodyFontFamily, color: typo.bodyColor }]}>
+              <Text style={[s.cardDropCap, { color: accent }]}>{data.despacho_text[0]}</Text>
+              {data.despacho_text.slice(1)}
+            </Text>
+          </Animated.View>
+        ) : null}
+
+        <View style={s.body}>
           {/* Apunte in situ · revealed when visit-token arrives */}
           {state !== "en_camino" && visit.apunte_in_situ ? (
             <Animated.View
@@ -761,6 +819,82 @@ const s = StyleSheet.create({
     fontSize: TypeSize.body,
     color: Colors.textPrimary,
     lineHeight: TypeSize.body * 1.65,
+  },
+
+  // Spec §7.3 pts 4-7 · body composition that sits below the hero veil.
+  // Folio (tracked-caps) → rumbo tag pill → monumental Fraunces 44pt name
+  // with italic-accent punctuation in rumbo color → italic Newsreader address.
+  stopNameBlock: { paddingHorizontal: 20, paddingTop: Space.lg },
+  stopFolio: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 10,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    color: "rgba(245,239,227,0.65)",
+    marginBottom: 5,
+  },
+  rumboTag: { flexDirection: "row", marginBottom: 14 },
+  rumboSwatch: { width: 8, height: 8, borderRadius: 2 },
+  rumboText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 9,
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
+  },
+  stopName: {
+    fontFamily: "Fraunces_500Medium",
+    fontSize: 44,
+    lineHeight: 44 * 0.96,
+    letterSpacing: -0.035 * 44,
+    color: Colors.textPrimary,
+    marginBottom: 6,
+  },
+  stopNameAccent: { fontFamily: "Fraunces_400Regular_Italic" },
+  stopAddressItalic: {
+    fontFamily: "Newsreader_400Regular_Italic",
+    fontStyle: "italic",
+    fontSize: 13,
+    lineHeight: 13 * 1.35,
+    color: "rgba(245,239,227,0.78)",
+    marginBottom: 18,
+  },
+
+  // Spec §7.3 pt 8 · Despacho card. L1 surface, rumbo 3pt left border,
+  // sanctioned `shadow.elevated` (the ONE shadow site on this screen per
+  // brandbook §2 override). Rumbo kicker + drop cap echo the saturation
+  // anchor without doubling it.
+  despachoCard: {
+    backgroundColor: Colors.surface,
+    borderLeftWidth: 3,
+    borderLeftColor: "transparent", // overridden inline with rumbo color
+    borderRadius: 10,
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 16,
+    // shadow.elevated · brandbook §2 floating-element recipe
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.55,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  cardLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 9,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    marginBottom: 8,
+  },
+  cardBody: {
+    fontFamily: "Newsreader_400Regular",
+    fontSize: 14,
+    lineHeight: 14 * 1.55,
+    color: Colors.textSecondary,
+  },
+  cardDropCap: {
+    fontFamily: "Fraunces_600SemiBold",
+    fontSize: 34,
+    lineHeight: 34 * 0.85,
   },
 
   apunteBlock: {
