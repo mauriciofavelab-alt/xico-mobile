@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ViewStyle } from "react-native";
+import { Platform, View, ViewStyle } from "react-native";
 import Animated, { Easing, FadeInUp, useReducedMotion } from "react-native-reanimated";
 
 type Props = {
@@ -27,6 +27,15 @@ export function RevealOnMount({
   // When set, render the children inline with no animation.
   const reducedMotion = useReducedMotion();
   if (reducedMotion) {
+    return <View style={style}>{children}</View>;
+  }
+
+  // Web bypass · Reanimated's `entering` animation on web leaves the animated
+  // element permanently `position: absolute`, which collapses the parent's
+  // height to 0 and overlaps every sibling. iOS reverts to `relative` cleanly
+  // after the animation finishes. Render inline on web so layout is correct;
+  // we keep the editorial cadence intact on iOS where Reanimated behaves.
+  if (Platform.OS === "web") {
     return <View style={style}>{children}</View>;
   }
 
