@@ -30,6 +30,13 @@ import { GrainOverlay } from "./GrainOverlay";
  *     audit — at 0 sellos the rosetón signals "1/52 done" which the manifesto
  *     forbids. Kept for backward compat; prefer mode='week' for new screens.
  *
+ * Optional · `withDropShadows` (Phase 3 Task 3.3 · spec §7.4 pt 8):
+ *   When true, filled petals render an offset-duplicate "shadow" path under
+ *   their fill. Sanctioned exception to the brandbook "hairline > shadow"
+ *   default · used for the Tu Códice hero rosetón (220pt) where the larger
+ *   scale + dark backdrop demand visible depth. Defaults false so smaller
+ *   call sites (Ruta listing, Stop screen) are unchanged.
+ *
  *   mode='week' (PREFERRED · added 2026-05-14 post-critique reframe) · shows
  *     ONLY this week's Ruta. Petals reflect rumbos PRESENT in this Ruta;
  *     rumbos not in this Ruta render as extra-dim "absent" outlines. Ticks
@@ -74,6 +81,9 @@ type LifetimeProps = {
   sellos?: Sello[];
   onPetalPress?: (slug: RumboSlug) => void;
   onCenterPress?: () => void;
+  /** Phase 3 Task 3.3 · per-petal drop shadow for hero rosetón (220pt+ scale).
+   *  Defaults false — small call sites stay shadow-free. See module JSDoc. */
+  withDropShadows?: boolean;
 };
 
 type WeekProps = {
@@ -92,6 +102,9 @@ type WeekProps = {
   tier?: TierKey;
   onPetalPress?: (slug: RumboSlug) => void;
   onCenterPress?: () => void;
+  /** Phase 3 Task 3.3 · per-petal drop shadow for hero rosetón (220pt+ scale).
+   *  Defaults false — small call sites stay shadow-free. See module JSDoc. */
+  withDropShadows?: boolean;
 };
 
 type Props = LifetimeProps | WeekProps;
@@ -178,6 +191,7 @@ export function Roseton(props: Props) {
               hasFill={distribution[slug] > 0}
               fillRatio={fillRatio(slug)}
               present={isPresent(slug)}
+              withDropShadow={!!props.withDropShadows && distribution[slug] > 0}
             />
           ))}
 
@@ -347,6 +361,7 @@ function Petal({
   hasFill,
   fillRatio = 0,
   present = true,
+  withDropShadow = false,
 }: {
   slug: RumboSlug;
   cx: number;
@@ -363,6 +378,14 @@ function Petal({
    *  rumbo with 0 stops in this Ruta gets a much dimmer ghost outline.
    *  Default true (lifetime mode — all 4 cardinals always present). */
   present?: boolean;
+  /** Render an offset-duplicate "shadow" path under the fill. Only takes
+   *  effect when hasFill=true (no shadow on ghost/absent outlines). The
+   *  shadow is a black path at 0.4 opacity, offset +3pt along the petal
+   *  axis (positive Y in petal-local coords, which points away from the
+   *  petal tip toward the center — i.e. "downward" relative to the rumbo
+   *  direction). Sanctioned exception to "hairline > shadow" per spec
+   *  §7.4 pt 8, only enabled for the hero rosetón. */
+  withDropShadow?: boolean;
 }) {
   // Local coords: petal extends from (0,0) center up to (0,-length) tip
   // Control points at (±width/2, -length/2) shape the almond's belly.
@@ -387,6 +410,24 @@ function Petal({
   const filledOpacity = 0.55 + 0.31 * Math.max(0, Math.min(1, fillRatio));
   return (
     <G transform={`translate(${cx}, ${cy}) rotate(${rotation})`}>
+      {/* Path B drop shadow · offset-duplicate path beneath the main fill.
+          Rendered first so the colored fill paints over it. Offset +3pt on
+          the petal-local Y axis (post-rotation this becomes a drop shadow
+          in the rumbo's outward direction). Pure black at 0.4 opacity reads
+          as depth against the warm-dark backdrop without going video-game-y.
+          react-native-svg 15.x has inconsistent <Filter>+<FeGaussianBlur>
+          coverage across platforms, so we use the reliable offset-duplicate
+          technique. Hard-edged shadow is acceptable for v1 per spec §7.4 pt 8
+          guidance ("tasteful, subtle Gaussian-feel, not video-game-y" — the
+          hard edge at low opacity reads tasteful at 220pt scale). */}
+      {withDropShadow && hasFill ? (
+        <Path
+          d={d}
+          fill="#000"
+          opacity={0.4}
+          transform="translate(0, 3)"
+        />
+      ) : null}
       <Path
         d={d}
         fill={hasFill ? color : "transparent"}

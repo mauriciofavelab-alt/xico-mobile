@@ -1,14 +1,17 @@
 // LEGACY mi-xico.tsx replaced 2026-05-15 · Liquid Glass redesign Phase 3 · spec §7.4
 // Phase 3 Task 3.2 · identity block (pre-line + Fraunces 42pt name with italic
 // family-name in current-rumbo color) + tier badge GlassChip.
-// Body sections (rosetón / stats / Carta) land in Tasks 3.3 + 3.4.
+// Phase 3 Task 3.3 · hero rosetón (220pt, lifetime mode, withDropShadows)
+// wrapped in HaloPulse using the user's two dominant rumbo colors.
+// Carta del Equipo lands in Task 3.4.
 import React, { useMemo } from "react";
 import { ScrollView, View, Text, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { GlassMasthead, ColorBleedBackdrop, GlassChip } from "@/components/liquid-glass";
+import { GlassMasthead, ColorBleedBackdrop, GlassChip, HaloPulse } from "@/components/liquid-glass";
 import { RevealOnMount } from "@/components/editorial/RevealOnMount";
+import { Roseton } from "@/components/pasaporte";
 import { Colors, Pillars } from "@/constants/colors";
 import { Rumbos, TIER_LABELS, type RumboSlug, type TierKey } from "@/constants/rumbos";
 import { useTier } from "@/hooks/useTier";
@@ -100,6 +103,28 @@ export default function TuCodiceScreen() {
   );
   const currentRumboColor = Rumbos[currentRumbo].hex;
 
+  /**
+   * Two dominant rumbos for the halo pulse · primary + secondary, sorted by
+   * sello count with the canonical este→sur→norte→oeste tiebreaker. For an
+   * Iniciado user with 0 sellos everywhere the order falls through to the
+   * tiebreaker order — primary=este (Tlapallan pink), secondary=sur
+   * (Huitzlampa cobalt) — the warmest opening signature for a new account.
+   * Alpha suffixes: `38` ≈ 22% (primary), `1F` ≈ 12% (secondary). Soft,
+   * atmospheric pulse — NOT theatrical. Saturation discipline preserved.
+   */
+  const [haloPrimaryHex, haloSecondaryHex] = useMemo(() => {
+    const byRumbo = tier?.by_rumbo;
+    const ranked = [...CANONICAL_TIEBREAK]
+      .map((slug) => ({ slug, count: byRumbo?.[slug] ?? 0 }))
+      .sort((a, b) => {
+        if (b.count !== a.count) return b.count - a.count;
+        return CANONICAL_TIEBREAK.indexOf(a.slug) - CANONICAL_TIEBREAK.indexOf(b.slug);
+      });
+    return [Rumbos[ranked[0].slug].hex, Rumbos[ranked[1].slug].hex];
+  }, [tier?.by_rumbo]);
+  const haloPrimary = `${haloPrimaryHex}38`;
+  const haloSecondary = `${haloSecondaryHex}1F`;
+
   const tierKey: TierKey = tier?.tier ?? "iniciado";
   const memberSinceLabel = useMemo(
     () => formatMemberSinceLabel(profile?.memberSince),
@@ -159,7 +184,24 @@ export default function TuCodiceScreen() {
           </View>
         )}
 
-        {/* 3.3 · rosetón + halo pulse */}
+        {/* 7.4 pt 8 · Hero rosetón (220pt, lifetime mode) wrapped in halo
+            pulse using the user's two dominant rumbo colors. RevealOnMount
+            index=3 lands the rosetón last in the cascade — the user reads
+            their name, tier, then the codex blooms in. */}
+        <RevealOnMount index={3} delay={300} step={200} duration={700}>
+          <View style={styles.rosetonHero}>
+            <HaloPulse primaryColor={haloPrimary} secondaryColor={haloSecondary}>
+              <Roseton
+                size={220}
+                byRumbo={tier?.by_rumbo ?? { norte: 0, este: 0, sur: 0, oeste: 0 }}
+                tier={tier?.tier ?? "iniciado"}
+                totalSellos={tier?.total ?? 0}
+                withDropShadows
+              />
+            </HaloPulse>
+          </View>
+        </RevealOnMount>
+
         {/* 3.4 · stats row + Carta del Equipo */}
       </ScrollView>
 
@@ -206,6 +248,11 @@ const styles = StyleSheet.create({
   },
   identityBlock: {
     marginBottom: 22,
+  },
+  rosetonHero: {
+    alignItems: "center",
+    marginVertical: 8,
+    marginBottom: 24,
   },
   preLine: {
     fontFamily: "Newsreader_400Regular_Italic",
