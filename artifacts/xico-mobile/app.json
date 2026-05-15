@@ -21,6 +21,9 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "XICO necesita saber que estás en cada parada de La Ruta para abrir el apunte in situ. Tu ubicación nunca se guarda.",
         "NSSupportsLiveActivities": true
+      },
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.com.xico.app.widgets"]
       }
     },
     "android": {
