@@ -65,7 +65,9 @@
     "@expo-google-fonts/newsreader": "^0.4.1",
     "@supabase/supabase-js": "^2.101.1",
     "expo-av": "~16.0.8",
+    "expo-build-properties": "~1.0.10",
     "expo-speech": "^14.0.8",
+    "react-native-maps": "1.20.1",
     "react-native-webview": "^13.16.1"
   }
 }
