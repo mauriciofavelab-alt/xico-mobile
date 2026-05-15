@@ -87,6 +87,12 @@ export default function AuthScreen() {
           autoFocus
           returnKeyType="send"
           onSubmitEditing={handleSend}
+          // A11y · 2026-05-15 (Agent D · diagnostic-code.md §D-5):
+          // placeholder text is NOT a label per WCAG · VoiceOver users
+          // landed on this input with no name. The field is the auth-flow
+          // gate · every accessibility user must be able to identify it.
+          accessibilityLabel="Correo electrónico"
+          accessibilityHint="Introduce tu correo para recibir el enlace de acceso"
         />
 
         {!!error && <Text style={s.error}>{error}</Text>}

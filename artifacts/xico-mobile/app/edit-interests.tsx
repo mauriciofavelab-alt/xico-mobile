@@ -128,16 +128,19 @@ export default function EditInterestsScreen() {
       await AsyncStorage.removeItem(`xico_despacho_${TODAY}`);
       await AsyncStorage.removeItem(`xico_despacho_data_${TODAY}`);
 
+      // DRY · 2026-05-15 (Agent D · diagnostic-code.md §G-4): see
+      // app/onboarding.tsx for the matching change. Both screens share the
+      // "PATCH /api/profile interests with current bearer" recipe — same
+      // failure-mode (anon user → skip; network fail → swallow) preserved.
       try {
-        const { API_BASE } = await import("@/constants/api");
-        const { supabase } = await import("@/constants/supabase");
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
+        const { API_BASE, getAuthHeaders } = await import("@/constants/api");
+        const authHeaders = await getAuthHeaders();
+        if (authHeaders.Authorization) {
           await fetch(`${API_BASE}/api/profile`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
+              ...authHeaders,
             },
             body: JSON.stringify({ interests: selected }),
           });
@@ -157,6 +160,14 @@ export default function EditInterestsScreen() {
           onPress={() => router.back()}
           hitSlop={12}
           style={({ pressed }) => [ob.backBtn, pressed && { opacity: 0.5 }]}
+          // A11y · 2026-05-15 (Agent D · diagnostic-code.md §D-3):
+          // Pressable used to render as un-roled · the visible glyph is
+          // a `←` arrow text-character (not an icon component), so VoiceOver
+          // had no signal that it was interactive · users heard plain text
+          // "Volver" with no button hint. Adding role + label gives the
+          // screen-reader the correct interaction model.
+          accessibilityRole="button"
+          accessibilityLabel="Volver"
         >
           <Text style={ob.backText}>← Volver</Text>
         </Pressable>
