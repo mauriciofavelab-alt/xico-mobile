@@ -1,4 +1,4 @@
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, useRouter, usePathname } from "expo-router";
 import React from "react";
 
 import { GlassTabBar, type TabItem } from "@/components/liquid-glass";
@@ -8,14 +8,21 @@ type TabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>["tab
 
 function LiquidGlassTabBar({ state }: TabBarProps) {
   const router = useRouter();
+  // The /ruta listing screen lives OUTSIDE the (tabs) group at app/ruta/index.tsx
+  // (because /ruta/stop/[id] is a non-tabbed full-screen route). When the user
+  // is on /ruta, the (tabs) navigator's state doesn't include it, so we use
+  // the full pathname to compute active state for the tab bar.
+  const pathname = usePathname();
   const currentName = state.routes[state.index]?.name;
+  const isOnRutaTree = pathname?.startsWith("/ruta") ?? false;
+
   const items: TabItem[] = [
     {
       key: "hoy",
       label: "Hoy",
       accentColor: Pillars.indice,
       onPress: () => router.push("/hoy"),
-      isActive: currentName === "hoy",
+      isActive: currentName === "hoy" && !isOnRutaTree,
       accessibilityLabel: "Hoy · El Despacho del día",
     },
     {
@@ -23,7 +30,7 @@ function LiquidGlassTabBar({ state }: TabBarProps) {
       label: "La Ruta",
       accentColor: Pillars.indice,
       onPress: () => router.push("/ruta"),
-      isActive: currentName === "ruta",
+      isActive: isOnRutaTree,
       accessibilityLabel: "La Ruta · paseo semanal",
     },
     {
@@ -31,7 +38,7 @@ function LiquidGlassTabBar({ state }: TabBarProps) {
       label: "Tu Códice",
       accentColor: Pillars.archivo,
       onPress: () => router.push("/tu-codice"),
-      isActive: currentName === "tu-codice",
+      isActive: currentName === "tu-codice" && !isOnRutaTree,
       accessibilityLabel: "Tu Códice · tu pasaporte personal",
     },
     {
@@ -39,7 +46,7 @@ function LiquidGlassTabBar({ state }: TabBarProps) {
       label: "Mapa",
       accentColor: Pillars.indice,
       onPress: () => router.push("/mapa"),
-      isActive: currentName === "mapa",
+      isActive: currentName === "mapa" && !isOnRutaTree,
       accessibilityLabel: "Mapa · paradas en Madrid",
     },
   ];
@@ -53,11 +60,8 @@ export default function TabLayout() {
       screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen name="hoy" options={{ title: "Hoy" }} />
-      <Tabs.Screen name="ruta" options={{ title: "La Ruta", href: "/ruta" }} />
       <Tabs.Screen name="tu-codice" options={{ title: "Tu Códice" }} />
       <Tabs.Screen name="mapa" options={{ title: "Mapa" }} />
-      {/* mi-xico stays hidden until Phase 3 Task 3.1 renames it to tu-codice. */}
-      <Tabs.Screen name="mi-xico" options={{ href: null }} />
     </Tabs>
   );
 }
