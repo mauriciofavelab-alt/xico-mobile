@@ -1,5 +1,12 @@
-import { Platform } from "react-native";
-
+/**
+ * Liquid Glass material variants for XICO.
+ *
+ * Note on the warm-black palette: `rgba(20, 14, 16, ...)` (#140E10) is the
+ * glass-tuned warm-black, intentionally slightly lighter than
+ * `Colors.background` (#080508). The lift compensates for translucency so
+ * the glass reads as warm-dark rather than muddy when layered over the app
+ * background or over photo content. Do not unify these two values.
+ */
 export const LiquidGlass = {
   /** .ultraThinMaterial — masthead, statusbar overlays. Background remains highly visible. */
   ultraThin: {
@@ -54,7 +61,7 @@ export const LiquidGlass = {
 export type LiquidGlassVariant = keyof typeof LiquidGlass;
 
 /** Returns `expo-blur` tint for the given variant. iOS only — Android falls back to solid. */
-export function blurTintForVariant(variant: LiquidGlassVariant): "dark" | "default" {
+export function blurTintForVariant(_variant: LiquidGlassVariant): "dark" | "default" {
   // All XICO glass uses dark tint over warm-black bg
   return "dark";
 }

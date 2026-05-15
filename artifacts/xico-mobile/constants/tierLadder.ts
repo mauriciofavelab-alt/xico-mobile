@@ -1,10 +1,14 @@
-import { Rumbos } from "./colors";
+import { TierKey, TIER_LABELS } from "./rumbos";
 
-export type TierName = "iniciado" | "conocedor" | "curador" | "cronista";
+/**
+ * Alias for spec naming continuity. The canonical type is `TierKey` from
+ * `./rumbos`; `TierName` here refers to the same union so existing
+ * consumers using `TIER_LABELS[tier]` keep working without churn.
+ */
+export type TierName = TierKey;
 
 export interface TierDefinition {
   name: TierName;
-  displayName: string;
   iosIconName: string;  // CFBundleAlternateIcons key
   minSellos: number;
   minDistinctRumbos: number;
@@ -15,7 +19,6 @@ export interface TierDefinition {
 export const TierLadder: TierDefinition[] = [
   {
     name: "iniciado",
-    displayName: "Iniciado",
     iosIconName: "AppIcon-Iniciado",
     minSellos: 0,
     minDistinctRumbos: 0,
@@ -23,7 +26,6 @@ export const TierLadder: TierDefinition[] = [
   },
   {
     name: "conocedor",
-    displayName: "Conocedor",
     iosIconName: "AppIcon-Conocedor",
     minSellos: 6,
     minDistinctRumbos: 2,
@@ -31,7 +33,6 @@ export const TierLadder: TierDefinition[] = [
   },
   {
     name: "curador",
-    displayName: "Curador",
     iosIconName: "AppIcon-Curador",
     minSellos: 16,
     minDistinctRumbos: 3,
@@ -39,7 +40,6 @@ export const TierLadder: TierDefinition[] = [
   },
   {
     name: "cronista",
-    displayName: "Cronista",
     iosIconName: "AppIcon-Cronista",
     minSellos: 36,
     minDistinctRumbos: 4,
@@ -48,18 +48,30 @@ export const TierLadder: TierDefinition[] = [
   },
 ];
 
-/** Returns the tier the user currently belongs to given their stats. */
+/**
+ * Returns the tier the user currently belongs to given their stats.
+ *
+ * Param naming intentionally matches the server payload contract used by
+ * `useTier` / `useSellos` (snake_case: total, distinct_rumbos, min_per_rumbo).
+ * `min_per_rumbo` is optional — only Cronista evaluates it, defaults to 0.
+ *
+ * Use `TIER_LABELS[computeTier(stats)]` to render the localized display name.
+ */
 export function computeTier(stats: {
   total: number;
-  distinctRumbos: number;
-  minPerRumbo: number;
+  distinct_rumbos: number;
+  min_per_rumbo?: number;
 }): TierName {
+  const minPer = stats.min_per_rumbo ?? 0;
   for (let i = TierLadder.length - 1; i >= 0; i--) {
     const t = TierLadder[i];
     if (stats.total < t.minSellos) continue;
-    if (stats.distinctRumbos < t.minDistinctRumbos) continue;
-    if (t.minPerRumbo && stats.minPerRumbo < t.minPerRumbo) continue;
+    if (stats.distinct_rumbos < t.minDistinctRumbos) continue;
+    if (t.minPerRumbo && minPer < t.minPerRumbo) continue;
     return t.name;
   }
   return "iniciado";
 }
+
+// Re-export TIER_LABELS for ergonomic single-import at call sites.
+export { TIER_LABELS };
