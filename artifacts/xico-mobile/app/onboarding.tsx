@@ -141,6 +141,10 @@ type StageProps = {
   // Whether to render the Saltar link in the stage's top-right.
   showSkip: boolean;
   onSkip: () => void;
+  // When true, the eyebrow + hero + body block is wrapped in a BlurView
+  // glass card · used on step 5 (Intereses) so the participatory bright
+  // backdrop stays bright but the title still has hairline-rim contrast.
+  glassHeader?: boolean;
 };
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
@@ -154,7 +158,32 @@ function WalkthroughStage({
   heroAnimation,
   showSkip,
   onSkip,
+  glassHeader,
 }: StageProps) {
+  const stageHeaderRow = (
+    <View style={styles.stageHeader}>
+      <Text style={styles.eyebrow}>{eyebrow}</Text>
+      {showSkip && (
+        <SpringPressable
+          onPress={onSkip}
+          hitSlop={12}
+          haptic="selection"
+          accessibilityRole="button"
+          accessibilityLabel="Saltar la introducción"
+        >
+          <Text style={styles.skipLink}>Saltar</Text>
+        </SpringPressable>
+      )}
+    </View>
+  );
+
+  const heroAndBody = (
+    <>
+      {hero}
+      <View style={styles.stageBodyBlock}>{body}</View>
+    </>
+  );
+
   return (
     <View style={styles.stageRoot} pointerEvents="box-none">
       <Image
@@ -175,24 +204,16 @@ function WalkthroughStage({
       <View style={styles.stageTopScrim} pointerEvents="none" />
 
       <View style={styles.stageInner} pointerEvents="box-none">
-        <View style={styles.stageHeader}>
-          <Text style={styles.eyebrow}>{eyebrow}</Text>
-          {showSkip && (
-            <SpringPressable
-              onPress={onSkip}
-              hitSlop={12}
-              haptic="selection"
-              accessibilityRole="button"
-              accessibilityLabel="Saltar la introducción"
-            >
-              <Text style={styles.skipLink}>Saltar</Text>
-            </SpringPressable>
-          )}
-        </View>
-
+        {stageHeaderRow}
         <View style={styles.stageHero} pointerEvents="box-none">
-          {hero}
-          <View style={styles.stageBodyBlock}>{body}</View>
+          {glassHeader ? (
+            <BlurView intensity={30} tint="dark" style={styles.glassHeaderCard}>
+              <View style={[StyleSheet.absoluteFill, styles.glassHeaderTint]} />
+              <View style={styles.glassHeaderInner}>{heroAndBody}</View>
+            </BlurView>
+          ) : (
+            heroAndBody
+          )}
           {heroAnimation ? (
             <View style={styles.stageAnimationBlock} pointerEvents="box-none">
               {heroAnimation}
@@ -654,7 +675,7 @@ export default function OnboardingScreen() {
       stage = (
         <WalkthroughStage
           backdrop={BACKDROP_MANIFESTO}
-          scrim={0.32}
+          scrim={0.58}
           eyebrow="XICO"
           showSkip={showSkip}
           onSkip={handleSkip}
@@ -692,7 +713,7 @@ export default function OnboardingScreen() {
       stage = (
         <WalkthroughStage
           backdrop={BACKDROP_RUTA}
-          scrim={0.26}
+          scrim={0.55}
           eyebrow="02 · DOMINGOS 9 AM"
           showSkip={showSkip}
           onSkip={handleSkip}
@@ -728,7 +749,8 @@ export default function OnboardingScreen() {
       stage = (
         <WalkthroughStage
           backdrop={BACKDROP_INTERESES}
-          scrim={0.14}
+          scrim={0.34}
+          glassHeader
           eyebrow="04 · TUS LECTURAS"
           showSkip={false}
           onSkip={handleSkip}
@@ -758,7 +780,7 @@ export default function OnboardingScreen() {
       stage = (
         <WalkthroughStage
           backdrop={BACKDROP_BIENVENIDA}
-          scrim={0.2}
+          scrim={0.55}
           eyebrow="BIENVENIDO"
           showSkip={false}
           onSkip={handleSkip}
@@ -838,6 +860,22 @@ const styles = StyleSheet.create({
   stageAnimationBlock: {
     marginTop: 36,
     alignItems: "center",
+  },
+  // Step 5 (Intereses) · glass-treated header so the participatory bright
+  // backdrop can stay bright but the title block still has hairline-rim
+  // contrast. Mirrors the BlurView chip pattern below.
+  glassHeaderCard: {
+    borderRadius: 20,
+    overflow: "hidden",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.18)",
+  },
+  glassHeaderTint: {
+    backgroundColor: "rgba(8,5,8,0.32)",
+  },
+  glassHeaderInner: {
+    paddingHorizontal: 22,
+    paddingVertical: 22,
   },
   eyebrow: {
     fontFamily: Fonts.sansSemibold,
