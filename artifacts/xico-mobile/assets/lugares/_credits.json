@@ -1,1 +1,230 @@
-[]
+[
+  {
+    "file": "001-mercado-san-fernando.jpg",
+    "lugar": "Mercado de San Fernando",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mercado%20de%20San%20Fernando%20(Madrid)%2001.jpg"
+  },
+  {
+    "file": "002-iglesia-san-gines.jpg",
+    "lugar": "Iglesia de San Ginés",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Iglesia%20de%20San%20Gin%C3%A9s%20(Madrid).jpg"
+  },
+  {
+    "file": "003-chocolateria-san-gines.jpg",
+    "lugar": "Chocolatería San Ginés",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Chocolate%20con%20churros%20-%20San%20Gin%C3%A9s%20-%20Madrid.jpg"
+  },
+  {
+    "file": "004-jardin-botanico-retiro.jpg",
+    "lugar": "Jardín Botánico del Retiro",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Real%20Jard%C3%ADn%20Bot%C3%A1nico%20-%20Madrid%20-%20001.jpg"
+  },
+  {
+    "file": "005-museo-antropologia.jpg",
+    "lugar": "Museo Nacional de Antropología",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Madrid%20-%20Museo%20Nacional%20de%20Antropolog%C3%ADa%202.jpg"
+  },
+  {
+    "file": "006-la-lucerna.jpg",
+    "lugar": "La Lucerna",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Tlayuda.jpg",
+    "note": "Tlayuda close-up · the dish La Lucerna serves; not a photo of the venue."
+  },
+  {
+    "file": "007-mercado-la-paz.jpg",
+    "lugar": "Mercado de La Paz",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mercado%20de%20la%20Paz%2C%20interior.JPG"
+  },
+  {
+    "file": "008-casa-de-mexico.jpg",
+    "lugar": "Casa de México en España",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Casa%20de%20Mexico%20en%20Madrid%2001.jpg"
+  },
+  {
+    "file": "009-la-corrala.jpg",
+    "lugar": "La Corrala",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:La%20Corrala%20de%20Lavapi%C3%A9s.jpg"
+  },
+  {
+    "file": "010-tienda-casa-mexico.jpg",
+    "lugar": "Tienda artesanal Casa de México",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Tapete%20de%20Lana%20de%20Teotitlan%2C%20Oaxaca.jpg",
+    "note": "Tapete zapoteca de Teotitlán del Valle · representa los textiles que la tienda vende."
+  },
+  {
+    "file": "011-bar-brutal.jpg",
+    "lugar": "Bar Brutal",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mezcal%20oaxaque%C3%B1o.JPG",
+    "note": "Mezcal oaxaqueño · representa la carta de mezcales del bar, no es foto del local."
+  },
+  {
+    "file": "012-fundacion-juan-march.jpg",
+    "lugar": "Fundación Juan March",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Casa%20Liraldi%20Luis%20Barrag%C3%A1n.JPG",
+    "note": "Casa Barragán · el sujeto del despacho de hoy, archivado en la Fundación."
+  },
+  {
+    "file": "013-photoespana.jpg",
+    "lugar": "PhotoEspaña",
+    "photographer": "PhotoEspaña festival",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:PHotoESPA%C3%91A%20BN%20Negativo.jpg"
+  },
+  {
+    "file": "014-reina-sofia.jpg",
+    "lugar": "Museo Reina Sofía",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Museo%20Reina%20Sofia-exterior.jpg"
+  },
+  {
+    "file": "015-real-academia-espanola.jpg",
+    "lugar": "Real Academia Española",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Sede%20de%20la%20Real%20Academia%20Espa%C3%B1ola.jpg"
+  },
+  {
+    "file": "016-museo-de-america.jpg",
+    "lugar": "Museo de América",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Madrid%20-%20Museo%20de%20Am%C3%A9rica%2001.jpg"
+  },
+  {
+    "file": "017-galeria-elvira-gonzalez.jpg",
+    "lugar": "Galería Elvira González",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Diego%20Rivera%20Mural%20Palacio%20Nacional%20Mexico.jpg",
+    "note": "Mural de Diego Rivera · representa el arte mexicano que la galería programa."
+  },
+  {
+    "file": "018-libreria-reina-sofia.jpg",
+    "lugar": "Librería La Central del Reina Sofía",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Exterior%20museo%20reina%20sofia%20in%20july%202018.jpg",
+    "note": "Reina Sofía · la librería está dentro del museo."
+  },
+  {
+    "file": "019-circulo-bellas-artes.jpg",
+    "lugar": "Círculo de Bellas Artes",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Fachada%20del%20C%C3%ADrculo%20de%20Bellas%20Artes%20(Madrid).jpg"
+  },
+  {
+    "file": "020-taberna-carmencita.jpg",
+    "lugar": "Taberna Carmencita",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mulato%20chile%20pods%20(dried).JPG",
+    "note": "Chiles secos · el pimentón de La Vera comparte linaje con el chile ancho."
+  },
+  {
+    "file": "021-bar-matos.jpg",
+    "lugar": "Bar Matos",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Calle%20de%20Lavapi%C3%A9s%20(Madrid)%2001.jpg",
+    "note": "Calle madrileña · contexto del barrio, no foto del bar."
+  },
+  {
+    "file": "022-museo-ciencias-naturales.jpg",
+    "lugar": "Museo Nacional de Ciencias Naturales",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Madrid%20-%20Museo%20Nacional%20de%20Ciencias%20Naturales%201.jpg"
+  },
+  {
+    "file": "023-mercado-anton-martin.jpg",
+    "lugar": "Mercado de Antón Martín",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mercado%20de%20Ant%C3%B3n%20Mart%C3%ADn%2C%20fachada%20calle%20Santa%20Isabel.JPG"
+  },
+  {
+    "file": "024-tienda-copal.jpg",
+    "lugar": "Tienda Copal",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Aztec%20Copal%20Incense%20(9781556773).jpg",
+    "note": "Copal · el producto que la tienda vende, no el local."
+  },
+  {
+    "file": "025-reina-sofia-coleccion.jpg",
+    "lugar": "Reina Sofía",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Museo%20Nacional%20Centro%20de%20Arte%20Reina%20Sof%C3%ADa%2C%20detalles%20del%20exterior%2C%20Madrid%2C%20Espa%C3%B1a%2C%202016%2008.JPG"
+  },
+  {
+    "file": "026-biblioteca-nacional.jpg",
+    "lugar": "Biblioteca Nacional",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Madrid%20-%20Biblioteca%20Nacional%2001.jpg"
+  },
+  {
+    "file": "027-sala-caracol.jpg",
+    "lugar": "Sala Caracol",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Natalia%20Lafourcade%20en%20concierto.jpg",
+    "note": "Música en vivo · contexto del lugar, no foto interior del local."
+  },
+  {
+    "file": "028-tlatelolco.jpg",
+    "lugar": "Centro Cultural Universitario Tlatelolco",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Plaza%20de%20las%20Tres%20Culturas%20-%20Panor%C3%A1mica.jpg"
+  },
+  {
+    "file": "029-barra-tobala.jpg",
+    "lugar": "Barra Tobalá",
+    "photographer": "AMPP archive (public domain)",
+    "license": "Public Domain",
+    "source_url": "https://commons.wikimedia.org/wiki/File:AMPP%20D031%20Plantation%20of%20Maguey%2C%20Agave%20Americana.jpg",
+    "note": "Plantación de maguey · el origen del mezcal que el bar sirve."
+  },
+  {
+    "file": "030-casa-de-mexico-cierre.jpg",
+    "lugar": "Casa de México en España",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Casa%20de%20Mexico%20en%20Madrid%2002.jpg"
+  },
+  {
+    "file": "_backdrop-tu-codice.jpg",
+    "lugar": "Madrid · golden hour",
+    "photographer": "Wikimedia Commons contributor",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Atardecer%20en%20Madrid%20.jpg"
+  }
+]
