@@ -324,8 +324,23 @@ export default function StopScreen() {
   }
   if (stop.isError || !stop.data) {
     return (
-      <View style={[s.root, { paddingTop: insets.top, alignItems: "center", justifyContent: "center" }]}>
-        <Text style={s.loadingText}>No se pudo cargar la parada.</Text>
+      <View style={[s.root, { paddingTop: insets.top }]}>
+        {/* Back button so the user can escape the error state · was missing
+            before. Tapping returns to the previous screen (/ruta listing or
+            wherever they came from). Per spec §11 HIG · every screen needs
+            a back affordance. */}
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Volver"
+          style={s.errorBack}
+          hitSlop={12}
+        >
+          <Feather name="chevron-left" size={28} color={Colors.textPrimary} />
+        </Pressable>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 }}>
+          <Text style={s.loadingText}>No se pudo cargar la parada.</Text>
+        </View>
       </View>
     );
   }
@@ -688,6 +703,20 @@ const s = StyleSheet.create({
     fontStyle: "italic",
     fontSize: TypeSize.body,
     color: Colors.textSecondary,
+    textAlign: "center",
+  },
+  // Error-state back button · floating top-left so the user can escape when
+  // the stop fails to load. Mirrors the placement of `closeBtn` on the main
+  // stop screen but standalone (no veil / no masthead overhead).
+  errorBack: {
+    position: "absolute",
+    left: Space.md,
+    top: Platform.OS === "web" ? Space.md : 8,
+    zIndex: 10,
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // Phase 9 cleanup · `heroContent` / `heroFolio` / `heroName` / `heroKicker`
