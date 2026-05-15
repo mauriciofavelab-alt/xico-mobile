@@ -354,7 +354,14 @@ export default function ArticleScreen() {
               style={StyleSheet.absoluteFill}
               pointerEvents="none"
             />
-            <Pressable onPress={() => router.back()} style={[s.backBtn, { top: topPad + 8 }]}>
+            <Pressable
+              onPress={() => router.back()}
+              // Phase 9 (Task 9.1): align with Dynamic Island clearance baseline
+              // used by GlassMasthead — `topPad + 22` keeps the 44pt hit target
+              // below the DI cutout on iPhone 14/15/16 Pro, while the 81pt floor
+              // protects older safe-area-only devices.
+              style={[s.backBtn, { top: Math.max(topPad + 22, 81) }]}
+            >
               <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} />
               <Feather name="arrow-left" size={18} color="rgba(255,255,255,0.9)" />
             </Pressable>
